@@ -1,0 +1,181 @@
+{
+  "judgePlanes": [
+    {
+      "id": 1,
+      "subJudgePlanes": [
+        {
+          "startT": 0,
+          "startY": 0,
+          "endT": 30,
+          "endY": 0.8,
+          "yAxisFunction": "Linear"
+        },
+        {
+          "startT": 5,
+          "startY": 0.8,
+          "endT": 10,
+          "endY": 0.6,
+          "yAxisFunction": "Sin"
+        },
+        {
+          "startT": 10,
+          "startY": 0.6,
+          "endT": 15,
+          "endY": 0.4,
+          "yAxisFunction": "Cos"
+        },
+        {
+          "startT": 15,
+          "startY": 0.4,
+          "endT": 120,
+          "endY": 0.2,
+          "yAxisFunction": "Linear"
+        }
+      ]
+    }
+  ],
+  "taps": [
+    {
+      "startT": 2,
+      "startX": 0,
+      "noteSize": 0.8,
+      "associatedPlane": {
+        "id": 1
+      }
+    },
+    {
+      "startT": 2.2,
+      "startX": 1.2,
+      "noteSize": 0.6,
+      "associatedPlane": {
+        "id": 1
+      }
+    },
+    {
+      "startT": 2.4,
+      "startX": -1.5,
+      "noteSize": 0.7,
+      "associatedPlane": {
+        "id": 1
+      }
+    },
+    {
+      "startT": 2.6,
+      "startX": 0.5,
+      "noteSize": 0.5,
+      "associatedPlane": {
+        "id": 1
+      }
+    },
+    {
+      "startT": 2.8,
+      "startX": -0.8,
+      "noteSize": 0.6,
+      "associatedPlane": {
+        "id": 1
+      }
+    }
+  ],
+  "holds": [
+    {
+      "associatedPlane": {
+        "id": 1
+      },
+      "subHoldList": [
+        {
+          "startT": 4,
+          "startXMin": -1,
+          "startXMax": 0,
+          "endT": 6,
+          "endXMin": -0.8,
+          "endXMax": 0.2,
+          "XLeftFunction": "Linear",
+          "XRightFunction": "Linear"
+        },
+        {
+          "startT": 6,
+          "startXMin": -0.6,
+          "startXMax": 0.4,
+          "endT": 8,
+          "endXMin": -0.4,
+          "endXMax": 0.6,
+          "XLeftFunction": "Sin",
+          "XRightFunction": "Sin"
+        },
+        {
+          "startT": 8,
+          "startXMin": -0.2,
+          "startXMax": 0.8,
+          "endT": 10,
+          "endXMin": 0,
+          "endXMax": 1,
+          "XLeftFunction": "Cos",
+          "XRightFunction": "Cos"
+        }
+      ]
+    }
+  ],
+  "slides": [
+    {
+      "startT": 10.2,
+      "startX": 0.8,
+      "noteSize": 0.6,
+      "associatedPlane": {
+        "id": 1
+      }
+    },
+    {
+      "startT": 10.4,
+      "startX": -1.2,
+      "noteSize": 0.8,
+      "associatedPlane": {
+        "id": 1
+      }
+    }
+  ],
+  "flicks": [
+    {
+      "startT": 65,
+      "startX": 1.5,
+      "noteSize": 0.5,
+      "associatedPlane": {
+        "id": 1
+      },
+      "flickDirection": 0.25
+    },
+    {
+      "startT": 85,
+      "startX": -0.5,
+      "noteSize": 0.6,
+      "associatedPlane": {
+        "id": 1
+      },
+      "flickDirection": 0.75
+    }
+  ],
+  "stars": [
+    {
+      "starHeadT": 70,
+      "subStarList": [
+        {
+          "starTrackStartT": 70,
+          "starTrackEndT": 80,
+          "startX": 0,
+          "startY": 0,
+          "endX": 1,
+          "endY": 1,
+          "trackFunction": "Linear"
+        },
+        {
+          "starTrackStartT": 80,
+          "starTrackEndT": 90,
+          "startX": 1,
+          "startY": 1,
+          "endX": 2,
+          "endY": 0.5,
+          "trackFunction": "Sin"
+        }
+      ]
+    }
+  ]
+}
