@@ -5,9 +5,13 @@ using Newtonsoft.Json;
 //using System.Drawing;
 //using System.Numerics;
 using Params;
+using static JudgePlane;
+using System.Collections;
 
+//不加这一行代码的话，读取Json会报错（因为JudgePlane实现了IEnumerable接口？）
+[JsonObject(MemberSerialization = MemberSerialization.OptIn)] 
 // 判定面类
-public class JudgePlane
+public class JudgePlane : IEnumerable<SubJudgePlane>
 {
     [JsonProperty("id")]
     // 判定面的唯一标识，按照要求改为数字编号
@@ -84,32 +88,39 @@ public class JudgePlane
     //}
 
     // 根据当前时间更新判定面的整体Y轴坐标，使其各子判定面按设定的函数变化
-    public void UpdatePlaneYAxis(float currentTime)
+    public float GetPlaneYAxis(float currentTime)
     {
-        float minY = Mathf.Infinity;
-        float maxY = -Mathf.Infinity;
-
+        //float minY = 0f;
+        //float maxY = HeightParams.HeightDefault;
         foreach (SubJudgePlane subPlane in subJudgePlaneList)
         {
-            if (currentTime >= subPlane.startT && currentTime <= subPlane.endT)
+            if (currentTime >= subPlane.startT && currentTime < subPlane.endT)
             {
                 // 根据Y轴变化函数类型计算当前子判定面的Y轴坐标范围
-                float subStartY = CalculateYAxisPosition(currentTime, subPlane.startT, subPlane.startY, subPlane.endT, subPlane.endY, subPlane.yAxisFunction);
-                float subEndY = CalculateYAxisPosition(currentTime, subPlane.startT, subPlane.startY + 1f, subPlane.endT, subPlane.endY + 1f, subPlane.yAxisFunction);
-                minY = Mathf.Min(minY, subStartY);
-                maxY = Mathf.Max(maxY, subEndY);
+                float YAxisCoordinate = CalculateYAxisPosition(currentTime, subPlane.startT, subPlane.startY, subPlane.endT, subPlane.endY, subPlane.yAxisFunction);
+                YAxisCoordinate *= HeightParams.HeightDefault;
+                return YAxisCoordinate;
             }
         }
-
-        // 更新平面的位置和缩放以反映Y轴坐标的变化
-        //planeObject.transform.position = new Vector3(0f, (minY + maxY) / 2f, 0f);
-        //planeObject.transform.localScale = new Vector3(10f, Mathf.Abs(maxY - minY), 10f);
+        return 0f;
     }
 
     // 计算指定子判定面在给定时间下根据不同函数类型的Y轴当前位置
-    public static float CalculateYAxisPosition(float currentTime, float startTime, float startVal, float endTime, float endVal, Utility.TransFunctionType functionType)
+    public static float CalculateYAxisPosition(float currentTime, float startTime, float startVal, float endTime, float endVal, TransFunctionType functionType)
     {
         return CalculatePosition(currentTime, startTime, startVal, endTime, endVal, functionType);
+    }
+
+    // 实现IEnumerable<SubJudgePlane>接口要求的GetEnumerator方法，返回一个用于遍历SubJudgePlane元素的枚举器
+    public IEnumerator<SubJudgePlane> GetEnumerator()
+    {
+        return subJudgePlaneList.GetEnumerator();
+    }
+
+    // 这个方法是为了兼容非泛型的IEnumerable接口，一般情况下可以简单调用泛型的GetEnumerator方法
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
 

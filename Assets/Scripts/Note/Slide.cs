@@ -16,8 +16,8 @@ namespace Note
         // 新增滑动键的大小
         public float noteSize;
         [JsonProperty("associatedPlane")]
-        // 与判定面相关联的引用（在序列化时这里只会记录相关标识，反序列化后需要重新关联，后面会处理）
-        public JudgePlane associatedPlane;
+        // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
+        public int associatedPlaneId;
 
         // 方法用于检查滑动键是否在规定的X轴坐标范围内（结合新的参数类来判断）
         public bool IsInXAxisRange()

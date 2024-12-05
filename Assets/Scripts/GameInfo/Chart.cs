@@ -64,7 +64,9 @@ public class Chart
         if (File.Exists(filePath))
         {
             string json = File.ReadAllText(filePath);
+            //Debug.Log(json);
             Chart chartData = JsonConvert.DeserializeObject<Chart>(json);
+            //Debug.Log(chartData);
 
             var chart = new Chart();
 
@@ -85,17 +87,10 @@ public class Chart
             foreach (var tap in chartData.taps)
             {
                 var newTap = new Tap();
+                newTap.startT = (float)tap.startT;
                 newTap.startX = (float)tap.startX;
                 newTap.noteSize = (float)tap.noteSize;
-                // 根据关联的判定面标识查找对应的判定面实例并关联
-                foreach (var judgePlane in chart.judgePlanes)
-                {
-                    if (judgePlane.id == (int)tap.associatedPlane.id)
-                    {
-                        newTap.associatedPlane = judgePlane;
-                        break;
-                    }
-                }
+                newTap.associatedPlaneId = (int)tap.associatedPlaneId;
                 chart.taps.Add(newTap);
             }
 
@@ -108,15 +103,7 @@ public class Chart
                 {
                     newHold.AddSubHold((float)subHold.startT, (float)subHold.startXMin, (float)subHold.startXMax, (float)subHold.endT, (float)subHold.endXMin, (float)subHold.endXMax, (Utility.TransFunctionType)subHold.XLeftFunction, (Utility.TransFunctionType)subHold.XRightFunction);
                 }
-                // 根据关联的判定面标识查找对应的判定面实例并关联
-                foreach (var judgePlane in chart.judgePlanes)
-                {
-                    if (judgePlane.id == (int)holdData.associatedPlane.id)
-                    {
-                        newHold.associatedPlane = judgePlane;
-                        break;
-                    }
-                }
+                newHold.associatedPlaneId = (int)holdData.associatedPlaneId;
                 chart.holds.Add(newHold);
             }
 
@@ -127,15 +114,7 @@ public class Chart
                 var newSlide = new Slide();
                 newSlide.startT = (float)slide.startT;
                 newSlide.startX = (float)slide.startX;
-                // 根据关联的判定面标识查找对应的判定面实例并关联
-                foreach (var judgePlane in chart.judgePlanes)
-                {
-                    if (judgePlane.id == (int)slide.associatedPlane.id)
-                    {
-                        newSlide.associatedPlane = judgePlane;
-                        break;
-                    }
-                }
+                newSlide.associatedPlaneId = (int)slide.associatedPlaneId;
                 chart.slides.Add(newSlide);
             }
 
@@ -147,15 +126,7 @@ public class Chart
                 newFlick.startT = (float)flick.startT;
                 newFlick.startX = (float)flick.startX;
                 newFlick.flickDirection = (float)flick.flickDirection;
-                // 根据关联的判定面标识查找对应的判定面实例并关联
-                foreach (var judgePlane in chart.judgePlanes)
-                {
-                    if (judgePlane.id == (int)flick.associatedPlane.id)
-                    {
-                        newFlick.associatedPlane = judgePlane;
-                        break;
-                    }
-                }
+                newFlick.associatedPlaneId = (int)flick.associatedPlaneId;
                 chart.flicks.Add(newFlick);
             }
 
@@ -168,6 +139,7 @@ public class Chart
                 {
                     newStar.AddSubStar((float)subStar.starTrackStartT, (float)subStar.starTrackEndT, (float)subStar.startX, (float)subStar.startY, (float)subStar.endX, (float)subStar.endY, (Utility.TrackFunctionType)subStar.trackFunction);
                 }
+                chart.stars.Add(newStar);
             }
 
             return chart;

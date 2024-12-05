@@ -9,6 +9,8 @@ public class Utility
     // 定义X轴/Y轴坐标变化函数的枚举类型
     //适用JudgePlane和Hold类
     public enum TransFunctionType { Linear, Sin, Cos }
+    // 正弦函数(开头不平滑，结尾平滑)
+    // 余弦函数(开头平滑，结尾不平滑)
 
     // 定义星星坐标变化函数的枚举类型
     //适用Star类
@@ -39,22 +41,26 @@ public class Utility
         }
 
         float result = 0f;
-
+        float TimePeriod = endTime - startTime;
+        float ValPeriod = endVal - startVal;
+        float currentTimeStandard = (currentTime - startTime) / TimePeriod;
+        
         switch (functionType)
         {
             case TransFunctionType.Linear:
                 // 线性函数计算当前位置
-                result = startVal + ((endVal - startVal) * ((currentTime - startTime) / (endTime - startTime)));
+                result = startVal + ValPeriod * currentTimeStandard;
                 break;
             case TransFunctionType.Sin:
-                // 正弦函数计算当前位置，这里假设周期为整个子判定面持续时间
-                float period = endTime - startTime;
-                result = startVal + ((endVal - startVal) / 2) * (1 + Mathf.Sin((2 * Mathf.PI * (currentTime - startTime)) / period));
+                // 正弦函数(开头不平滑，结尾平滑)
+                //Debug.Log(1 / 2 * Mathf.PI * currentTimeStandard);
+                //Debug.Log(Mathf.Sin(1 / 2 * Mathf.PI * currentTimeStandard));
+                result = startVal + ValPeriod * Mathf.Sin(0.5f * Mathf.PI * currentTimeStandard);
+                //Debug.Log(result);
                 break;
             case TransFunctionType.Cos:
-                // 余弦函数计算当前位置，同样假设周期为整个子判定面持续时间
-                period = endTime - startTime;
-                result = startVal + ((endVal - startVal) / 2) * (1 + Mathf.Cos((2 * Mathf.PI * (currentTime - startTime)) / period));
+                // 余弦函数(开头平滑，结尾不平滑)
+                result = startVal + ValPeriod * (1 - Mathf.Cos(0.5f * Mathf.PI * currentTimeStandard));
                 break;
         }
 
@@ -97,6 +103,36 @@ public class Utility
 
         return result;
     }
+
+    //计算与相机在特定距离下，世界坐标单位长度对应的屏幕像素长度
+    public static float CalculateWorldUnitToScreenPixelAtDistance(Vector3 targetPoint)
+    {
+        // 获取摄像机组件（假设场景中只有一个主摄像机，可根据实际情况调整获取方式）
+        Camera mainCamera = Camera.main;
+
+        // 注意Camera视野轴设置为垂直，需要计算水平场视角
+        float verticalFOV = mainCamera.fieldOfView;
+        float aspectRatio = mainCamera.aspect;
+        // 通过三角函数关系计算水平视场角
+        float horizontalFOV = 2 * Mathf.Atan(Mathf.Tan(verticalFOV * Mathf.Deg2Rad / 2) * aspectRatio) * Mathf.Rad2Deg;
+
+        //Debug.Log("水平视场角为: " + horizontalFOV + "度");
+        float screenWidth = Screen.width; // 屏幕宽度，单位是像素
+        //float screenHeight = Screen.height; // 屏幕高度，单位是像素
+
+        // 根据摄像机的视野角度（fieldOfView）和近裁剪平面距离（nearClipPlane）计算视野的水平半角（单位：弧度）
+        float halfFieldOfViewInRadians = horizontalFOV * Mathf.Deg2Rad / 2;
+
+        float distanceToCamera = Vector3.Distance(targetPoint, mainCamera.transform.position);
+
+        float VisibleRangeAtTargetDepth = 2 * distanceToCamera * Mathf.Tan(halfFieldOfViewInRadians);
+        //Debug.Log(VisibleRangeAtTargetDepth);
+        float worldUnitToScreenPixelXAtTarget = screenWidth / VisibleRangeAtTargetDepth;
+
+        return worldUnitToScreenPixelXAtTarget;
+    }
+
+
 }
 
 

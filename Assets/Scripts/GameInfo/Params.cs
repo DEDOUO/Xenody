@@ -18,4 +18,23 @@ namespace Params
         public static float YaxisMin = 0;
         public static float YaxisMax = 1;
     }
+
+    public static class SpeedParams
+    {
+        // 速度参数
+        // 1秒钟Note在世界坐标前进的距离（Z轴）
+        public static float NoteSpeedDefault = 50f;
+    }
+
+    public static class HeightParams
+    {
+        // 天线在世界中的实际高度（Y轴）
+        public static float HeightDefault = 6f;
+    }
+    public static class HorizontalParams
+    {
+        // 判定区大小参数，距离屏幕边缘的水平边距
+        public static float HorizontalMargin = 0.1f;
+    }
+
 }

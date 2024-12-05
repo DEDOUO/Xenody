@@ -6,26 +6,26 @@
         {
           "startT": 0,
           "startY": 0,
-          "endT": 30,
+          "endT": 3,
           "endY": 0.8,
           "yAxisFunction": "Linear"
         },
         {
-          "startT": 5,
+          "startT": 3,
           "startY": 0.8,
-          "endT": 10,
+          "endT": 6,
           "endY": 0.6,
           "yAxisFunction": "Sin"
         },
         {
-          "startT": 10,
+          "startT": 6,
           "startY": 0.6,
-          "endT": 15,
+          "endT": 9,
           "endY": 0.4,
           "yAxisFunction": "Cos"
         },
         {
-          "startT": 15,
+          "startT": 9,
           "startY": 0.4,
           "endT": 120,
           "endY": 0.2,
@@ -39,48 +39,36 @@
       "startT": 2,
       "startX": 0,
       "noteSize": 0.8,
-      "associatedPlane": {
-        "id": 1
-      }
+      "associatedPlane": 1
     },
     {
       "startT": 2.2,
       "startX": 1.2,
       "noteSize": 0.6,
-      "associatedPlane": {
-        "id": 1
-      }
+      "associatedPlane": 1
     },
     {
       "startT": 2.4,
       "startX": -1.5,
       "noteSize": 0.7,
-      "associatedPlane": {
-        "id": 1
-      }
+      "associatedPlane": 1
     },
     {
       "startT": 2.6,
       "startX": 0.5,
       "noteSize": 0.5,
-      "associatedPlane": {
-        "id": 1
-      }
+      "associatedPlane": 1
     },
     {
       "startT": 2.8,
       "startX": -0.8,
       "noteSize": 0.6,
-      "associatedPlane": {
-        "id": 1
-      }
+      "associatedPlane": 1
     }
   ],
   "holds": [
     {
-      "associatedPlane": {
-        "id": 1
-      },
+      "associatedPlane": 1,
       "subHoldList": [
         {
           "startT": 4,
@@ -120,46 +108,38 @@
       "startT": 10.2,
       "startX": 0.8,
       "noteSize": 0.6,
-      "associatedPlane": {
-        "id": 1
-      }
+      "associatedPlane": 1
     },
     {
       "startT": 10.4,
       "startX": -1.2,
       "noteSize": 0.8,
-      "associatedPlane": {
-        "id": 1
-      }
+      "associatedPlane": 1
     }
   ],
   "flicks": [
     {
-      "startT": 65,
+      "startT": 7,
       "startX": 1.5,
       "noteSize": 0.5,
-      "associatedPlane": {
-        "id": 1
-      },
-      "flickDirection": 0.25
+      "flickDirection": 0.25,
+      "associatedPlane": 1
     },
     {
-      "startT": 85,
+      "startT": 8,
       "startX": -0.5,
       "noteSize": 0.6,
-      "associatedPlane": {
-        "id": 1
-      },
-      "flickDirection": 0.75
+      "flickDirection": 0.75,
+      "associatedPlane": 1
     }
   ],
   "stars": [
     {
-      "starHeadT": 70,
+      "starHeadT": 12,
       "subStarList": [
         {
-          "starTrackStartT": 70,
-          "starTrackEndT": 80,
+          "starTrackStartT": 13,
+          "starTrackEndT": 14,
           "startX": 0,
           "startY": 0,
           "endX": 1,
@@ -167,8 +147,8 @@
           "trackFunction": "Linear"
         },
         {
-          "starTrackStartT": 80,
-          "starTrackEndT": 90,
+          "starTrackStartT": 14,
+          "starTrackEndT": 15,
           "startX": 1,
           "startY": 1,
           "endX": 2,

@@ -18,12 +18,13 @@ namespace Note
         [JsonProperty("noteSize")]
         // 新增划键的大小
         public float noteSize;
-        [JsonProperty("associatedPlane")]
-        // 与判定面相关联的引用（在序列化时这里只会记录相关标识，反序列化后需要重新关联，后面会处理）
-        public JudgePlane associatedPlane;
         [JsonProperty("flickDirectionVector")]
         // 用于记录划键操作的滑动方向（设置为0-1之间的值）
         public float flickDirection;
+        [JsonProperty("associatedPlane")]
+        // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
+        public int associatedPlaneId;
+
 
         // 检测玩家是否在正确的时间点击并向正确方向滑动了划键对应的判定区（仅针对移动端触摸检测）
         public bool IsFlickedCorrectly()

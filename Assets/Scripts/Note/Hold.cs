@@ -12,8 +12,8 @@ namespace Note
         // 用于存储子Hold参数的列表
         public List<SubHold> subHoldList = new();
         [JsonProperty("associatedPlane")]
-        // 与判定面相关联的引用（在序列化时这里只会记录相关标识，反序列化后需要重新关联，后面会处理）
-        public JudgePlane associatedPlane;
+        // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
+        public int associatedPlaneId;
 
         // 内部类，用于表示子Hold的参数结构
         public class SubHold
