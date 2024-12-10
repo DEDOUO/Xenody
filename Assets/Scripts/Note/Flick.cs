@@ -18,7 +18,7 @@ namespace Note
         [JsonProperty("noteSize")]
         // 新增划键的大小
         public float noteSize;
-        [JsonProperty("flickDirectionVector")]
+        [JsonProperty("flickDirection")]
         // 用于记录划键操作的滑动方向（设置为0-1之间的值）
         public float flickDirection;
         [JsonProperty("associatedPlane")]

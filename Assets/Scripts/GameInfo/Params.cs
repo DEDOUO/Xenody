@@ -36,5 +36,10 @@ namespace Params
         // 判定区大小参数，距离屏幕边缘的水平边距
         public static float HorizontalMargin = 0.1f;
     }
+    public static class FinenessParams
+    {
+        // 模拟Hold/JudgePlane曲面时，用几个斜面代替曲面
+        public static int Segment = 8;
+    }
 
 }

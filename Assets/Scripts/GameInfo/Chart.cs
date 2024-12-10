@@ -40,15 +40,6 @@ public class Chart
             judgePlanes,
             taps,
             holds,
-            //holds = holds.Select(hold =>
-            //{
-            //    var subHoldList = hold.GetSubHoldList();
-            //    return new
-            //    {
-            //        SubHoldList = subHoldList,
-            //        AssociatedPlaneId = hold.associatedPlane.id
-            //    };
-            //}).ToList(),
             slides,
             flicks,
             stars
@@ -114,6 +105,7 @@ public class Chart
                 var newSlide = new Slide();
                 newSlide.startT = (float)slide.startT;
                 newSlide.startX = (float)slide.startX;
+                newSlide.noteSize = (float)slide.noteSize;
                 newSlide.associatedPlaneId = (int)slide.associatedPlaneId;
                 chart.slides.Add(newSlide);
             }
@@ -122,9 +114,12 @@ public class Chart
             chart.flicks = new List<Flick>();
             foreach (var flick in chartData.flicks)
             {
+                //Debug.Log(flick.startT);
+                //Debug.Log(flick.flickDirection);
                 var newFlick = new Flick();
                 newFlick.startT = (float)flick.startT;
                 newFlick.startX = (float)flick.startX;
+                newFlick.noteSize = (float)flick.noteSize;
                 newFlick.flickDirection = (float)flick.flickDirection;
                 newFlick.associatedPlaneId = (int)flick.associatedPlaneId;
                 chart.flicks.Add(newFlick);
