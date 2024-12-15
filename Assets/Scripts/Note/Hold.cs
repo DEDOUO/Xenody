@@ -81,6 +81,7 @@ namespace Note
         {
             return subHoldList;
         }
+
         public bool IsInXAxisRange()
         {
             foreach (SubHold subhold in subHoldList)
@@ -92,5 +93,54 @@ namespace Note
             }
             return true;
         }
+
+        public float GetFirstSubHoldStartTime()
+        {
+            if (subHoldList.Count > 0)
+            {
+                return subHoldList[0].startT;
+            }
+            Debug.LogError("Hold中没有子Hold，无法获取第一个SubHold的startT。");
+            return -1; // 返回一个表示错误的值，可根据实际情况调整
+        }
+
+        public float GetLastSubHoldEndTime()
+        {
+            if (subHoldList.Count > 0)
+            {
+                return subHoldList[subHoldList.Count - 1].endT;
+            }
+            Debug.LogError("Hold中没有子Hold，无法获取最后一个SubHold的endT。");
+            return -1; // 返回一个表示错误的值，可根据实际情况调整
+        }
+
+        // 根据currentTime获取当前SubHold的左侧X轴坐标
+        public float GetCurrentSubHoldLeftX(float currentTime)
+        {
+            foreach (SubHold subHold in subHoldList)
+            {
+                if (currentTime >= subHold.startT && currentTime <= subHold.endT)
+                {
+                    return Utility.CalculatePosition(currentTime, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                }
+            }
+            // 如果没有找到对应的SubHold，根据你的需求返回合适的值，这里返回0
+            return 0;
+        }
+
+        // 根据currentTime获取当前SubHold的右侧X轴坐标
+        public float GetCurrentSubHoldRightX(float currentTime)
+        {
+            foreach (SubHold subHold in subHoldList)
+            {
+                if (currentTime >= subHold.startT && currentTime <= subHold.endT)
+                {
+                    return Utility.CalculatePosition(currentTime, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+                }
+            }
+            // 如果没有找到对应的SubHold，根据你的需求返回合适的值，这里返回0
+            return 0;
+        }
+
     }
 }

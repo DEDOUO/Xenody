@@ -4,6 +4,9 @@ using System.Linq;
 using Params;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.Experimental.Rendering.Universal;
+using UnityEngine.Rendering.Universal;
+using Note;
 
 public class MusicAndChartPlayer : MonoBehaviour
 {
@@ -13,11 +16,19 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject TapsParent;
     private GameObject SlidesParent;
     private GameObject FlicksParent;
+    private GameObject HoldsParent;
+
     private AudioSource TapSoundEffect;
     private AudioSource SlideSoundEffect;
     private AudioSource FlickSoundEffect;
+    private AudioSource HoldSoundEffect;
+
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
+    private Dictionary<string, float> holdEndTimes = new Dictionary<string, float>(); // 存储Hold实例名到其结束时间的映射
     private Dictionary<string, KeyInfo> keyReachedJudgment = new Dictionary<string, KeyInfo>(); // 存储实例名到键信息的映射
+    private Dictionary<string, GameObject> holdHitEffectDictionary = new Dictionary<string, GameObject>();
+    // 新增一个列表用于存储当前正在处理的Hold对应的instanceName
+    private List<string> currentHoldInstanceNames = new List<string>();
     private bool isMusicPlayingStarted; // 用于标识是否已经开始音乐播放阶段
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
@@ -27,17 +38,21 @@ public class MusicAndChartPlayer : MonoBehaviour
     {
         public float startT;
         public bool isJudged;
+        public bool isSoundPlayedAtStart;
+        public bool isSoundPlayedAtEnd;
         public KeyInfo(float startTime)
         {
             startT = startTime;
             isJudged = false;
+            isSoundPlayedAtStart = false;
+            isSoundPlayedAtEnd = false;
         }
     }
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, 
-        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, 
-        AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, Chart chart)
+        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent,
+        AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, Chart chart)
     {
         this.audioSource = audioSource;
         JudgePlanesParent = judgePlanesParent;
@@ -45,17 +60,19 @@ public class MusicAndChartPlayer : MonoBehaviour
         TapsParent = tapsParent;
         SlidesParent = slidesParent;
         FlicksParent = flicksParent;
+        HoldsParent = holdsParent;
         TapSoundEffect = tapSoundEffect;
         SlideSoundEffect = slideSoundEffect;
         FlickSoundEffect = flickSoundEffect;
+        HoldSoundEffect = holdSoundEffect;
         this.chart = chart;
     }
 
     public void PlayMusicAndChart(Chart chart)
     {
-        
+
         // 提前加工Chart里所有键（Tap和Slide等）的startT与对应实例名的映射关系，并按照startT排序
-        PrepareStartTimeToInstanceNamesMapping(chart);
+        PrepareChartMapping(chart);
         audioSource.Play();
         isMusicPlayingStarted = true;
     }
@@ -76,6 +93,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                         List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
                         foreach (var instanceName in instanceNames)
                         {
+                            //Debug.Log(instanceName);
                             KeyInfo keyInfo = keyReachedJudgment[instanceName];
                             keyInfo.isJudged = true;
                             // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
@@ -95,9 +113,64 @@ public class MusicAndChartPlayer : MonoBehaviour
                                 //Debug.Log(Time.time);
                                 PlayAnimation(instanceName, "FlickEffect"); // 假设动画名称为FlickEffect，按实际修改
                             }
+                            else if (instanceName.StartsWith("Hold"))
+                            {
+                                //hold游戏物体实例
+                                GameObject holdObject = GameObject.Find(instanceName);
+                                // 从instanceName中提取数字部分，用于查找对应的Hold
+                                int holdIndex = GetHoldIndexFromInstanceName(instanceName);
+                                if (holdIndex >= 0 && holdIndex < chart.holds.Count)
+                                {
+                                    Hold hold = chart.holds[holdIndex];
+                                    KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
+                                    float holdEndTime = holdEndTimes[instanceName];
+                                    bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
+                                    bool isEnd = currentTime >= holdEndTime;
+                                    Debug.Log($"InstanceName: {instanceName}, currentTime: {currentTime}, isStart: {isStart}, isEnd: {isEnd}");
+
+                                    //计算当前光效所在世界坐标
+                                    // 获取Subhold的X轴左侧和右侧坐标
+                                    float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
+                                    float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
+                                    // 计算X轴坐标均值
+                                    float x = (subholdLeftX + subholdRightX) / 2;
+
+                                    // 获取所在JudgePlane当时刻坐标
+                                    float y = 0f;
+                                    JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
+                                    if (correspondingJudgePlane != null)
+                                    {
+                                        y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                                    }
+                                    //HoldHitEffect的位置
+                                    Vector3 holdHitEffectPosition = new Vector3(x, y, 0);
+                                    if (isStart && !holdKeyInfo.isSoundPlayedAtStart) // 仅在开始判定且还没播放过开始音效时播放
+                                    {
+                                        HoldSoundEffect.Play();
+                                        holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
+                                        // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
+                                        currentHoldInstanceNames.Add(instanceName);
+                                        Debug.Log(holdHitEffectPosition);
+                                        CreateHoldLight(holdKeyInfo, instanceName, holdObject, holdHitEffectPosition); // 通过实例名创建光源，这里传入Hold实例
+                                    }
+                                    //else if (isEnd && !holdKeyInfo.isSoundPlayedAtEnd) // 仅在结束判定且还没播放过结束音效时播放
+                                    //{
+                                    //    HoldSoundEffect.Play();
+                                    //    holdKeyInfo.isSoundPlayedAtEnd = true; // 标记已播放结束音效
+                                    //    DestroyPreviousLight(holdKeyInfo, instanceName); // 通过实例名销毁光源，这里传入Hold实例
+                                    //}
+                                    //else if (isStart && !isEnd) // 在持续判定阶段
+                                    //{
+                                    //    Debug.Log(holdHitEffectPosition);
+                                    //    UpdateHoldLight(holdKeyInfo, instanceName, holdObject, holdHitEffectPosition); // 通过实例名更新光源，并传入chart和Hold实例参数
+                                    //}
+                                }
+                            }
                         }
                         currentIndex++;
                     }
+                    // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
+                    UpdateHoldStates(currentTime);
                     UpdatePositions(chart);
                 }
             }
@@ -108,9 +181,111 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
     }
+    private void UpdateHoldStates(float currentTime)
+    {
+        for (int i = currentHoldInstanceNames.Count - 1; i >= 0; i--)
+        {
+            string instanceName = currentHoldInstanceNames[i];
+            GameObject holdObject = GameObject.Find(instanceName);
+            int holdIndex = GetHoldIndexFromInstanceName(instanceName);
+            if (holdIndex >= 0 && holdIndex < chart.holds.Count)
+            {
+                Hold hold = chart.holds[holdIndex];
+                KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
+                float holdEndTime = holdEndTimes[instanceName];
+                bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
+                bool isEnd = currentTime >= holdEndTime;
 
+                // 获取当前光效所在世界坐标
+                float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
+                float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
+                float x = (subholdLeftX + subholdRightX) / 2;
 
-    private void PrepareStartTimeToInstanceNamesMapping(Chart chart)
+                float y = 0f;
+                JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
+                if (correspondingJudgePlane != null)
+                {
+                    y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                }
+                Vector3 holdHitEffectPosition = new Vector3(x, y, 0);
+
+                if (isEnd && !holdKeyInfo.isSoundPlayedAtEnd)
+                {
+                    HoldSoundEffect.Play();
+                    holdKeyInfo.isSoundPlayedAtEnd = true;
+                    DestroyPreviousLight(holdKeyInfo, instanceName);
+                    // 如果已经结束判定，从列表中移除该instanceName
+                    currentHoldInstanceNames.RemoveAt(i);
+                }
+                else if (isStart && !isEnd)
+                {
+                    Debug.Log(holdHitEffectPosition);
+                    UpdateHoldLight(holdKeyInfo, instanceName, holdObject, holdHitEffectPosition);
+                }
+            }
+        }
+    }
+
+    // 辅助方法，从instanceName中提取数字部分，用于查找对应的Hold索引
+    private int GetHoldIndexFromInstanceName(string instanceName)
+    {
+        if (instanceName.StartsWith("Hold") && int.TryParse(instanceName.Substring(4), out int index))
+        {
+            return index - 1;
+        }
+        return -1;
+    }
+
+    private void CreateHoldLight(KeyInfo holdKeyInfo, string instanceName, GameObject holdGameObject, Vector3 holdHitEffectPosition)
+    {
+        if (holdGameObject != null)
+        {
+            // 创建HoldHitEffect子物体
+            GameObject holdHitEffect = new GameObject("HoldHitEffect");
+            holdHitEffect.transform.parent = holdGameObject.transform;
+
+            // 创建一个新的Light组件（3D光源）并挂载到HoldHitEffect上
+            Light holdLight = holdHitEffect.AddComponent<Light>();
+            holdLight.color = Color.blue;
+            holdLight.intensity = 1f;
+            holdLight.range = 0.1f;
+
+            // 将创建的HoldHitEffect添加到字典中
+            holdHitEffectDictionary[instanceName] = holdHitEffect;
+
+            holdHitEffect.transform.position = holdHitEffectPosition;
+        }
+    }
+
+    private void UpdateHoldLight(KeyInfo holdKeyInfo, string instanceName, GameObject holdGameObject, Vector3 holdHitEffectPosition)
+    {
+        if (holdHitEffectDictionary.TryGetValue(instanceName, out GameObject holdHitEffect) && holdHitEffect != null && holdHitEffect.GetComponent<Light>() != null)
+        {
+            Light holdLight = holdHitEffect.GetComponent<Light>();
+
+            holdHitEffect.transform.position = holdHitEffectPosition;
+        }
+    }
+
+    private void DestroyPreviousLight(KeyInfo holdKeyInfo, string instanceName)
+    {
+        if (holdHitEffectDictionary.TryGetValue(instanceName, out GameObject holdHitEffect) && holdHitEffect != null)
+        {
+            Destroy(holdHitEffect);
+            holdHitEffectDictionary.Remove(instanceName);
+        }
+    }
+    private JudgePlane GetCorrespondingJudgePlaneBasedOnTime(float currentTime, Chart chart, Hold hold)
+    {
+        JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
+        if (associatedJudgePlaneObject != null)
+        {
+            return associatedJudgePlaneObject;
+        }
+        return null;
+    }
+
+    private void PrepareChartMapping(Chart chart)
     {
         List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
         if (chart.taps != null)
@@ -141,6 +316,19 @@ public class MusicAndChartPlayer : MonoBehaviour
                 string instanceName = $"Flick{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(flick.startT, instanceName));
                 keyReachedJudgment[instanceName] = new KeyInfo(flick.startT);
+            }
+        }
+        if (chart.holds != null)
+        {
+            for (int i = 0; i < chart.holds.Count; i++)
+            {
+                var hold = chart.holds[i];
+                float startT = hold.GetFirstSubHoldStartTime();
+                float endT = hold.GetLastSubHoldEndTime();
+                string instanceName = $"Hold{i + 1}";
+                allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+                keyReachedJudgment[instanceName] = new KeyInfo(startT);
+                holdEndTimes[instanceName] = endT; // 记录Hold的结束时间
             }
         }
 
@@ -262,6 +450,39 @@ public class MusicAndChartPlayer : MonoBehaviour
                 }
             }
         }
+
+        // 针对Hold键进行额外的位置或属性更新（示例）
+        if (HoldsParent != null)
+        {
+            for (int i = 0; i < HoldsParent.transform.childCount; i++)
+            {
+                Transform childTransform = HoldsParent.transform.GetChild(i);
+                GameObject holdGameObject = childTransform.gameObject;
+                string instanceName = holdGameObject.name;
+                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+
+                //注意Hold无论是否判定，位置都要更新
+                Vector3 currentPosition = childTransform.position;
+                currentPosition.z += zAxisDecreasePerFrame;
+                childTransform.position = currentPosition;
+
+                if (!keyInfo.isJudged)
+                {
+                    // 根据当前时间和Hold的开始、结束时间来调整Hold的缩放，示例逻辑，假设Hold持续时间越长，X轴方向缩放越大
+                    //float holdStartTime = keyInfo.startT;
+                    //float holdEndTime = holdEndTimes[instanceName];
+                    //float currentTime = Time.time;
+                    //if (currentTime >= holdStartTime && currentTime < holdEndTime)
+                    //{
+                    //    float elapsedTime = currentTime - holdStartTime;
+                    //    float totalDuration = holdEndTime - holdStartTime;
+                    //    float scaleFactor = elapsedTime / totalDuration; // 根据时间占比计算缩放因子
+                    //    Vector3 currentScale = holdGameObject.transform.localScale;
+                    //    holdGameObject.transform.localScale = new Vector3(currentScale.x + scaleFactor, currentScale.y, currentScale.z);
+                    //}
+                }
+            }
+        }
     }
 
     // 播放动画的方法，设置Animator的动画控制器并播放指定动画
@@ -300,6 +521,18 @@ public class MusicAndChartPlayer : MonoBehaviour
             else if (animationName == "FlickEffect")
             {
                 controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController"); 
+            }
+            else if (animationName == "HoldStartEffect") // Hold开始动画控制器加载
+            {
+                controller = Resources.Load<RuntimeAnimatorController>("Animations/HoldStartEffectController");
+            }
+            else if (animationName == "HoldSustainEffect") // Hold持续动画控制器加载
+            {
+                controller = Resources.Load<RuntimeAnimatorController>("Animations/HoldSustainEffectController");
+            }
+            else if (animationName == "HoldEndEffect") // Hold结束动画控制器加载
+            {
+                controller = Resources.Load<RuntimeAnimatorController>("Animations/HoldEndEffectController");
             }
 
             if (controller == null)
@@ -341,6 +574,20 @@ public class MusicAndChartPlayer : MonoBehaviour
                     {
                         return judgePlane;
                     }
+                }
+            }
+        }
+        return null;
+    }
+    private JudgePlane GetCorrespondingJudgePlane(Chart chart, int judgePlaneId)
+    {
+        if (chart != null && chart.judgePlanes != null)
+        {
+            foreach (var judgePlane in chart.judgePlanes)
+            {
+                if (judgePlane.id == judgePlaneId)
+                {
+                    return judgePlane;
                 }
             }
         }

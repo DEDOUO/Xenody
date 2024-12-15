@@ -9,14 +9,17 @@ public class AutoPlay : MonoBehaviour
     public AudioSource TapSoundEffect;
     public AudioSource SlideSoundEffect;
     public AudioSource FlickSoundEffect;
+    public AudioSource HoldSoundEffect;
 
     public GameObject JudgePlanesParent;
     public GameObject JudgeLinesParent;
     public GameObject TapsParent;
     public GameObject SlidesParent;
     public GameObject FlicksParent;
+    public GameObject HoldsParent;
 
     public Sprite JudgePlaneSprite;
+    public Sprite HoldSprite;
     public GlobalRenderOrderManager renderOrderManager;
     public GameObject AnimatorContainer;
     
@@ -34,9 +37,14 @@ public class AutoPlay : MonoBehaviour
         SlidesParent = GameObject.Find("SlidesParent");
         // 查找FlicksParent
         FlicksParent = GameObject.Find("FlicksParent");
+        // 查找HoldsParent
+        HoldsParent = GameObject.Find("HoldsParent");
 
         // 加载JudgePlaneSprite
         JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack");
+
+        // 加载JudgePlaneSprite
+        HoldSprite = Resources.Load<Sprite>("Sprites/TrackConflict");
 
         // 查找包含AudioSource的GameObject
         GameObject audioObj = GameObject.Find("AudioService");
@@ -57,6 +65,8 @@ public class AutoPlay : MonoBehaviour
             TapSoundEffect = audioSources[0];
             SlideSoundEffect = audioSources[1];
             FlickSoundEffect = audioSources[2];
+            //Hold与Tap音效一致
+            HoldSoundEffect = audioSources[0];
 
             // 检查并处理AudioClip
             //if (TapSoundEffect.clip != null)
@@ -96,7 +106,8 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, JudgePlaneSprite, renderOrderManager, AnimatorContainer);
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, JudgePlaneSprite, HoldSprite, 
+            renderOrderManager, AnimatorContainer);
 
         // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰
         MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
@@ -106,10 +117,11 @@ public class AutoPlay : MonoBehaviour
         instantiator.InstantiateTaps(chart);
         instantiator.InstantiateSlides(chart);
         instantiator.InstantiateFlicks(chart);
+        instantiator.InstantiateHolds(chart);
 
         // 播放音乐和更新谱面位置
-        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, 
-            TapsParent, SlidesParent, FlicksParent, TapSoundEffect, SlideSoundEffect, FlickSoundEffect, chart);
+        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, 
+            TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, chart);
         player.enabled = true;
         player.PlayMusicAndChart(chart);
     }

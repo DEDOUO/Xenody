@@ -72,31 +72,31 @@
       "subHoldList": [
         {
           "startT": 4,
-          "startXMin": -1,
+          "startXMin": -2,
           "startXMax": 0,
-          "endT": 6,
-          "endXMin": -0.8,
-          "endXMax": 0.2,
+          "endT": 4.5,
+          "endXMin": 0,
+          "endXMax": 2,
           "XLeftFunction": "Linear",
           "XRightFunction": "Linear"
         },
         {
-          "startT": 6,
-          "startXMin": -0.6,
-          "startXMax": 0.4,
-          "endT": 8,
-          "endXMin": -0.4,
-          "endXMax": 0.6,
+          "startT": 4.5,
+          "startXMin": 0.9,
+          "startXMax": 1.1,
+          "endT": 5,
+          "endXMin": -1,
+          "endXMax": 2,
           "XLeftFunction": "Sin",
           "XRightFunction": "Sin"
         },
         {
-          "startT": 8,
-          "startXMin": -0.2,
-          "startXMax": 0.8,
-          "endT": 10,
-          "endXMin": 0,
-          "endXMax": 1,
+          "startT": 5,
+          "startXMin": -2,
+          "startXMax": 2,
+          "endT": 5.5,
+          "endXMin": -0.1,
+          "endXMax": 0.1,
           "XLeftFunction": "Cos",
           "XRightFunction": "Cos"
         }
