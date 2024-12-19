@@ -217,6 +217,7 @@ public class ChartInstantiator : MonoBehaviour
                 {
                     //获取Tap在X轴的长度（用于缩放）
                     tapXAxisLength = spriteRenderer.sprite.bounds.size.x;
+                    //Debug.Log(spriteRenderer.sprite.bounds.size.x);
                 }
                 else
                 {
