@@ -56,8 +56,7 @@ namespace Note
         // 方法用于检查划键是否在规定的X轴坐标范围内（结合新的参数类来判断）
         public bool IsInXAxisRange()
         {
-            float halfNoteSize = noteSize / 2;
-            return startX - halfNoteSize >= ChartParams.XaxisMin && startX + halfNoteSize <= ChartParams.XaxisMax;
+            return Utility.IsInXAxisRange(noteSize, startX);
         }
         public bool IsInFlickRange()
         {

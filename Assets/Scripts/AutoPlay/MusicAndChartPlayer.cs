@@ -131,12 +131,12 @@ public class MusicAndChartPlayer : MonoBehaviour
                                     bool isEnd = currentTime >= holdEndTime;
                                     //Debug.Log($"InstanceName: {instanceName}, currentTime: {currentTime}, isStart: {isStart}, isEnd: {isEnd}");
 
-                                    //计算当前光效所在世界坐标
                                     // 获取Subhold的X轴左侧和右侧坐标
                                     float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
                                     float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
                                     // 计算X轴坐标均值
                                     float x = (subholdLeftX + subholdRightX) / 2;
+                                    float x_width = (subholdRightX - subholdLeftX)*1.5f;
 
                                     // 获取所在JudgePlane当时刻坐标
                                     float y = 0f;
@@ -146,27 +146,31 @@ public class MusicAndChartPlayer : MonoBehaviour
                                         y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                                     }
                                     //HoldHitEffect的位置（注意挂载在Hold物体下，需要根据父物体坐标折算子物体相对坐标））
-                                    Vector3 holdHitEffectPosition = new Vector3(x, y, 0f);
+                                    Vector3 holdHitEffectPosition = new Vector3(-x, y, 0f);
                                     if (isStart && !holdKeyInfo.isSoundPlayedAtStart) // 仅在开始判定且还没播放过开始音效时播放
                                     {
                                         HoldSoundEffect.Play();
                                         holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
                                         // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
                                         currentHoldInstanceNames.Add(instanceName);
-                                        Debug.Log(holdHitEffectPosition);
+                                        //Debug.Log(holdHitEffectPosition);
                                         GameObject holdHitEffect = new GameObject($"HoldHitEffect{holdIndex + 1}");
                                         holdHitEffect.transform.parent = HoldsParent.transform;
                                         holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
                                         holdHitEffect.transform.position = holdHitEffectPosition;
+                                        holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
                                         holdHitEffect.AddComponent< SpriteRenderer > ();
 
                                         //动画组件加载和状态设置
                                         Animator holdAnimator = holdHitEffect.AddComponent<Animator>();
                                         holdAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-                                        int holdStartHash = Animator.StringToHash($"HoldStart_{holdIndex}");
+                                        int holdStartHash = Animator.StringToHash($"HoldStart");
                                         //设置状态为HoldStart
                                         holdAnimator.SetTrigger(holdStartHash);
-                                        PlayAnimation($"HoldHitEffect{holdIndex + 1}", "HoldEffect");
+
+                                        // 挂载PingPongAnimationStateController脚本
+                                        //PingPongAnimationStateController pingPongScript = holdHitEffect.AddComponent<PingPongAnimationStateController>();
+                                        //PlayAnimation($"HoldHitEffect{holdIndex + 1}", "HoldEffect");
                                     }
                                 }
                             }
@@ -205,6 +209,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                 float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
                 float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
                 float x = (subholdLeftX + subholdRightX) / 2;
+                float x_width = (subholdRightX - subholdLeftX) * 1.5f;
 
                 float y = 0f;
                 JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
@@ -231,11 +236,13 @@ public class MusicAndChartPlayer : MonoBehaviour
                         
                         if (animator != null)
                         {
-                            int holdEndHash = Animator.StringToHash($"HoldEnd_{holdIndex}");
+                            int holdEndHash = Animator.StringToHash($"HoldEnd");
+                            //Debug.Log("holdEndHash: " + holdEndHash);
                             // 设置动画状态为HoldEnd
                             animator.SetTrigger(holdEndHash);
-                            // 等待动画播放完毕后删除物体
-                            StartCoroutine(CheckAnimationEnd(animator, holdHitEffect));
+                            PlayAnimation($"HoldHitEffect{holdIndex + 1}", "HoldEffect");
+                            //Debug.Log(1);
+
                         }
                     }
 
@@ -246,6 +253,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     //Debug.Log(holdHitEffectPosition);
                     GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
                     holdHitEffect.transform.position = holdHitEffectPosition;
+                    holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
                     //UpdateHoldLight(holdKeyInfo, instanceName, holdObject, holdHitEffectPosition);
                 }
             }
@@ -517,13 +525,13 @@ public class MusicAndChartPlayer : MonoBehaviour
             //animator.Play("TapHitEffect");
 
             // 针对Hold开始判定时动画在第1帧和第6帧之间反复播放
-            if (animationName != "HoldEffect")
-            {
+            //if (animationName != "HoldEffect")
+            //{
                 // 对于其他类型的键，正常播放动画
                 animator.Play("TapHitEffect");
                 // 检查动画是否播放完毕（这里使用一个简单的方法来模拟，实际可能需要更精确的判断）
                 StartCoroutine(CheckAnimationEnd(animator, keyGameObject));
-            }
+            //}
 
             //SpriteRenderer spriteRenderer = keyGameObject.GetComponent<SpriteRenderer>();
             ////获取Tap在X轴的长度（用于缩放）

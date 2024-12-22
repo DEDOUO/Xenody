@@ -104,18 +104,72 @@
     }
   ],
   "slides": [
-    {
-      "startT": 10.2,
-      "startX": 0.8,
-      "noteSize": 0.6,
-      "associatedPlane": 1
-    },
-    {
-      "startT": 10.4,
-      "startX": -1.2,
-      "noteSize": 0.8,
-      "associatedPlane": 1
-    }
+      {
+        "startT": 8.0,
+        "startX": -1.7,
+        "noteSize": 0.6,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.1,
+        "startX": -1.4,
+        "noteSize": 0.68,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.2,
+        "startX": -1.1,
+        "noteSize": 0.76,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.3,
+        "startX": -0.8,
+        "noteSize": 0.84,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.4,
+        "startX": -0.5,
+        "noteSize": 0.92,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.5,
+        "startX": -0.2,
+        "noteSize": 1.0,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.6,
+        "startX": 0.1,
+        "noteSize": 1.08,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.7,
+        "startX": 0.4,
+        "noteSize": 1.16,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.8,
+        "startX": 0.7,
+        "noteSize": 1.24,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 8.9,
+        "startX": 1.0,
+        "noteSize": 1.32,
+        "associatedPlane": 1
+      },
+      {
+        "startT": 9.0,
+        "startX": 1.3,
+        "noteSize": 1.4,
+        "associatedPlane": 1
+      }
   ],
   "flicks": [
     {
@@ -126,7 +180,7 @@
       "associatedPlane": 1
     },
     {
-      "startT": 8,
+      "startT": 7.5,
       "startX": -0.5,
       "noteSize": 0.6,
       "flickDirection": 0.75,

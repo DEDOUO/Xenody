@@ -23,8 +23,7 @@ namespace Note
         // 方法用于检查点键是否在规定的X轴坐标范围内（避免越界）
         public bool IsInXAxisRange()
         {
-            float halfNoteSize = noteSize / 2;
-            return startX - halfNoteSize >= ChartParams.XaxisMin && startX + halfNoteSize <= ChartParams.XaxisMax;
+            return Utility.IsInXAxisRange(noteSize, startX);
         }
     }
 }

@@ -1,6 +1,4 @@
-//using System.Collections.Generic;
-//using System.Numerics;
-//using UnityEngine;
+
 
 //// 判定面上的点键类
 //public class Tap : MonoBehaviour

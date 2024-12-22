@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using Newtonsoft.Json;
 using Params;
+using static Utility;
+
 namespace Note
 {
     // 滑动键（Slide）类
@@ -22,8 +24,7 @@ namespace Note
         // 方法用于检查滑动键是否在规定的X轴坐标范围内（结合新的参数类来判断）
         public bool IsInXAxisRange()
         {
-            float halfNoteSize = noteSize / 2;
-            return startX - halfNoteSize >= ChartParams.XaxisMin && startX + halfNoteSize <= ChartParams.XaxisMax;
+            return Utility.IsInXAxisRange(noteSize, startX);
         }
     }
 }

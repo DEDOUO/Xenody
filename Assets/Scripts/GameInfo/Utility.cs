@@ -2,6 +2,7 @@ using System;
 //using System.Numerics;
 using UnityEngine;
 using Note;
+using Params;
 //using static Utility;
 
 public class Utility
@@ -132,6 +133,11 @@ public class Utility
         return worldUnitToScreenPixelXAtTarget;
     }
 
+    public static bool IsInXAxisRange(float noteSize, float startX)
+    {
+        float halfNoteSize = noteSize / 2;
+        return startX - halfNoteSize >= ChartParams.XaxisMin - 0.01f && startX + halfNoteSize <= ChartParams.XaxisMax + 0.01f;
+    }
 
 }
 
