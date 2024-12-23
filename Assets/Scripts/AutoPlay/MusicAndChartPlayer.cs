@@ -136,7 +136,22 @@ public class MusicAndChartPlayer : MonoBehaviour
                                     float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
                                     // 计算X轴坐标均值
                                     float x = (subholdLeftX + subholdRightX) / 2;
-                                    float x_width = (subholdRightX - subholdLeftX)*1.5f;
+
+                                    JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
+                                    float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
+                                    //Debug.Log(yAxisPosition);
+                                    Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                                    float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+                                    //Debug.Log(worldUnitToScreenPixelX);
+                                    float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
+                                    float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
+                                    //Debug.Log(noteSizeWorldLengthPerUnit);
+
+                                    //这里的155f是原始HitEffect对应的像素数/100
+                                    float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
+                                    //Debug.Log(x_width);
+
+                                    //float x_width = (subholdRightX - subholdLeftX)*1.5f;
 
                                     // 获取所在JudgePlane当时刻坐标
                                     float y = 0f;
@@ -146,7 +161,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                                         y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                                     }
                                     //HoldHitEffect的位置（注意挂载在Hold物体下，需要根据父物体坐标折算子物体相对坐标））
-                                    Vector3 holdHitEffectPosition = new Vector3(-x, y, 0f);
+                                    Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
                                     if (isStart && !holdKeyInfo.isSoundPlayedAtStart) // 仅在开始判定且还没播放过开始音效时播放
                                     {
                                         HoldSoundEffect.Play();
@@ -209,7 +224,17 @@ public class MusicAndChartPlayer : MonoBehaviour
                 float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
                 float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
                 float x = (subholdLeftX + subholdRightX) / 2;
-                float x_width = (subholdRightX - subholdLeftX) * 1.5f;
+
+                JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
+                float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(currentTime);
+                Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+                float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
+                float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
+                //这里的155f是原始HitEffect对应的像素数/100
+                float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
+
+                //float x_width = (subholdRightX - subholdLeftX) * 1.5f;
 
                 float y = 0f;
                 JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
@@ -217,7 +242,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                 {
                     y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                 }
-                Vector3 holdHitEffectPosition = new Vector3(-x, y, 0f);
+                Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
 
                 if (isEnd && !holdKeyInfo.isSoundPlayedAtEnd)
                 {
@@ -483,7 +508,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
             //临时调整一下动画效果的缩放，用以跟Note大小匹配
             Vector3 currentScale = keyGameObject.transform.localScale;
-            currentScale.x *= 1.5f;
+            currentScale.x *= 247/165f;
             keyGameObject.transform.localScale = currentScale;
 
             // 判断是否是Flick类型的键，如果是则先删除其所有子物体（如FlickArrow）
@@ -645,6 +670,23 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
         return null;
+    }
+    private float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition)
+    {
+        // 获取屏幕宽度
+        float screenWidth = Screen.width;
+        float targetHorizontalMargin = HorizontalParams.HorizontalMargin; // 目标水平边距，即离屏幕边缘10%的距离，可根据需求调整
+
+        // 计算水平可视范围（考虑边距后的有效宽度）
+        float horizontalVisibleRange = screenWidth * (1 - 2 * targetHorizontalMargin);
+
+        Vector3 Point = worldPosition;
+
+        float WorldUnitToScreenPixelX = Utility.CalculateWorldUnitToScreenPixelAtDistance(Point);
+
+        float XWorld = horizontalVisibleRange / 2 / WorldUnitToScreenPixelX;
+
+        return XWorld;
     }
 }
 

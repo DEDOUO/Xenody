@@ -217,7 +217,7 @@ public class ChartInstantiator : MonoBehaviour
                 {
                     //获取Tap在X轴的长度（用于缩放）
                     tapXAxisLength = spriteRenderer.sprite.bounds.size.x;
-                    //Debug.Log(spriteRenderer.sprite.bounds.size.x);
+                    //Debug.Log(tapXAxisLength);
                 }
                 else
                 {
@@ -243,6 +243,7 @@ public class ChartInstantiator : MonoBehaviour
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（封装成方法方便复用，以下是示例方法定义，参数需根据实际情况传入合适的世界坐标点）
                         Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
                         float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+                        //Debug.Log(worldUnitToScreenPixelX);
 
                         // 计算Tap的X轴坐标
                         float startXWorld = worldUnitToScreenPixelX * tap.startX / ChartParams.XaxisMax;
