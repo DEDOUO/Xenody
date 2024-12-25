@@ -17,11 +17,13 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject SlidesParent;
     private GameObject FlicksParent;
     private GameObject HoldsParent;
+    private GameObject StarsParent;
 
     private AudioSource TapSoundEffect;
     private AudioSource SlideSoundEffect;
     private AudioSource FlickSoundEffect;
     private AudioSource HoldSoundEffect;
+    private AudioSource StarHeadSoundEffect;
 
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
     private Dictionary<string, float> holdEndTimes = new Dictionary<string, float>(); // 存储Hold实例名到其结束时间的映射
@@ -55,8 +57,9 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, 
-        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent,
-        AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, Chart chart)
+        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent,
+        AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect, 
+        Chart chart)
     {
         this.audioSource = audioSource;
         JudgePlanesParent = judgePlanesParent;
@@ -65,10 +68,12 @@ public class MusicAndChartPlayer : MonoBehaviour
         SlidesParent = slidesParent;
         FlicksParent = flicksParent;
         HoldsParent = holdsParent;
+        StarsParent = starsParent;
         TapSoundEffect = tapSoundEffect;
         SlideSoundEffect = slideSoundEffect;
         FlickSoundEffect = flickSoundEffect;
         HoldSoundEffect = holdSoundEffect;
+        StarHeadSoundEffect = starheadSoundEffect;
         this.chart = chart;
     }
 
@@ -174,7 +179,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                                         holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
                                         holdHitEffect.transform.position = holdHitEffectPosition;
                                         holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
-                                        holdHitEffect.AddComponent< SpriteRenderer > ();
+                                        holdHitEffect.AddComponent<SpriteRenderer>();
 
                                         //动画组件加载和状态设置
                                         Animator holdAnimator = holdHitEffect.AddComponent<Animator>();
@@ -188,6 +193,12 @@ public class MusicAndChartPlayer : MonoBehaviour
                                         //PlayAnimation($"HoldHitEffect{holdIndex + 1}", "HoldEffect");
                                     }
                                 }
+                            }
+                            else if (instanceName.StartsWith("StarHead"))
+                            {
+                                //Debug.Log(1);
+                                StarHeadSoundEffect.Play();
+                                PlayAnimation(instanceName, "StarHeadEffect");
                             }
                         }
                         currentIndex++;
@@ -352,6 +363,18 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
 
+        if (chart.stars != null)
+        {
+            for (int i = 0; i < chart.stars.Count; i++)
+            {
+                var star = chart.stars[i];
+                float startT = star.starHeadT;
+                string instanceName = $"StarHead{i + 1}";
+                allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+                keyReachedJudgment[instanceName] = new KeyInfo(startT);
+            }
+        }
+
         // 按照startT进行排序
         allPairs = allPairs.OrderBy(pair => pair.Key).ToList();
 
@@ -364,7 +387,19 @@ public class MusicAndChartPlayer : MonoBehaviour
                 startTimeToInstanceNames[startTime] = new List<string>();
             }
             startTimeToInstanceNames[startTime].Add(instanceName);
+            //Debug.Log(startTimeToInstanceNames[startTime]);
         }
+
+        // 输出所有列表内容
+        //foreach (var startTime in startTimeToInstanceNames.Keys)
+        //{
+        //    List<string> instanceNames = startTimeToInstanceNames[startTime];
+        //    Debug.Log($"Start Time: {startTime}");
+        //    foreach (var instanceName in instanceNames)
+        //    {
+        //        Debug.Log($"  Instance Name: {instanceName}");
+        //    }
+        //}
     }
 
     private void UpdatePositions(Chart chart)
@@ -492,6 +527,24 @@ public class MusicAndChartPlayer : MonoBehaviour
                 }
             }
         }
+        // 针对StarHead键进行位置更新
+        if (StarsParent != null)
+        {
+            for (int i = 0; i < StarsParent.transform.childCount; i++)
+            {
+                Transform childTransform = StarsParent.transform.GetChild(i);
+                GameObject starHeadGameObject = childTransform.gameObject;
+                string instanceName = starHeadGameObject.name;
+                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                //如果是HoldHitEffect物体，则跳过
+                if (instanceName.StartsWith("StarHead") && !keyInfo.isJudged)
+                {
+                    Vector3 currentPosition = childTransform.position;
+                    currentPosition.z += zAxisDecreasePerFrame;
+                    childTransform.position = currentPosition;
+                }
+            }
+        }
     }
 
     // 播放动画的方法，设置Animator的动画控制器并播放指定动画
@@ -540,32 +593,24 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
             }
+            else if (animationName == "StarHeadEffect") // Hold开始动画控制器加载
+            {
+                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
+            }
 
             if (controller == null)
             {
                 Debug.LogError($"无法加载 {animationName} 的AnimatorController资源，请检查资源路径和文件是否存在！");
             }
             animator.runtimeAnimatorController = controller;
-            //animator.Play(animationName);
-            //animator.Play("TapHitEffect");
 
-            // 针对Hold开始判定时动画在第1帧和第6帧之间反复播放
-            //if (animationName != "HoldEffect")
-            //{
-                // 对于其他类型的键，正常播放动画
-                animator.Play("TapHitEffect");
-                // 检查动画是否播放完毕（这里使用一个简单的方法来模拟，实际可能需要更精确的判断）
-                StartCoroutine(CheckAnimationEnd(animator, keyGameObject));
-            //}
-
-            //SpriteRenderer spriteRenderer = keyGameObject.GetComponent<SpriteRenderer>();
-            ////获取Tap在X轴的长度（用于缩放）
-            //float tapXAxisLength = spriteRenderer.sprite.bounds.size.x;
-            //Debug.Log(tapXAxisLength);
-
-            
+            // 正常播放动画
+            animator.Play("TapHitEffect");
+            // 检查动画是否播放完毕（这里使用一个简单的方法来模拟，实际可能需要更精确的判断）
+            StartCoroutine(CheckAnimationEnd(animator, keyGameObject));
         }
     }
+
     // 协程方法用于控制动画帧在第1帧和第6帧之间循环
     //private IEnumerator LoopAnimationFrames(Animator animator, int startFrame, int endFrame)
     //{

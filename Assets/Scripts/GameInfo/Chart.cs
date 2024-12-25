@@ -114,8 +114,6 @@ public class Chart
             chart.flicks = new List<Flick>();
             foreach (var flick in chartData.flicks)
             {
-                //Debug.Log(flick.startT);
-                //Debug.Log(flick.flickDirection);
                 var newFlick = new Flick();
                 newFlick.startT = (float)flick.startT;
                 newFlick.startX = (float)flick.startX;
@@ -130,6 +128,7 @@ public class Chart
             foreach (var starData in chartData.stars)
             {
                 var newStar = new Star();
+                newStar.starHeadT = (float)starData.starHeadT;
                 foreach (var subStar in starData.subStarList)
                 {
                     newStar.AddSubStar((float)subStar.starTrackStartT, (float)subStar.starTrackEndT, (float)subStar.startX, (float)subStar.startY, (float)subStar.endX, (float)subStar.endY, (Utility.TrackFunctionType)subStar.trackFunction);

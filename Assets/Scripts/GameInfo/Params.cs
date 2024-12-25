@@ -17,6 +17,9 @@ namespace Params
         // Y轴坐标从 0 到 1
         public static float YaxisMin = 0;
         public static float YaxisMax = 1;
+
+        //StarHead默认的X轴坐标宽度
+        public static float StarHeadXAxis = 0.4f;
     }
 
     public static class SpeedParams

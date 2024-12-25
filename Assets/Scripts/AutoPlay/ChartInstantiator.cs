@@ -13,6 +13,7 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject SlidesParent;
     private GameObject FlicksParent;
     private GameObject HoldsParent;
+    private GameObject StarsParent;
     private Sprite JudgePlaneSprite;
     private Sprite HoldSprite;
     private GlobalRenderOrderManager renderOrderManager;
@@ -21,7 +22,7 @@ public class ChartInstantiator : MonoBehaviour
     //private Dictionary<GameObject, bool> slideReachedJudgmentLine = new Dictionary<GameObject, bool>(); 
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
-    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent,
+    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent,
         Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer)
     {
         JudgePlanesParent = judgePlanesParent;
@@ -30,6 +31,7 @@ public class ChartInstantiator : MonoBehaviour
         SlidesParent = slidesParent;
         FlicksParent = flicksParent;
         HoldsParent = holdsParent;
+        StarsParent = starsParent;
         JudgePlaneSprite = judgePlaneSprite;
         HoldSprite = holdSprite;
         renderOrderManager = globalRenderOrderManager;
@@ -543,6 +545,75 @@ public class ChartInstantiator : MonoBehaviour
                     }
                 }
                 holdIndex++;
+            }
+        }
+    }
+
+    public void InstantiateStarHeads(Chart chart)
+    {
+        if (chart != null && chart.stars != null)
+        {
+            // 假设Tap预制体的加载路径，你需要根据实际情况修改
+            GameObject starheadPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/StarHead.prefab", typeof(GameObject));
+            if (starheadPrefab != null)
+            {
+                float starheadXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
+                SpriteRenderer spriteRenderer = starheadPrefab.GetComponent<SpriteRenderer>();
+                if (spriteRenderer != null)
+                {
+                    //获取Tap在X轴的长度（用于缩放）
+                    starheadXAxisLength = spriteRenderer.sprite.bounds.size.x;
+                }
+                else
+                {
+                    Debug.LogError($"starhead预制体实例 {starheadPrefab.name} 缺少SpriteRenderer组件，无法获取X轴长度进行缩放设置！");
+                }
+
+                int starIndex = 1;
+                foreach (var star in chart.stars)
+                {
+                    // 实例化starhead预制体
+                    GameObject starheadInstance = Instantiate(starheadPrefab);
+                    starheadInstance.name = $"StarHead{starIndex}"; // 命名
+                    // 将starhead设置为ChartGameObjects的子物体
+                    starheadInstance.transform.SetParent(StarsParent.transform);
+
+                    // 获取开始的X轴和Y轴坐标
+                    Vector2 firstStarCoodinate = star.GetFirstSubStarCoordinates();
+                    float xAxisPosition = firstStarCoodinate.x;
+                    float yAxisPosition = firstStarCoodinate.y;
+                    yAxisPosition  *= HeightParams.HeightDefault;
+                    // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围
+                    Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                    float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+
+                    // 计算X轴坐标
+                    float startXWorld = worldUnitToScreenPixelX * xAxisPosition / ChartParams.XaxisMax;
+                    // 根据noteSize折算到X轴世界坐标长度，计算每单位noteSize对应的世界坐标长度
+                    float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
+                    // 根据StarHead本身在X轴的世界坐标长度和noteSize计算X轴的缩放值
+                    //默认StarHead对应的X轴键宽为0.8
+                    float xAxisScale = noteSizeWorldLengthPerUnit / starheadXAxisLength * ChartParams.StarHeadXAxis;
+
+                    // 设置StarHead实例的缩放比例
+                    starheadInstance.transform.localScale = new Vector3(xAxisScale, xAxisScale, 1);
+
+                    // 设置StarHead实例的位置（X、Y、Z轴坐标）
+                    float zPositionForStartT = CalculateZAxisPosition(star.starHeadT);
+                    starheadInstance.transform.position = new Vector3(-startXWorld, yAxisPosition, zPositionForStartT);
+
+                    // 检查点键是否在规定的X轴坐标范围内，如果不在范围，可进行相应处理，比如隐藏或者输出警告等（这里简单示例输出警告）
+                    if (!star.IsInAxisRange())
+                    {
+                        Debug.LogWarning($"Star with starHeadT: {star.starHeadT} is out of Axis range!");
+                    }
+
+                    starIndex++;
+                }
+            }
+            else
+            {
+                Debug.LogError("无法加载star预制体！");
             }
         }
     }

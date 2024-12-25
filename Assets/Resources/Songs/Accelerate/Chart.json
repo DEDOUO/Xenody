@@ -189,20 +189,20 @@
   ],
   "stars": [
     {
-      "starHeadT": 12,
+      "starHeadT": 9,
       "subStarList": [
         {
-          "starTrackStartT": 13,
-          "starTrackEndT": 14,
-          "startX": 0,
-          "startY": 0,
+          "starTrackStartT": 9.5,
+          "starTrackEndT": 10,
+          "startX": -1,
+          "startY": 0.4,
           "endX": 1,
           "endY": 1,
           "trackFunction": "Linear"
         },
         {
-          "starTrackStartT": 14,
-          "starTrackEndT": 15,
+          "starTrackStartT": 10,
+          "starTrackEndT": 10.5,
           "startX": 1,
           "startY": 1,
           "endX": 2,

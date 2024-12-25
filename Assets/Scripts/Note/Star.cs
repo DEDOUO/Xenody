@@ -91,5 +91,32 @@ namespace Note
         {
             return subStarList;
         }
+
+        // 新增的方法：获取第一个subStar的X轴和Y轴坐标
+        public Vector2 GetFirstSubStarCoordinates()
+        {
+            if (subStarList.Count > 0)
+            {
+                var firstSubStar = subStarList[0];
+                return new Vector2(firstSubStar.startX, firstSubStar.startY);
+            }
+            else
+            {
+                // 如果没有子星星，返回零向量
+                return Vector2.zero;
+            }
+        }
+        public bool IsInAxisRange()
+        {
+            foreach (var subStar in subStarList)
+            {
+                if (!subStar.IsInAxisRange())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
     }
 }
