@@ -19,9 +19,12 @@ public class AutoPlay : MonoBehaviour
     public GameObject FlicksParent;
     public GameObject HoldsParent;
     public GameObject StarsParent;
+    public GameObject subStarsParentObj;
+    public RectTransform SubStarsParent;
 
     public Sprite JudgePlaneSprite;
     public Sprite HoldSprite;
+    //public Sprite StarArrowSprite;
     public GlobalRenderOrderManager renderOrderManager;
     public GameObject AnimatorContainer;
     
@@ -29,25 +32,19 @@ public class AutoPlay : MonoBehaviour
     private Dictionary<GameObject, bool> tapReachedJudgmentLine = new Dictionary<GameObject, bool>();
     private void Awake()
     {
-        // 查找JudgePlanesParent
+        // 查找场景内游戏物体
         JudgePlanesParent = GameObject.Find("JudgePlanesParent");
-        // 查找JudgeLinesParent
         JudgeLinesParent = GameObject.Find("JudgeLinesParent");
-        // 查找TapsParent
         TapsParent = GameObject.Find("TapsParent");
-        // 查找SlidesParent
         SlidesParent = GameObject.Find("SlidesParent");
-        // 查找FlicksParent
         FlicksParent = GameObject.Find("FlicksParent");
-        // 查找HoldsParent
         HoldsParent = GameObject.Find("HoldsParent");
-        // 查找StarsParent
         StarsParent = GameObject.Find("StarsParent");
+        subStarsParentObj = GameObject.Find("SubStarsParent");
+        SubStarsParent = subStarsParentObj.GetComponent<RectTransform>();
 
-        // 加载JudgePlaneSprite
+        // 加载Sprite
         JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack");
-
-        // 加载JudgePlaneSprite
         HoldSprite = Resources.Load<Sprite>("Sprites/TrackConflict");
 
         // 查找包含AudioSource的GameObject
@@ -112,7 +109,7 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent,
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent, SubStarsParent,
             JudgePlaneSprite, HoldSprite, 
             renderOrderManager, AnimatorContainer);
 
@@ -126,7 +123,7 @@ public class AutoPlay : MonoBehaviour
         instantiator.InstantiateFlicks(chart);
         instantiator.InstantiateHolds(chart);
         instantiator.InstantiateStarHeads(chart);
-
+        instantiator.InstantiateSubStars(chart); 
         // 播放音乐和更新谱面位置
         player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent,
             TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, chart);

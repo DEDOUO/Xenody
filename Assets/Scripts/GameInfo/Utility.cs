@@ -3,6 +3,8 @@ using System;
 using UnityEngine;
 using Note;
 using Params;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using static Note.Star;
 //using static Utility;
 
 public class Utility
@@ -15,7 +17,10 @@ public class Utility
 
     // 定义星星坐标变化函数的枚举类型
     //适用Star类
-    public enum TrackFunctionType { Linear, Sin, Cos, Circular }
+    //public enum TrackFunctionType { Linear, Sin, Cos, Circular }
+    //星星暂时只支持线性和圆形（椭圆型）
+    //sin和cos涉及曲线计算的部分，不能用初等函数表示，只能通过数值计算，暂时忽略
+    public enum TrackFunctionType { Linear, UpperCir, LowerCir }
 
     /// <summary>
     /// 根据给定的时间、起始值、结束值以及坐标变化函数类型来计算相应的位置值。
@@ -69,40 +74,282 @@ public class Utility
     }
 
     // 根据给定时间和子星星参数计算当前子星星的位置
-    public static Vector2 CalculatePosition(float currentTime, Star.SubStar subStar)
+    public static Vector2 CalculateSubStarPosition(float currentRate, Star.SubStar subStar)
     {
         Vector2 result = Vector2.zero;
-
+        Vector2 offset = Vector2.zero;
+        float a = 0f;
+        float b = 0f;
+        float theta = 0f;
+        float k = 0f;
+        float t = 0f;
         switch (subStar.trackFunction)
         {
             case TrackFunctionType.Linear:
                 // 线性函数计算当前位置
-                result.x = subStar.startX + ((subStar.endX - subStar.startX) * ((currentTime - subStar.starTrackStartT) / (subStar.starTrackEndT - subStar.starTrackStartT)));
-                result.y = subStar.startY + ((subStar.endY - subStar.startY) * ((currentTime - subStar.starTrackStartT) / (subStar.starTrackEndT - subStar.starTrackStartT)));
+                result.x = subStar.startX + ((subStar.endX - subStar.startX) * currentRate);
+                result.y = subStar.startY + ((subStar.endY - subStar.startY) * currentRate);
                 break;
-            case TrackFunctionType.Sin:
-                // 正弦函数计算当前位置，这里假设周期为整个子星星轨道持续时间
-                float periodX = subStar.starTrackEndT - subStar.starTrackStartT;
-                float periodY = subStar.starTrackEndT - subStar.starTrackStartT;
-                result.x = subStar.startX + ((subStar.endX - subStar.startX) / 2) * (1 + Mathf.Sin((2 * Mathf.PI * (currentTime - subStar.starTrackStartT)) / periodX));
-                result.y = subStar.startY + ((subStar.endY - subStar.startY) / 2) * (1 + Mathf.Sin((2 * Mathf.PI * (currentTime - subStar.starTrackStartT)) / periodY));
+            case TrackFunctionType.UpperCir:
+                // UpperCir指向上凸起的圆弧（详见说明）
+                a = Mathf.Abs(subStar.endX - subStar.startX);
+                b = Mathf.Abs(subStar.endY - subStar.startY);
+                if (subStar.startX < subStar.endX && subStar.startY < subStar.endY)
+                {
+                    theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.endX;
+                    offset.y = subStar.startY;
+                }
+                if (subStar.startX < subStar.endX && subStar.startY > subStar.endY)
+                {
+                    theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.startX;
+                    offset.y = subStar.endY;
+                }
+                if (subStar.startX > subStar.endX && subStar.startY < subStar.endY)
+                {
+                    theta = currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.endX;
+                    offset.y = subStar.startY;
+                }
+                if (subStar.startX > subStar.endX && subStar.startY > subStar.endY)
+                {
+                    theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.startX;
+                    offset.y = subStar.endY;
+                }
+                k = Mathf.Tan(theta);
+                t = Mathf.Atan(k*a/b);
+                result.x = offset.x + a * Mathf.Cos(t);
+                result.y = offset.y + b * Mathf.Sin(t);
                 break;
-            case TrackFunctionType.Cos:
-                // 余弦函数计算当前位置，同样假设周期为整个子星星轨道持续时间
-                periodX = subStar.starTrackEndT - subStar.starTrackStartT;
-                periodY = subStar.starTrackEndT - subStar.starTrackStartT;
-                result.x = subStar.startX + ((subStar.endX - subStar.startX) / 2) * (1 + Mathf.Cos((2 * Mathf.PI * (currentTime - subStar.starTrackStartT)) / periodX));
-                result.y = subStar.startY + ((subStar.endY - subStar.startY) / 2) * (1 + Mathf.Cos((2 * Mathf.PI * (currentTime - subStar.starTrackStartT)) / periodY));
-                break;
-            case TrackFunctionType.Circular:
-                // 圆形轨道函数计算当前位置（简单示例，假设绕圆心顺时针匀速运动，圆心为起始位置，可根据实际调整完善）
-                float angle = ((currentTime - subStar.starTrackStartT) / (subStar.starTrackEndT - subStar.starTrackStartT)) * 2 * Mathf.PI;
-                result.x = subStar.startX + Mathf.Cos(angle) * (subStar.endX - subStar.startX);
-                result.y = subStar.startY + Mathf.Sin(angle) * (subStar.endY - subStar.startY);
+            case TrackFunctionType.LowerCir:
+                // LowerCir指向下凸起的圆弧（详见说明）
+                a = Mathf.Abs(subStar.endX - subStar.startX);
+                b = Mathf.Abs(subStar.endY - subStar.startY);
+                if (subStar.startX < subStar.endX && subStar.startY < subStar.endY)
+                {
+                    theta = 1.5f*Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.startX;
+                    offset.y = subStar.endY;
+                }
+                if (subStar.startX < subStar.endX && subStar.startY > subStar.endY)
+                {
+                    theta = Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.endX;
+                    offset.y = subStar.startY;
+                }
+                if (subStar.startX > subStar.endX && subStar.startY < subStar.endY)
+                {
+                    theta = 1.5f * Mathf.PI  - currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.startX;
+                    offset.y = subStar.endY;
+                }
+                if (subStar.startX > subStar.endX && subStar.startY > subStar.endY)
+                {
+                    theta = - currentRate * 0.5f * Mathf.PI;
+                    offset.x = subStar.endX;
+                    offset.y = subStar.startY;
+                }
+                k = Mathf.Tan(theta);
+                t = Mathf.Atan(k * a / b);
+                result.x = offset.x + a * Mathf.Cos(t);
+                result.y = offset.y + b * Mathf.Sin(t);
                 break;
         }
-
         return result;
+    }
+
+    public static Vector2 CalculateSubArrowPosition(float currentRate, Vector2 subStarStartScreen, Vector2 subStarEndScreen, TrackFunctionType trackFunction)
+    {
+        float x1 = subStarStartScreen.x;
+        float y1 = subStarStartScreen.y;
+        float x2 = subStarEndScreen.x;
+        float y2 = subStarEndScreen.y;
+
+        Vector2 result = Vector2.zero;
+        Vector2 offset = Vector2.zero;
+        float a = 0f;
+        float b = 0f;
+        float theta = 0f;
+        float k = 0f;
+        float t = 0f;
+        switch (trackFunction)
+        {
+            case TrackFunctionType.Linear:
+                // 线性函数计算当前位置
+                result.x = x1 + ((x2 - x1) * currentRate);
+                result.y = y1 + ((y2 - y1) * currentRate);
+                break;
+            case TrackFunctionType.UpperCir:
+                // UpperCir指向上凸起的圆弧（详见说明）
+                a = Mathf.Abs(x2 - x1);
+                b = Mathf.Abs(y2 - y1);
+                if (x1 < x2 && y1 < y2)
+                {
+                    theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    offset.x = x2;
+                    offset.y = y1;
+                }
+                if (x1 < x2 && y1 > y2)
+                {
+                    theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    offset.x = x1;
+                    offset.y = y2;
+                    //Debug.Log(theta);
+                    //Debug.Log(offset);
+                }
+                if (x1 > x2 && y1 < y2)
+                {
+                    theta = currentRate * 0.5f * Mathf.PI;
+                    offset.x = x2;
+                    offset.y = y1;
+                }
+                if (x1 > x2 && y1 > y2)
+                {
+                    theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    offset.x = x1;
+                    offset.y = y2;
+                }
+                //先判断theta是否为π/2或3/2π（无正切值）
+                if (Mathf.Abs(Mathf.Cos(theta)) < 0.001f)
+                {
+                    result.x = offset.x;
+                    result.y = offset.y + b;
+                    break;
+                }
+                k = Mathf.Tan(theta);
+                t = Mathf.Atan(k * a / b);
+                result.x = offset.x + a * Mathf.Cos(t);
+                result.y = offset.y + b * Mathf.Sin(t);
+                //Debug.Log(result);
+                break;
+            case TrackFunctionType.LowerCir:
+                // LowerCir指向下凸起的圆弧（详见说明）
+                a = Mathf.Abs(x2 - x1);
+                b = Mathf.Abs(y2 - y1);
+                if (x1 < x2 && y1 < y2)
+                {
+                    theta = 1.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    offset.x = x1;
+                    offset.y = y2;
+                }
+                if (x1 < x2 && y1 > y2)
+                {
+                    theta = Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    offset.x = x2;
+                    offset.y = y1;
+                }
+                if (x1 > x2 && y1 < y2)
+                {
+                    theta = 1.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    offset.x = x1;
+                    offset.y = y2;
+                }
+                if (x1 > x2 && y1 > y2)
+                {
+                    theta = -currentRate * 0.5f * Mathf.PI;
+                    offset.x = x2;
+                    offset.y = y1;
+                }
+                //先判断theta是否为π/2或3/2π（无正切值）
+                if (Mathf.Abs(Mathf.Cos(theta)) < 0.001f)
+                {
+                    result.x = offset.x;
+                    result.y = offset.y - b;
+                    break;
+                }
+                k = Mathf.Tan(theta);
+                t = Mathf.Atan(k * a / b);
+                result.x = offset.x + a * Mathf.Cos(t);
+                result.y = offset.y + b * Mathf.Sin(t);
+                break;
+        }
+        return result;
+    }
+    public static float CalculateSubArrowRotation(float currentRate, Vector2 subStarStartScreen, Vector2 subStarEndScreen, TrackFunctionType trackFunction)
+    {
+        float x1 = subStarStartScreen.x;
+        float y1 = subStarStartScreen.y;
+        float x2 = subStarEndScreen.x;
+        float y2 = subStarEndScreen.y;
+
+        float result = 0f;
+        float theta = 0f;
+        if (x1 == x2)
+        { return result; }
+        switch (trackFunction)
+        {
+            case TrackFunctionType.Linear:
+                // 线性函数计算当前位置
+                theta = Mathf.Atan((y2 - y1) / (x2 - x1));
+                result = (theta - 0.5f * Mathf.PI) * Mathf.Rad2Deg;
+                break;
+            case TrackFunctionType.UpperCir:
+                // UpperCir指向上凸起的圆弧（详见说明）
+                if (x1 < x2 && y1 < y2)
+                {
+                    theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                }
+                if (x1 < x2 && y1 > y2)
+                {
+                    theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                }
+                if (x1 > x2 && y1 < y2)
+                {
+                    theta = currentRate * 0.5f * Mathf.PI;
+                }
+                if (x1 > x2 && y1 > y2)
+                {
+                    theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                }
+                result = (theta - Mathf.PI) * Mathf.Rad2Deg;
+                break;
+            case TrackFunctionType.LowerCir:
+                // LowerCir指向下凸起的圆弧（详见说明）
+                if (x1 < x2 && y1 < y2)
+                {
+                    theta = 1.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                }
+                if (x1 < x2 && y1 > y2)
+                {
+                    theta = Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                }
+                if (x1 > x2 && y1 < y2)
+                {
+                    theta = 1.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                }
+                if (x1 > x2 && y1 > y2)
+                {
+                    theta = -currentRate * 0.5f * Mathf.PI;
+                }
+                result = (theta - Mathf.PI) * Mathf.Rad2Deg;
+                break;
+        }
+        return result;
+    }
+
+    public static float CalculateSubStarCurveLength(Note.Star.SubStar subStar)
+    {
+        float length = 0.0f;
+        switch (subStar.trackFunction)
+        {
+            case TrackFunctionType.Linear:
+                // 计算直线长度
+                length = Vector2.Distance(new Vector2(subStar.startX, subStar.startY), new Vector2(subStar.endX, subStar.endY));
+                break;
+            case TrackFunctionType.UpperCir:
+            case TrackFunctionType.LowerCir:
+                // 对于圆弧，这里使用简单的椭圆周长近似公式：π * (3 * (a + b) - Mathf.Sqrt((3 * a + b) * (a + 3 * b)))
+                float a = Mathf.Abs(subStar.endX - subStar.startX);
+                float b = Mathf.Abs(subStar.endY - subStar.startY);
+                length = Mathf.PI * (3 * (a + b) - Mathf.Sqrt((3 * a + b) * (a + 3 * b)))/4;
+                break;
+            default:
+                // 对于其他未定义的情况，可以添加相应的处理或抛出异常
+                break;
+        }
+        return length;
     }
 
     //计算与相机在特定距离下，世界坐标单位长度对应的屏幕像素长度
@@ -132,6 +379,15 @@ public class Utility
 
         return worldUnitToScreenPixelXAtTarget;
     }
+
+    public static float CalculateYAxisPixel(Vector3 targetPoint)
+    {
+        // 获取摄像机组件（假设场景中只有一个主摄像机，可根据实际情况调整获取方式）
+        Camera mainCamera = Camera.main;
+        Vector3 screenPosition = mainCamera.WorldToScreenPoint(targetPoint);
+        return screenPosition.y;
+    }
+
 
     public static bool IsInXAxisRange(float noteSize, float startX)
     {

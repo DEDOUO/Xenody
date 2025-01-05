@@ -195,7 +195,7 @@
           "starTrackStartT": 9.5,
           "starTrackEndT": 10,
           "startX": -1,
-          "startY": 0.4,
+          "startY": 0,
           "endX": 1,
           "endY": 1,
           "trackFunction": "Linear"
@@ -207,7 +207,7 @@
           "startY": 1,
           "endX": 2,
           "endY": 0.5,
-          "trackFunction": "Sin"
+          "trackFunction": "UpperCir"
         }
       ]
     }

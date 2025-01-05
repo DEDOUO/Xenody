@@ -3,6 +3,11 @@ using UnityEditor;
 using Params;
 using static Utility;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
+using System;
+using Unity.VisualScripting;
+using static Note.Star;
+
 
 
 public class ChartInstantiator : MonoBehaviour
@@ -14,15 +19,24 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject FlicksParent;
     private GameObject HoldsParent;
     private GameObject StarsParent;
+    private RectTransform SubStarsParent;
+
+    //public GameObject StarArrowPrefab;
     private Sprite JudgePlaneSprite;
     private Sprite HoldSprite;
+    //private Sprite StarArrowSprite;
+
     private GlobalRenderOrderManager renderOrderManager;
     private GameObject videoPlayerContainer;
+
+    //public float screenWidth = Screen.width;
+    //public float screenHeight = Screen.height;
     //private Dictionary<GameObject, bool> tapReachedJudgmentLine = new Dictionary<GameObject, bool>();
     //private Dictionary<GameObject, bool> slideReachedJudgmentLine = new Dictionary<GameObject, bool>(); 
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
     public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent,
+        RectTransform subStarsParent,
         Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer)
     {
         JudgePlanesParent = judgePlanesParent;
@@ -32,6 +46,7 @@ public class ChartInstantiator : MonoBehaviour
         FlicksParent = flicksParent;
         HoldsParent = holdsParent;
         StarsParent = starsParent;
+        SubStarsParent = subStarsParent;
         JudgePlaneSprite = judgePlaneSprite;
         HoldSprite = holdSprite;
         renderOrderManager = globalRenderOrderManager;
@@ -616,6 +631,126 @@ public class ChartInstantiator : MonoBehaviour
                 Debug.LogError("无法加载star预制体！");
             }
         }
+    }
+
+    public void InstantiateSubStars(Chart chart)
+    {
+        if (chart != null && chart.stars != null)
+        {
+            int starIndex = 1;
+            foreach (var star in chart.stars)
+            {
+                int subStarIndex = 1;
+                foreach (var subStar in star.subStarList)
+                {
+                    // 检查子星星是否在规定的 X 轴坐标范围内，如果不在范围，可进行相应处理，比如隐藏或者输出警告等（这里简单示例输出警告）
+                    if (!subStar.IsInAxisRange())
+                    {
+                        Debug.LogWarning($"SubStar from {subStar.starTrackStartT} to {subStar.starTrackEndT} is out of Axis range!");
+                    }
+
+                    // 计算 subStar 的曲线长度
+                    float curveLength = Utility.CalculateSubStarCurveLength(subStar);
+                    //Debug.Log(curveLength);
+                    // 根据曲线长度和每单位长度的 SubArrow 数量，计算需要初始化的 SubArrow 数量
+                    //四舍五入
+                    int numArrows = (int)MathF.Floor(curveLength * StarArrowParams.subArrowsPerUnitLength + 0.5f);
+                    //Debug.Log(numArrows);
+                    float rateStep = 1.0f / (float)(numArrows-1);
+
+                    InitiateStarArrows(subStar, starIndex, subStarIndex, numArrows, rateStep);
+                    subStarIndex++;
+                }
+                starIndex++;
+            }
+        }
+    }
+
+    public void InitiateStarArrows(Note.Star.SubStar subStar, int starIndex, int subStarIndex, float numArrows, float rateStep)
+    {
+        GameObject StarArrowPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/StarArrow.prefab", typeof(GameObject));
+        if (StarArrowPrefab != null)
+        {
+            float currentRate = 0.0f;
+
+            GameObject subStarArrowContainer = new GameObject($"Star{starIndex}SubStar{subStarIndex}Arrows", typeof(RectTransform));
+            RectTransform subStarArrowContainerRectTransform = subStarArrowContainer.GetComponent<RectTransform>();
+            subStarArrowContainerRectTransform.SetParent(SubStarsParent);
+            // 将 subStarArrowContainer 的位置、旋转和缩放设置为默认值
+            subStarArrowContainerRectTransform.anchoredPosition3D = Vector3.zero;
+            subStarArrowContainerRectTransform.localRotation = Quaternion.identity;
+            subStarArrowContainerRectTransform.localScale = Vector3.one;
+            subStarArrowContainerRectTransform.sizeDelta = SubStarsParent.sizeDelta;
+
+            //先将subStar的起点和终点转换为画布上的坐标
+            Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
+            Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
+            Vector2 subStarStartScreen = ScalePositionToScreen(subStarStart);
+            Vector2 subStarEndScreen = ScalePositionToScreen(subStarEnd);
+            //Debug.Log(subStarStartScreen);
+            //Debug.Log(subStarEndScreen);
+
+            if (subStarIndex == 1)
+            {
+                // 当 subStarIndex 为 1 时，初始化第一个箭头；否则忽略第一个箭头
+                //计算箭头位置
+                Vector2 position = Utility.CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
+                float rotation = Utility.CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
+                // 放缩 position 以适应屏幕坐标
+                //Vector2 scaledPosition = ScalePositionToScreen(position);
+                //初始化箭头
+                GameObject arrow = Instantiate(StarArrowPrefab);
+                arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{0 + 1}";
+                RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
+                arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
+                arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
+                arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
+                arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
+            }
+
+            currentRate += rateStep;
+            for (int i = 1; i < numArrows; i++)
+            {
+                //计算箭头位置
+                Vector2 position = Utility.CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
+                float rotation = Utility.CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
+                // 放缩 position 以适应屏幕坐标
+                //Vector2 scaledPosition = ScalePositionToScreen(position);
+                //初始化箭头
+                GameObject arrow = Instantiate(StarArrowPrefab);
+                arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{i + 1}";
+                RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
+                arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
+                arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
+                arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
+                arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
+                currentRate += rateStep;
+            }
+        }
+    }
+
+    private Vector2 ScalePositionToScreen(Vector2 position)
+    {
+        //注意这里获取的是画布的长宽，而不是屏幕的长宽
+        float screenWidth = SubStarsParent.sizeDelta.x;
+        float screenHeight = SubStarsParent.sizeDelta.y;
+        //Debug.Log(screenHeight);
+
+        float screenXMin = screenWidth * HorizontalParams.HorizontalMargin;
+        float screenXMax = screenWidth * (1- HorizontalParams.HorizontalMargin);
+        float screenXRange = screenXMax - screenXMin;
+
+        Vector3 worldYBottom = new Vector3(0, 0, 0);
+        Vector3 worldYCeiling = new Vector3(0, HeightParams.HeightDefault, 0);
+        //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
+        float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
+        float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
+
+        float scaledX = position.x / ChartParams.XaxisMax * screenXRange / 2;
+        float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
+
+
+        return new Vector2(scaledX, scaledY);
     }
 
     private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld, 

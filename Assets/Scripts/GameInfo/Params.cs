@@ -44,5 +44,11 @@ namespace Params
         // 模拟Hold/JudgePlane曲面时，用几个斜面代替曲面
         public static int Segment = 8;
     }
-
+    public static class StarArrowParams
+    {
+        // 箭头的默认缩放比例
+        public static float defaultScale = 20.0f;
+        // 每单位长度的 SubArrow 数量
+        public static int subArrowsPerUnitLength = 8; 
+    }
 }
