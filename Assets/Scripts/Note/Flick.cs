@@ -15,13 +15,13 @@ namespace Note
         [JsonProperty("startX")]
         // 划键在X轴的坐标（这里简化为一个坐标，可根据实际情况调整具体含义，比如中心坐标等）
         public float startX;
-        [JsonProperty("noteSize")]
+        [JsonProperty("Size")]
         // 新增划键的大小
         public float noteSize;
-        [JsonProperty("flickDirection")]
+        [JsonProperty("Dir")]
         // 用于记录划键操作的滑动方向（设置为0-1之间的值）
         public float flickDirection;
-        [JsonProperty("associatedPlane")]
+        [JsonProperty("Pid")]
         // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
         public int associatedPlaneId;
 

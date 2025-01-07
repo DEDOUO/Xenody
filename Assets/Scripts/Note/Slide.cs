@@ -14,10 +14,10 @@ namespace Note
         [JsonProperty("startX")]
         // 滑动键在X轴的坐标（这里简化为一个坐标，可根据实际情况调整具体含义，比如中心坐标等）
         public float startX;
-        [JsonProperty("noteSize")]
+        [JsonProperty("Size")]
         // 新增滑动键的大小
         public float noteSize;
-        [JsonProperty("associatedPlane")]
+        [JsonProperty("Pid")]
         // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
         public int associatedPlaneId;
 

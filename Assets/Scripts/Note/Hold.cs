@@ -8,13 +8,15 @@ namespace Note
     // 持续按键（Hold）类，代表整个Hold，由多个子Hold组成
     public class Hold
     {
-        [JsonProperty("subHoldList")]
-        // 用于存储子Hold参数的列表
-        public List<SubHold> subHoldList = new();
-        [JsonProperty("associatedPlane")]
+        [JsonProperty("Pid")]
         // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
         public int associatedPlaneId;
-
+        [JsonProperty("id")]
+        // Hold的id，用于分辨同一时间戳的不同Hold
+        public int holdId;
+        [JsonProperty("sub")]
+        // 用于存储子Hold参数的列表
+        public List<SubHold> subHoldList = new();
         // 内部类，用于表示子Hold的参数结构
         public class SubHold
         {
@@ -30,9 +32,9 @@ namespace Note
             public float endXMin;
             [JsonProperty("endXMax")]
             public float endXMax;
-            [JsonProperty("XLeftFunction")]
+            [JsonProperty("LFunc")]
             public Utility.TransFunctionType XLeftFunction;
-            [JsonProperty("XRightFunction")]
+            [JsonProperty("RFunc")]
             public Utility.TransFunctionType XRightFunction;
 
             public SubHold(float startTime, float startXMinVal, float startXMaxVal, float endTime, float endXMinVal,

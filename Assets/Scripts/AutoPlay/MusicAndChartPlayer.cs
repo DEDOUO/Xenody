@@ -28,16 +28,21 @@ public class MusicAndChartPlayer : MonoBehaviour
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
     private Dictionary<string, float> holdEndTimes = new Dictionary<string, float>(); // 存储Hold实例名到其结束时间的映射
     private Dictionary<string, KeyInfo> keyReachedJudgment = new Dictionary<string, KeyInfo>(); // 存储实例名到键信息的映射
-    private Dictionary<string, GameObject> holdHitEffectDictionary = new Dictionary<string, GameObject>();
+    //private Dictionary<string, GameObject> holdHitEffectDictionary = new Dictionary<string, GameObject>();
     // 新增一个列表用于存储当前正在处理的Hold对应的instanceName
     private List<string> currentHoldInstanceNames = new List<string>();
     private bool isMusicPlayingStarted; // 用于标识是否已经开始音乐播放阶段
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
 
-    private Animator holdAnimator;
-    private int holdStartHash;
-    private int holdEndHash;
+    //private Animator holdAnimator;
+    //private int holdStartHash;
+    //private int holdEndHash;
+
+    //public float StarAppearTime = 1.0f;
+    public List<Note.Star.SubStar> subStars = new List<Note.Star.SubStar>();
+    private Dictionary<int, List<GameObject>> subStarArrows = new Dictionary<int, List<GameObject>>();
+
 
     // 内部类，用于存储键的相关信息以及判定状态
     private class KeyInfo
@@ -56,9 +61,9 @@ public class MusicAndChartPlayer : MonoBehaviour
     }
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
-    public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, 
+    public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent,
         GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent,
-        AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect, 
+        AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect,
         Chart chart)
     {
         this.audioSource = audioSource;
@@ -206,6 +211,8 @@ public class MusicAndChartPlayer : MonoBehaviour
                     // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
                     UpdateHoldStates(currentTime);
                     UpdatePositions(chart);
+                    //更新所有Arrow的透明度
+                    CheckArrowVisibility(chart);
                 }
             }
             else
@@ -213,6 +220,113 @@ public class MusicAndChartPlayer : MonoBehaviour
                 // 歌曲播放结束后，跳回选歌场景
                 SceneManager.LoadScene("SongSelect");
             }
+        }
+    }
+    private void CheckArrowVisibility(Chart chart)
+    {
+        float currentTime = Time.time;
+        if (chart.stars != null)
+        {
+            for (int i = 0; i < chart.stars.Count; i++)
+            {
+                var star = chart.stars[i];
+                float starHeadT = star.starHeadT;
+                for (int j = 0; j < star.subStarList.Count; j++)
+                {
+                    var subStar = star.subStarList[j];
+                    int subStarIndex = j;
+
+                    //if (!subStarArrows.ContainsKey(subStarIndex))
+                    //{
+                    //    subStarArrows[subStarIndex] = new List<GameObject>();
+                    //}
+                    string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
+                    //Debug.Log(instanceName);
+                    GameObject SubStarArrowParent = GameObject.Find(instanceName);
+                    //Debug.Log(SubStarArrowParent);
+                    List<GameObject> arrows = new List<GameObject>();
+
+                    if (SubStarArrowParent != null)
+                    {
+                        for (int k = 0; k < SubStarArrowParent.transform.childCount; k++)
+                        {
+                            GameObject arrow = SubStarArrowParent.transform.GetChild(k).gameObject;
+                            arrows.Add(arrow);
+                        }
+
+                        if (currentTime >= starHeadT - ChartParams.StarAppearTime && currentTime < starHeadT)
+                        {
+                            // 当时间处于 starHeadT - StarAppearTime 和 substar.startT 之间时，将该 substar 下对应 Arrow 均设置为可见，该 substar 下所有 arrow 的透明度由 0 线性地变为 1
+                            if (arrows.Count != 0)
+                            {
+                                float t = (currentTime - (starHeadT - ChartParams.StarAppearTime)) / ChartParams.StarAppearTime;
+                                foreach (var arrow in arrows)
+                                {
+                                    arrow.SetActive(true);
+                                    SetArrowAlpha(arrow, t);
+                                }
+                            }
+                        }
+                        else if (currentTime >= subStar.starTrackStartT && currentTime < subStar.starTrackEndT)
+                        {
+                            if (arrows.Count != 0)
+                            {
+                                // 计算时间间隔和每个箭头的时间间隔
+                                float totalTime = subStar.starTrackEndT - subStar.starTrackStartT;
+                                float arrowTimeInterval = totalTime / arrows.Count;
+
+                                // 计算当前时间所在的箭头索引
+                                int arrowIndex = Mathf.FloorToInt((currentTime - subStar.starTrackStartT) / arrowTimeInterval);
+
+                                // 确保箭头索引不越界
+                                arrowIndex = Mathf.Clamp(arrowIndex, 0, arrows.Count - 1);
+
+                                // 遍历箭头，根据时间设置透明度
+                                for (int k = 0; k < arrows.Count; k++)
+                                {
+                                    float alpha = 1.0f;
+                                    if (k <= arrowIndex)
+                                    {
+                                        // 对于当前箭头及之前的箭头，根据时间线性改变透明度
+                                        if (k == arrowIndex)
+                                        {
+                                            float timeInInterval = (currentTime - (subStar.starTrackStartT + k * arrowTimeInterval)) / arrowTimeInterval;
+                                            alpha = 1.0f - timeInInterval;
+                                        }
+                                        else
+                                        {
+                                            alpha = 0.0f;
+                                        }
+                                    }
+                                    SetArrowAlpha(arrows[k], alpha);
+                                }
+                            }
+                        }
+                        else if (currentTime >= subStar.starTrackEndT)
+                        {
+                            if (arrows.Count != 0)
+                            {
+                                // 当时间大于 starTrackEndT 时，删除所有 substar 下的 arrow 实例
+                                Destroy(SubStarArrowParent);
+                                //subStarArrows.Remove(subStarIndex);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    private void SetArrowAlpha(GameObject arrow, float alpha)
+    {
+        SpriteRenderer arrowSpriteRenderer = arrow.GetComponent<SpriteRenderer>();
+        if (arrowSpriteRenderer != null)
+        {
+            Color color = arrowSpriteRenderer.color;
+            color.a = alpha;
+            arrowSpriteRenderer.color = color;
         }
     }
 
@@ -269,7 +383,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     if (holdHitEffect != null)
                     {
                         Animator animator = holdHitEffect.GetComponent<Animator>();
-                        
+
                         if (animator != null)
                         {
                             int holdEndHash = Animator.StringToHash($"HoldEnd");
@@ -515,8 +629,8 @@ public class MusicAndChartPlayer : MonoBehaviour
                 GameObject holdGameObject = childTransform.gameObject;
                 string instanceName = holdGameObject.name;
                 //如果是HoldHitEffect物体，则跳过
-                if (! instanceName.StartsWith("HoldHitEffect"))
-                { 
+                if (!instanceName.StartsWith("HoldHitEffect"))
+                {
                     KeyInfo keyInfo = keyReachedJudgment[instanceName];
 
                     //注意Hold无论是否判定，位置都要更新
@@ -561,7 +675,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
             //临时调整一下动画效果的缩放，用以跟Note大小匹配
             Vector3 currentScale = keyGameObject.transform.localScale;
-            currentScale.x *= 247/165f;
+            currentScale.x *= 247 / 165f;
             keyGameObject.transform.localScale = currentScale;
 
             // 判断是否是Flick类型的键，如果是则先删除其所有子物体（如FlickArrow）
@@ -587,7 +701,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
             else if (animationName == "FlickEffect")
             {
-                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController"); 
+                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
             }
             else if (animationName == "HoldEffect") // Hold开始动画控制器加载
             {

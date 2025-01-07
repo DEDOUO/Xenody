@@ -20,6 +20,7 @@ namespace Params
 
         //StarHead默认的X轴坐标宽度
         public static float StarHeadXAxis = 0.4f;
+        public static float StarAppearTime = 0.4f;
     }
 
     public static class SpeedParams
@@ -49,6 +50,6 @@ namespace Params
         // 箭头的默认缩放比例
         public static float defaultScale = 20.0f;
         // 每单位长度的 SubArrow 数量
-        public static int subArrowsPerUnitLength = 8; 
+        public static int subArrowsPerUnitLength = 8;
     }
 }

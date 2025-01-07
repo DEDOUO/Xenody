@@ -9,14 +9,14 @@ using static JudgePlane;
 using System.Collections;
 
 //不加这一行代码的话，读取Json会报错（因为JudgePlane实现了IEnumerable接口？）
-[JsonObject(MemberSerialization = MemberSerialization.OptIn)] 
+[JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 // 判定面类
 public class JudgePlane : IEnumerable<SubJudgePlane>
 {
     [JsonProperty("id")]
     // 判定面的唯一标识，按照要求改为数字编号
     public int id;
-    [JsonProperty("subJudgePlanes")]
+    [JsonProperty("sub")]
     // 用于存储子判定面参数的列表
     public List<SubJudgePlane> subJudgePlaneList = new List<SubJudgePlane>();
 
@@ -31,7 +31,7 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
         public float endT;
         [JsonProperty("endY")]
         public float endY;
-        [JsonProperty("yAxisFunction")]
+        [JsonProperty("Func")]
         public TransFunctionType yAxisFunction;
 
         public SubJudgePlane(float startTime, float startYVal, float endTime, float endYVal, TransFunctionType func)

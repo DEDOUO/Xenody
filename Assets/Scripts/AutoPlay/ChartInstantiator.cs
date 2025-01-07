@@ -78,7 +78,7 @@ public class ChartInstantiator : MonoBehaviour
                         switch (subJudgePlane.yAxisFunction)
                         {
                             case TransFunctionType.Linear:
-                                firstSubJudgePlaneInstance = CreateJudgePlaneQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT, 
+                                firstSubJudgePlaneInstance = CreateJudgePlaneQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
                                     JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent);
                                 break;
                             case TransFunctionType.Sin:
@@ -502,7 +502,7 @@ public class ChartInstantiator : MonoBehaviour
                                 float zPositionForEndT = CalculateZAxisPosition(subHold.endT);
 
                                 // 一次性生成整个SubHold
-                                GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld, 
+                                GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
                                     startY, endY, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent);
                                 break;
                             //否则要分割成多个子块，生成后拼接
@@ -597,7 +597,7 @@ public class ChartInstantiator : MonoBehaviour
                     Vector2 firstStarCoodinate = star.GetFirstSubStarCoordinates();
                     float xAxisPosition = firstStarCoodinate.x;
                     float yAxisPosition = firstStarCoodinate.y;
-                    yAxisPosition  *= HeightParams.HeightDefault;
+                    yAxisPosition *= HeightParams.HeightDefault;
                     // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围
                     Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
                     float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
@@ -656,7 +656,7 @@ public class ChartInstantiator : MonoBehaviour
                     //四舍五入
                     int numArrows = (int)MathF.Floor(curveLength * StarArrowParams.subArrowsPerUnitLength + 0.5f);
                     //Debug.Log(numArrows);
-                    float rateStep = 1.0f / (float)(numArrows-1);
+                    float rateStep = 1.0f / (float)(numArrows - 1);
 
                     InitiateStarArrows(subStar, starIndex, subStarIndex, numArrows, rateStep);
                     subStarIndex++;
@@ -673,6 +673,7 @@ public class ChartInstantiator : MonoBehaviour
         {
             float currentRate = 0.0f;
 
+
             GameObject subStarArrowContainer = new GameObject($"Star{starIndex}SubStar{subStarIndex}Arrows", typeof(RectTransform));
             RectTransform subStarArrowContainerRectTransform = subStarArrowContainer.GetComponent<RectTransform>();
             subStarArrowContainerRectTransform.SetParent(SubStarsParent);
@@ -682,13 +683,17 @@ public class ChartInstantiator : MonoBehaviour
             subStarArrowContainerRectTransform.localScale = Vector3.one;
             subStarArrowContainerRectTransform.sizeDelta = SubStarsParent.sizeDelta;
 
+
+            // 存储所有箭头实例的列表
+            //List<GameObject> arrowInstances = new List<GameObject>();
+
+
             //先将subStar的起点和终点转换为画布上的坐标
             Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
             Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
             Vector2 subStarStartScreen = ScalePositionToScreen(subStarStart);
             Vector2 subStarEndScreen = ScalePositionToScreen(subStarEnd);
-            //Debug.Log(subStarStartScreen);
-            //Debug.Log(subStarEndScreen);
+
 
             if (subStarIndex == 1)
             {
@@ -696,9 +701,7 @@ public class ChartInstantiator : MonoBehaviour
                 //计算箭头位置
                 Vector2 position = Utility.CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
                 float rotation = Utility.CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
-                // 放缩 position 以适应屏幕坐标
-                //Vector2 scaledPosition = ScalePositionToScreen(position);
-                //初始化箭头
+                // 初始化箭头
                 GameObject arrow = Instantiate(StarArrowPrefab);
                 arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{0 + 1}";
                 RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
@@ -706,7 +709,10 @@ public class ChartInstantiator : MonoBehaviour
                 arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
                 arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
                 arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
+                arrow.SetActive(false);
+                //arrowInstances.Add(arrow);
             }
+
 
             currentRate += rateStep;
             for (int i = 1; i < numArrows; i++)
@@ -714,9 +720,7 @@ public class ChartInstantiator : MonoBehaviour
                 //计算箭头位置
                 Vector2 position = Utility.CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
                 float rotation = Utility.CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
-                // 放缩 position 以适应屏幕坐标
-                //Vector2 scaledPosition = ScalePositionToScreen(position);
-                //初始化箭头
+                // 初始化箭头
                 GameObject arrow = Instantiate(StarArrowPrefab);
                 arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{i + 1}";
                 RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
@@ -724,10 +728,85 @@ public class ChartInstantiator : MonoBehaviour
                 arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
                 arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
                 arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
+                arrow.SetActive(false);
+                //arrowInstances.Add(arrow);
                 currentRate += rateStep;
             }
+
+            //// 将所有箭头合成一个游戏物体
+            //GameObject combinedArrow = CombineArrowInstances(arrowInstances, subStarArrowContainerRectTransform);
+            //// 删除合并前的实例
+            //foreach (GameObject arrowInstance in arrowInstances)
+            //{
+            //    Destroy(arrowInstance);
+            //}
         }
     }
+
+    //private GameObject CombineArrowInstances(List<GameObject> instances, RectTransform subStarArrowContainerRectTransform)
+    //{
+    //    GameObject combined = new GameObject("CombinedArrow");
+    //    RectTransform combinedRectTransform = combined.AddComponent<RectTransform>();
+    //    combinedRectTransform.SetParent(subStarArrowContainerRectTransform);
+
+    //    // 用于存储合并后的顶点、三角形索引和 UV 坐标
+    //    List<Vector3> vertices = new List<Vector3>();
+    //    List<int> triangles = new List<int>();
+    //    List<Vector2> uvs = new List<Vector2>();
+
+    //    int vertexOffset = 0;
+
+    //    foreach (GameObject instance in instances)
+    //    {
+    //        RectTransform instanceRect = instance.GetComponent<RectTransform>();
+    //        SpriteRenderer instanceSpriteRenderer = instance.GetComponent<SpriteRenderer>();
+
+    //        // 获取实例的精灵信息
+    //        Sprite sprite = instanceSpriteRenderer.sprite;
+    //        if (sprite == null) continue;
+
+    //        // 获取精灵的顶点和三角形信息
+    //        Vector2[] spriteVertices = sprite.vertices;
+    //        ushort[] spriteTriangles = sprite.triangles;
+    //        Vector2[] spriteUVs = sprite.uv;
+
+    //        // 将实例的顶点、三角形和 UV 坐标添加到合并列表中
+    //        for (int i = 0; i < spriteVertices.Length; i++)
+    //        {
+    //            Vector3 worldVertex = instanceRect.TransformPoint(spriteVertices[i]);
+    //            Vector2 localVertex = combinedRectTransform.InverseTransformPoint(worldVertex);
+    //            vertices.Add(localVertex);
+    //        }
+    //        for (int i = 0; i < spriteTriangles.Length; i++)
+    //        {
+    //            triangles.Add(spriteTriangles[i] + vertexOffset);
+    //        }
+
+    //        uvs.AddRange(spriteUVs);
+    //        vertexOffset += spriteVertices.Length;
+
+    //        // 禁用实例，而不是立即销毁，避免在遍历过程中修改集合
+    //        //instance.SetActive(false);
+    //    }
+
+    //    // 创建新的网格
+    //    Mesh combinedMesh = new Mesh();
+    //    combinedMesh.vertices = vertices.ToArray();
+    //    combinedMesh.triangles = triangles.ToArray();
+    //    combinedMesh.uv = uvs.ToArray();
+    //    combinedMesh.RecalculateNormals();
+
+    //    // 添加网格组件和渲染器组件
+    //    MeshFilter combinedMeshFilter = combined.AddComponent<MeshFilter>();
+    //    combinedMeshFilter.mesh = combinedMesh;
+    //    MeshRenderer combinedRenderer = combined.AddComponent<MeshRenderer>();
+    //    combinedRenderer.material = instances[0].GetComponentInChildren<MeshRenderer>().material;
+
+    //    // 启用合并后的对象
+    //    combined.SetActive(true);
+
+    //    return combined;
+    //}
 
     private Vector2 ScalePositionToScreen(Vector2 position)
     {
@@ -737,7 +816,7 @@ public class ChartInstantiator : MonoBehaviour
         //Debug.Log(screenHeight);
 
         float screenXMin = screenWidth * HorizontalParams.HorizontalMargin;
-        float screenXMax = screenWidth * (1- HorizontalParams.HorizontalMargin);
+        float screenXMax = screenWidth * (1 - HorizontalParams.HorizontalMargin);
         float screenXRange = screenXMax - screenXMin;
 
         Vector3 worldYBottom = new Vector3(0, 0, 0);
@@ -753,7 +832,7 @@ public class ChartInstantiator : MonoBehaviour
         return new Vector2(scaledX, scaledY);
     }
 
-    private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld, 
+    private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
         float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject)
     {
         //Hold的Y轴坐标需要上移一点，以显示在JudgePlane上方

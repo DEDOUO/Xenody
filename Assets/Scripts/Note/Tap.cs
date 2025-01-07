@@ -13,10 +13,10 @@ namespace Note
         [JsonProperty("startX")]
         // 点键自身的X轴坐标
         public float startX;
-        [JsonProperty("noteSize")]
+        [JsonProperty("Size")]
         // 点键的大小（可用于碰撞检测范围等设置，根据实际需求调整）
         public float noteSize;
-        [JsonProperty("associatedPlane")]
+        [JsonProperty("Pid")]
         // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
         public int associatedPlaneId;
 

@@ -8,11 +8,12 @@ using Newtonsoft.Json;
 using UnityEngine;
 //using static Utility;
 using Note;
+using Params;
 
 // 谱面文件类
 public class Chart
 {
-    [JsonProperty("judgePlanes")]
+    [JsonProperty("planes")]
     // 判定面实例列表，用于存储所有判定面信息
     public List<JudgePlane> judgePlanes;
     [JsonProperty("taps")]
@@ -35,15 +36,7 @@ public class Chart
     public void ExportToJson(string filePath)
     {
         // 创建一个包含所有键型信息的匿名对象，用于序列化
-        var chartData = new
-        {
-            judgePlanes,
-            taps,
-            holds,
-            slides,
-            flicks,
-            stars
-        };
+        var chartData = new { judgePlanes, taps, holds, slides, flicks, stars };
 
         string json = JsonConvert.SerializeObject(chartData, Formatting.Indented);
         File.WriteAllText(filePath, json);
@@ -90,11 +83,12 @@ public class Chart
             foreach (var holdData in chartData.holds)
             {
                 var newHold = new Hold();
+                newHold.associatedPlaneId = (int)holdData.associatedPlaneId;
+                newHold.holdId = (int)holdData.holdId;
                 foreach (var subHold in holdData.subHoldList)
                 {
                     newHold.AddSubHold((float)subHold.startT, (float)subHold.startXMin, (float)subHold.startXMax, (float)subHold.endT, (float)subHold.endXMin, (float)subHold.endXMax, (Utility.TransFunctionType)subHold.XLeftFunction, (Utility.TransFunctionType)subHold.XRightFunction);
                 }
-                newHold.associatedPlaneId = (int)holdData.associatedPlaneId;
                 chart.holds.Add(newHold);
             }
 
@@ -128,10 +122,38 @@ public class Chart
             foreach (var starData in chartData.stars)
             {
                 var newStar = new Star();
+                newStar.associatedPlaneId = (int)starData.associatedPlaneId;
+                newStar.starId = (int)starData.starId;
                 newStar.starHeadT = (float)starData.starHeadT;
-                foreach (var subStar in starData.subStarList)
+
+                // 找到对应的 JudgePlane
+                JudgePlane associatedJudgePlane = null;
+                foreach (var judgePlane in chart.judgePlanes)
                 {
-                    newStar.AddSubStar((float)subStar.starTrackStartT, (float)subStar.starTrackEndT, (float)subStar.startX, (float)subStar.startY, (float)subStar.endX, (float)subStar.endY, (Utility.TrackFunctionType)subStar.trackFunction);
+                    if (judgePlane.id == starData.associatedPlaneId)
+                    {
+                        associatedJudgePlane = judgePlane;
+                        break;
+                    }
+                }
+                if (associatedJudgePlane != null)
+                {
+                    float startY = associatedJudgePlane.GetPlaneYAxis(newStar.starHeadT) / HeightParams.HeightDefault;
+                    //Debug.Log(startY);
+                    bool firstSubStar = true;
+                    foreach (var subStar in starData.subStarList)
+                    {
+                        //每个Star的第一个SubStar的Y轴坐标与所在JudgePlane的Y轴坐标保持一致
+                        if (firstSubStar)
+                        {
+                            newStar.AddSubStar((float)subStar.starTrackStartT, (float)subStar.starTrackEndT, (float)subStar.startX, startY, (float)subStar.endX, (float)subStar.endY, (Utility.TrackFunctionType)subStar.trackFunction);
+                            firstSubStar = false;
+                        }
+                        else
+                        {
+                            newStar.AddSubStar((float)subStar.starTrackStartT, (float)subStar.starTrackEndT, (float)subStar.startX, (float)subStar.startY, (float)subStar.endX, (float)subStar.endY, (Utility.TrackFunctionType)subStar.trackFunction);
+                        }
+                    }
                 }
                 chart.stars.Add(newStar);
             }
