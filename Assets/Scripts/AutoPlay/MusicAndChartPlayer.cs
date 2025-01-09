@@ -28,6 +28,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
     private Dictionary<string, float> holdEndTimes = new Dictionary<string, float>(); // 存储Hold实例名到其结束时间的映射
     private Dictionary<string, KeyInfo> keyReachedJudgment = new Dictionary<string, KeyInfo>(); // 存储实例名到键信息的映射
+    private List<float> JudgePlanesStartT = new List<float>(); // 判定面的开始时间（用于JudgeLine出现时间计算
     //private Dictionary<string, GameObject> holdHitEffectDictionary = new Dictionary<string, GameObject>();
     // 新增一个列表用于存储当前正在处理的Hold对应的instanceName
     private List<string> currentHoldInstanceNames = new List<string>();
@@ -210,6 +211,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     }
                     // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
                     UpdateHoldStates(currentTime);
+                    //更新所有Note位置
                     UpdatePositions(chart);
                     //更新所有Arrow的透明度
                     CheckArrowVisibility(chart);
@@ -433,6 +435,16 @@ public class MusicAndChartPlayer : MonoBehaviour
     private void PrepareChartMapping(Chart chart)
     {
         List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
+        if (chart.judgePlanes != null)
+        {
+            for (int i = 0; i < chart.judgePlanes.Count; i++)
+            {
+                var judgePlane = chart.judgePlanes[i];
+                float startT = judgePlane.subJudgePlaneList[0].startT;
+                JudgePlanesStartT.Add(startT);
+            }
+
+        }
         if (chart.taps != null)
         {
             for (int i = 0; i < chart.taps.Count; i++)
@@ -547,23 +559,61 @@ public class MusicAndChartPlayer : MonoBehaviour
                     JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlane(chart, judgeLineTransform.name);
                     if (correspondingJudgePlane != null)
                     {
+
+                        // 获取该 JudgeLine 的开始时间
+                        float startT = JudgePlanesStartT[i];
+
                         // 获取当前时间
                         float currentTime = Time.time;
-                        // 调用JudgePlane的GetPlaneYAxis方法获取当前时间的Y轴坐标，并更新JudgeLine的Y轴坐标
-                        float newYAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
-                        Vector3 position = judgeLineTransform.position;
-                        position.y = newYAxis;
-                        judgeLineTransform.position = position;
 
-                        // 根据newYAxis的值，实时改变correspondingJudgePlane下所有SubJudgePlane实例的透明度
-                        ChangeSubJudgePlaneTransparency(correspondingJudgePlane, newYAxis);
+                        //只有当当前时间大于开始时间时，才更新JudgeLine的位置
+                        if (currentTime > startT)
+                        {
+                            // 调用JudgePlane的GetPlaneYAxis方法获取当前时间的Y轴坐标，并更新JudgeLine的Y轴坐标
+                            float newYAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                            Vector3 position = judgeLineTransform.position;
+                            position.y = newYAxis;
+                            judgeLineTransform.position = position;
+                            // 根据newYAxis的值，实时改变correspondingJudgePlane下所有SubJudgePlane实例的透明度
+                            ChangeSubJudgePlaneTransparency(correspondingJudgePlane, newYAxis);
+                        }
+
+                        // 判断当前时间与开始时间的关系
+                        if (currentTime < startT - ChartParams.JudgeLineAppearTime)
+                        {
+                            // 当当前时间小于开始时间 - 出现时间时，不进行操作
+                            judgeLineTransform.gameObject.SetActive(false);
+                        }
+                        else if (currentTime >= startT - ChartParams.JudgeLineAppearTime && currentTime <= startT)
+                        {
+                            // 当当前时间介于开始时间 - 出现时间与开始时间之间时，设置 JudgeLine 为 active，且透明度线性地由 0 变为 1
+                            judgeLineTransform.gameObject.SetActive(true);
+                            float t = (currentTime - (startT - ChartParams.JudgeLineAppearTime)) / ChartParams.JudgeLineAppearTime;
+                            SetJudgeLineAlpha(judgeLineTransform.gameObject, t);
+                        }
+                        else if (currentTime >= startT)
+                        {
+                            // 当当前时间大于开始时间时，设置 JudgeLine 为 active，且透明度为 1
+                            judgeLineTransform.gameObject.SetActive(true);
+                            SetJudgeLineAlpha(judgeLineTransform.gameObject, 1f);
+                        }
                     }
                 }
             }
         }
 
-        // 更新Tap和Slide的位置，统一处理，不再区分两个字典
+        // 其他键型的位置
         UpdateKeysPosition(zAxisDecreasePerFrame);
+    }
+    private void SetJudgeLineAlpha(GameObject judgeLine, float alpha)
+    {
+        SpriteRenderer spriteRenderer = judgeLine.GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            Color color = spriteRenderer.color;
+            color.a = alpha;
+            spriteRenderer.color = color;
+        }
     }
 
     private void UpdateKeysPosition(float zAxisDecreasePerFrame)

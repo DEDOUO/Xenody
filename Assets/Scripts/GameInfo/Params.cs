@@ -20,7 +20,11 @@ namespace Params
 
         //StarHead默认的X轴坐标宽度
         public static float StarHeadXAxis = 0.4f;
+        //Star默认的出现时间
         public static float StarAppearTime = 0.4f;
+
+        //JudgeLine默认的出现时间
+        public static float JudgeLineAppearTime = 0.4f;
     }
 
     public static class SpeedParams

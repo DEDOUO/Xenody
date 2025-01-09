@@ -124,8 +124,17 @@ public class ChartInstantiator : MonoBehaviour
                             GameObject judgeLineInstance = Instantiate(judgeLinePrefab, firstSubJudgePlaneInstance.transform);
                             judgeLineInstance.name = $"JudgeLine{judgePlaneIndex}";
                             judgeLineInstance.transform.SetParent(JudgeLinesParent.transform);
-                            // 初始化JudgeLine实例的位置与JudgePlane下第一个SubJudgePlane的位置一致（这里简单示例，可根据实际需求调整更准确的初始化逻辑）
+                            // 初始化JudgeLine实例的位置与JudgePlane下第一个SubJudgePlane的位置一致
                             judgeLineInstance.transform.position = firstSubJudgePlaneInstance.transform.position;
+                            // 设置y轴坐标为subJudgePlane的startT对应的y轴坐标
+                            float newYAxis = judgePlane.GetPlaneYAxis(subJudgePlane.startT);
+                            //Debug.Log(newYAxis);
+                            Vector3 position = judgeLineInstance.transform.position;
+                            position.y = newYAxis;
+                            judgeLineInstance.transform.position = position;
+                            //Debug.Log(judgeLineInstance.transform.position);
+                            //默认不显示
+                            judgeLineInstance.SetActive(false);
                             //Debug.Log(firstSubJudgePlaneInstance.transform.position.z);
                         }
                         subJudgePlaneIndex++;
@@ -470,14 +479,17 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.holds != null)
         {
             int holdIndex = 1;
-            // 创建一个空物体作为hold实例的父物体，用于统一管理和规范命名
-            GameObject holdParent = new GameObject($"Hold{holdIndex}");
-            holdParent.transform.position = new Vector3(0, 0, 0);
-            // 将holdParent设置为ChartGameObjects的子物体
-            holdParent.transform.SetParent(HoldsParent.transform);
 
             foreach (var hold in chart.holds)
             {
+
+                //Debug.Log(hold);
+                // 创建一个空物体作为hold实例的父物体，用于统一管理和规范命名
+                GameObject holdParent = new GameObject($"Hold{holdIndex}");
+                holdParent.transform.position = new Vector3(0, 0, 0);
+                // 将holdParent设置为ChartGameObjects的子物体
+                holdParent.transform.SetParent(HoldsParent.transform);
+
                 JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
                 if (associatedJudgePlaneObject != null)
                 {

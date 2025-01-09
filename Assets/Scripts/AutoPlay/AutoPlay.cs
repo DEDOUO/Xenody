@@ -45,7 +45,7 @@ public class AutoPlay : MonoBehaviour
 
         // 加载Sprite
         JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack");
-        HoldSprite = Resources.Load<Sprite>("Sprites/TrackConflict");
+        HoldSprite = Resources.Load<Sprite>("Sprites/HoldBlueSprite");
 
         // 查找包含AudioSource的GameObject
         GameObject audioObj = GameObject.Find("AudioService");
