@@ -31,13 +31,13 @@ namespace Params
     {
         // 速度参数
         // 1秒钟Note在世界坐标前进的距离（Z轴）
-        public static float NoteSpeedDefault = 50f;
+        public static float NoteSpeedDefault = 80f;
     }
 
     public static class HeightParams
     {
         // 天线在世界中的实际高度（Y轴）
-        public static float HeightDefault = 6f;
+        public static float HeightDefault = 4.5f;
     }
     public static class HorizontalParams
     {

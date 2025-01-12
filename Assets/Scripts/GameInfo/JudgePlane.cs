@@ -122,5 +122,25 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     {
         return GetEnumerator();
     }
+
+
+    public bool IsSubJudgePlaneLinear(float startT, float endT)
+    {
+        // 这里需要根据 judgePlane 的 SubJudgePlane 信息，判断 startT 到 endT 之间是否均为 Linear 函数类型
+        // 假设 judgePlane 有一个方法可以获取 SubJudgePlane 列表，并且每个 SubJudgePlane 有一个方法可以获取其函数类型
+        foreach (var subJudgePlane in subJudgePlaneList)
+        {
+            float subStartT = subJudgePlane.startT;
+            float subEndT = subJudgePlane.endT;
+            if (subStartT <= endT && subEndT >= startT)
+            {
+                if (subJudgePlane.yAxisFunction != Utility.TransFunctionType.Linear)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 

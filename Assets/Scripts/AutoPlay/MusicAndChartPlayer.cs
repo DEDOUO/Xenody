@@ -4,8 +4,8 @@ using System.Linq;
 using Params;
 using System.Collections;
 using UnityEngine.SceneManagement;
-using UnityEngine.Experimental.Rendering.Universal;
-using UnityEngine.Rendering.Universal;
+//using UnityEngine.Experimental.Rendering.Universal;
+//using UnityEngine.Rendering.Universal;
 using Note;
 
 public class MusicAndChartPlayer : MonoBehaviour
@@ -25,6 +25,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private AudioSource HoldSoundEffect;
     private AudioSource StarHeadSoundEffect;
 
+    private float audioPrevTime = 0f;
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
     private Dictionary<string, float> holdEndTimes = new Dictionary<string, float>(); // 存储Hold实例名到其结束时间的映射
     private Dictionary<string, KeyInfo> keyReachedJudgment = new Dictionary<string, KeyInfo>(); // 存储实例名到键信息的映射
@@ -35,14 +36,12 @@ public class MusicAndChartPlayer : MonoBehaviour
     private bool isMusicPlayingStarted; // 用于标识是否已经开始音乐播放阶段
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
-
-    //private Animator holdAnimator;
-    //private int holdStartHash;
-    //private int holdEndHash;
+    private float audioTime = 0f;
+    public float updateInterval = 0.00833333f;  // 更新间隔，固定为120帧
 
     //public float StarAppearTime = 1.0f;
-    public List<Note.Star.SubStar> subStars = new List<Note.Star.SubStar>();
-    private Dictionary<int, List<GameObject>> subStarArrows = new Dictionary<int, List<GameObject>>();
+    public List<Star.SubStar> subStars = new List<Star.SubStar>();
+    //private Dictionary<int, List<GameObject>> subStarArrows = new Dictionary<int, List<GameObject>>();
 
 
     // 内部类，用于存储键的相关信息以及判定状态
@@ -89,133 +88,144 @@ public class MusicAndChartPlayer : MonoBehaviour
         PrepareChartMapping(chart);
         audioSource.Play();
         isMusicPlayingStarted = true;
+        StartCoroutine(UpdatePositionsCoroutine());
     }
 
-    private void Update()
+    private IEnumerator UpdatePositionsCoroutine()
+    {
+        //float audioPrevTime = 0f;
+
+        while (true)
+        {
+            if (audioSource.isPlaying)
+            {
+                Updateall();
+                //audioPrevTime = audioSource.time;
+            }
+
+            yield return new WaitForSeconds(updateInterval);
+        }
+    }
+
+    private void Updateall()
     {
         if (isMusicPlayingStarted) // 只有当明确进入音乐播放阶段才进行后续判断
         {
             if (audioSource.isPlaying)
             {
-                float currentTime = Time.time;
+                float currentTime = audioSource.time;
+                //Debug.Log("1. " + currentTime);
                 // 未知原因，时间为0时就执行了UpdatePositions(chart)导致Z轴坐标偏后了，先额外加个判断，之后再查问题……
-                if (currentTime > 0)
+                //if (currentTime > 0)
+                //{
+                // 使用双指针来维护从上一帧到这一帧的时间，包含哪些note
+                while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
                 {
-                    // 使用双指针来维护从上一帧到这一帧的时间，包含哪些note
-                    while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
+                    List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
+                    foreach (var instanceName in instanceNames)
                     {
-                        List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
-                        foreach (var instanceName in instanceNames)
+                        //Debug.Log(instanceName);
+                        KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                        keyInfo.isJudged = true;
+                        // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
+                        if (instanceName.StartsWith("Tap"))
                         {
-                            //Debug.Log(instanceName);
-                            KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                            keyInfo.isJudged = true;
-                            // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
-                            if (instanceName.StartsWith("Tap"))
+                            TapSoundEffect.Play();
+                            PlayAnimation(instanceName, "TapHitEffect");
+                        }
+                        else if (instanceName.StartsWith("Slide"))
+                        {
+                            SlideSoundEffect.Play();
+                            PlayAnimation(instanceName, "SlideEffect");
+                        }
+                        else if (instanceName.StartsWith("Flick"))
+                        {
+                            FlickSoundEffect.Play();
+                            PlayAnimation(instanceName, "FlickEffect");
+                        }
+                        else if (instanceName.StartsWith("Hold"))
+                        {
+                            //hold游戏物体实例
+                            GameObject holdObject = GameObject.Find(instanceName);
+                            // 从instanceName中提取数字部分，用于查找对应的Hold
+                            int holdIndex = GetHoldIndexFromInstanceName(instanceName);
+                            if (holdIndex >= 0 && holdIndex < chart.holds.Count)
                             {
-                                TapSoundEffect.Play();
-                                PlayAnimation(instanceName, "TapHitEffect");
-                            }
-                            else if (instanceName.StartsWith("Slide"))
-                            {
-                                SlideSoundEffect.Play();
-                                PlayAnimation(instanceName, "SlideEffect");
-                            }
-                            else if (instanceName.StartsWith("Flick"))
-                            {
-                                FlickSoundEffect.Play();
-                                //Debug.Log(Time.time);
-                                PlayAnimation(instanceName, "FlickEffect"); // 假设动画名称为FlickEffect，按实际修改
-                            }
-                            else if (instanceName.StartsWith("Hold"))
-                            {
-                                //hold游戏物体实例
-                                GameObject holdObject = GameObject.Find(instanceName);
-                                // 从instanceName中提取数字部分，用于查找对应的Hold
-                                int holdIndex = GetHoldIndexFromInstanceName(instanceName);
-                                if (holdIndex >= 0 && holdIndex < chart.holds.Count)
+                                Hold hold = chart.holds[holdIndex];
+                                KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
+                                float holdEndTime = holdEndTimes[instanceName];
+                                bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
+                                bool isEnd = currentTime >= holdEndTime;
+                                //Debug.Log($"InstanceName: {instanceName}, currentTime: {currentTime}, isStart: {isStart}, isEnd: {isEnd}");
+
+                                // 获取Subhold的X轴左侧和右侧坐标
+                                float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
+                                float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
+                                // 计算X轴坐标均值
+                                float x = (subholdLeftX + subholdRightX) / 2;
+
+                                JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
+                                float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
+                                //Debug.Log(yAxisPosition);
+                                Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                                float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+                                //Debug.Log(worldUnitToScreenPixelX);
+                                float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
+                                float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
+                                //Debug.Log(noteSizeWorldLengthPerUnit);
+
+                                float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
+                                //Debug.Log(x_width);
+
+                                // 获取所在JudgePlane当时刻坐标
+                                float y = 0f;
+                                JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
+                                if (correspondingJudgePlane != null)
                                 {
-                                    Hold hold = chart.holds[holdIndex];
-                                    KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
-                                    float holdEndTime = holdEndTimes[instanceName];
-                                    bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
-                                    bool isEnd = currentTime >= holdEndTime;
-                                    //Debug.Log($"InstanceName: {instanceName}, currentTime: {currentTime}, isStart: {isStart}, isEnd: {isEnd}");
+                                    y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                                }
+                                //HoldHitEffect的位置（注意挂载在Hold物体下，需要根据父物体坐标折算子物体相对坐标））
+                                Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
+                                if (isStart && !holdKeyInfo.isSoundPlayedAtStart) // 仅在开始判定且还没播放过开始音效时播放
+                                {
+                                    HoldSoundEffect.Play();
+                                    holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
+                                                                             // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
+                                    currentHoldInstanceNames.Add(instanceName);
+                                    //Debug.Log(holdHitEffectPosition);
+                                    GameObject holdHitEffect = new GameObject($"HoldHitEffect{holdIndex + 1}");
+                                    holdHitEffect.transform.parent = HoldsParent.transform;
+                                    holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+                                    holdHitEffect.transform.position = holdHitEffectPosition;
+                                    holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
+                                    holdHitEffect.AddComponent<SpriteRenderer>();
 
-                                    // 获取Subhold的X轴左侧和右侧坐标
-                                    float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
-                                    float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
-                                    // 计算X轴坐标均值
-                                    float x = (subholdLeftX + subholdRightX) / 2;
+                                    //动画组件加载和状态设置
+                                    Animator holdAnimator = holdHitEffect.AddComponent<Animator>();
+                                    holdAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
+                                    int holdStartHash = Animator.StringToHash($"HoldStart");
+                                    //设置状态为HoldStart
+                                    holdAnimator.SetTrigger(holdStartHash);
 
-                                    JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
-                                    float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
-                                    //Debug.Log(yAxisPosition);
-                                    Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
-                                    float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
-                                    //Debug.Log(worldUnitToScreenPixelX);
-                                    float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
-                                    float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
-                                    //Debug.Log(noteSizeWorldLengthPerUnit);
-
-                                    //这里的155f是原始HitEffect对应的像素数/100
-                                    float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
-                                    //Debug.Log(x_width);
-
-                                    //float x_width = (subholdRightX - subholdLeftX)*1.5f;
-
-                                    // 获取所在JudgePlane当时刻坐标
-                                    float y = 0f;
-                                    JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
-                                    if (correspondingJudgePlane != null)
-                                    {
-                                        y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
-                                    }
-                                    //HoldHitEffect的位置（注意挂载在Hold物体下，需要根据父物体坐标折算子物体相对坐标））
-                                    Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
-                                    if (isStart && !holdKeyInfo.isSoundPlayedAtStart) // 仅在开始判定且还没播放过开始音效时播放
-                                    {
-                                        HoldSoundEffect.Play();
-                                        holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
-                                        // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
-                                        currentHoldInstanceNames.Add(instanceName);
-                                        //Debug.Log(holdHitEffectPosition);
-                                        GameObject holdHitEffect = new GameObject($"HoldHitEffect{holdIndex + 1}");
-                                        holdHitEffect.transform.parent = HoldsParent.transform;
-                                        holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
-                                        holdHitEffect.transform.position = holdHitEffectPosition;
-                                        holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
-                                        holdHitEffect.AddComponent<SpriteRenderer>();
-
-                                        //动画组件加载和状态设置
-                                        Animator holdAnimator = holdHitEffect.AddComponent<Animator>();
-                                        holdAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-                                        int holdStartHash = Animator.StringToHash($"HoldStart");
-                                        //设置状态为HoldStart
-                                        holdAnimator.SetTrigger(holdStartHash);
-
-                                        // 挂载PingPongAnimationStateController脚本
-                                        //PingPongAnimationStateController pingPongScript = holdHitEffect.AddComponent<PingPongAnimationStateController>();
-                                        //PlayAnimation($"HoldHitEffect{holdIndex + 1}", "HoldEffect");
-                                    }
                                 }
                             }
-                            else if (instanceName.StartsWith("StarHead"))
-                            {
-                                //Debug.Log(1);
-                                StarHeadSoundEffect.Play();
-                                PlayAnimation(instanceName, "StarHeadEffect");
-                            }
                         }
-                        currentIndex++;
+                        else if (instanceName.StartsWith("StarHead"))
+                        {
+                            StarHeadSoundEffect.Play();
+                            PlayAnimation(instanceName, "StarHeadEffect");
+                        }
                     }
-                    // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
-                    UpdateHoldStates(currentTime);
-                    //更新所有Note位置
-                    UpdatePositions(chart);
-                    //更新所有Arrow的透明度
-                    CheckArrowVisibility(chart);
+                    currentIndex++;
                 }
+                // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
+                UpdateHoldStates(currentTime);
+                //更新所有Note位置
+                UpdatePositions(chart, currentTime);
+                //更新所有Arrow的透明度
+                CheckArrowVisibility(chart, currentTime);
+                //Debug.Log("2. " + audioTime);
+                //}
             }
             else
             {
@@ -224,9 +234,8 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
     }
-    private void CheckArrowVisibility(Chart chart)
+    private void CheckArrowVisibility(Chart chart, float currentTime)
     {
-        float currentTime = Time.time;
         if (chart.stars != null)
         {
             for (int i = 0; i < chart.stars.Count; i++)
@@ -347,7 +356,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                 bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
                 bool isEnd = currentTime >= holdEndTime;
 
-                // 获取当前光效所在世界坐标
                 float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
                 float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
                 float x = (subholdLeftX + subholdRightX) / 2;
@@ -358,17 +366,12 @@ public class MusicAndChartPlayer : MonoBehaviour
                 float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
                 float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
                 float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
-                //这里的155f是原始HitEffect对应的像素数/100
-                float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
 
-                //float x_width = (subholdRightX - subholdLeftX) * 1.5f;
+                float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
 
                 float y = 0f;
                 JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
-                if (correspondingJudgePlane != null)
-                {
-                    y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
-                }
+                y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                 Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
 
                 if (isEnd && !holdKeyInfo.isSoundPlayedAtEnd)
@@ -378,9 +381,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                     // 如果已经结束判定，从列表中移除该instanceName
                     currentHoldInstanceNames.RemoveAt(i);
 
-                    //int holdEndHash = Animator.StringToHash($"HoldEnd_{holdIndex}");
-                    //animator.SetTrigger(holdEndHash);
-                    //StartCoroutine(CheckAnimationEnd(animator, holdHitEffect));
                     GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
                     if (holdHitEffect != null)
                     {
@@ -393,20 +393,15 @@ public class MusicAndChartPlayer : MonoBehaviour
                             // 设置动画状态为HoldEnd
                             animator.SetTrigger(holdEndHash);
                             PlayAnimation($"HoldHitEffect{holdIndex + 1}", "HoldEffect");
-                            //Debug.Log(1);
 
                         }
                     }
-
-
                 }
                 else if (isStart && !isEnd)
                 {
-                    //Debug.Log(holdHitEffectPosition);
                     GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
                     holdHitEffect.transform.position = holdHitEffectPosition;
                     holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
-                    //UpdateHoldLight(holdKeyInfo, instanceName, holdObject, holdHitEffectPosition);
                 }
             }
         }
@@ -528,12 +523,15 @@ public class MusicAndChartPlayer : MonoBehaviour
         //}
     }
 
-    private void UpdatePositions(Chart chart)
+    private void UpdatePositions(Chart chart, float currentTime)
     {
         //Debug.Log($"当前帧率: {1.0f / Time.deltaTime}");
-        // 计算每帧对应的Z轴坐标减少量，假设帧率是固定的（比如60帧每秒），这里用1.0f/Time.deltaTime来获取帧率，然后根据每秒钟变化单位计算每帧变化量
-        float zAxisDecreasePerFrame = SpeedParams.NoteSpeedDefault * Time.deltaTime;
-
+        // 计算每帧对应的Z轴坐标减少量，假设帧率是固定的（比如60帧每秒），然后根据每秒钟变化单位计算每帧变化量
+        //Debug.Log("2. " + audioSource.time);
+        float audioTimeDelta = currentTime - audioPrevTime;
+        float zAxisDecreasePerFrame = SpeedParams.NoteSpeedDefault * audioTimeDelta;
+        audioTime += audioTimeDelta;
+        //Debug.Log(zAxisDecreasePerFrame);
         // 如果已经创建了JudgePlanesParent并且音频正在播放，更新其子物体的Z轴坐标
         if (JudgePlanesParent != null)
         {
@@ -543,7 +541,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Vector3 currentPosition = childTransform.position;
                 currentPosition.z += zAxisDecreasePerFrame;
                 childTransform.position = currentPosition;
-                //Debug.Log(Time.time + "___" + childTransform.position.z);
             }
         }
 
@@ -562,9 +559,6 @@ public class MusicAndChartPlayer : MonoBehaviour
 
                         // 获取该 JudgeLine 的开始时间
                         float startT = JudgePlanesStartT[i];
-
-                        // 获取当前时间
-                        float currentTime = Time.time;
 
                         //只有当当前时间大于开始时间时，才更新JudgeLine的位置
                         if (currentTime > startT)
@@ -604,6 +598,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
         // 其他键型的位置
         UpdateKeysPosition(zAxisDecreasePerFrame);
+        audioPrevTime = currentTime;
     }
     private void SetJudgeLineAlpha(GameObject judgeLine, float alpha)
     {
@@ -717,6 +712,11 @@ public class MusicAndChartPlayer : MonoBehaviour
         GameObject keyGameObject = GameObject.Find(instanceName);
         if (keyGameObject != null)
         {
+            //先修改物体z轴位置为0（保证判定特效在判定线上）
+            Vector3 pos = keyGameObject.transform.position;
+            pos.z = 0;
+            keyGameObject.transform.position = pos;
+
             Animator animator = keyGameObject.GetComponent<Animator>();
             if (animator == null)
             {

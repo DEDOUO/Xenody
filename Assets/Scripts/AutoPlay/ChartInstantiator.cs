@@ -455,7 +455,7 @@ public class ChartInstantiator : MonoBehaviour
                         flickArrowInstance.transform.localPosition = new Vector3(0, 0.3f, 0); // 示例，可根据实际调整
 
                         // 根据Flick的缩放比例同步缩放箭头（仅针对Y轴缩放，即缩放箭头长度）
-                        flickArrowInstance.transform.localScale = new Vector3(0.6f, xAxisScale, 1);
+                        flickArrowInstance.transform.localScale = new Vector3(0.6f, xAxisScale*0.3f, 1);
                     }
 
                     // 检查Flick相关的范围等条件是否满足（这里简单示例输出警告，按实际需求完善检查逻辑）
@@ -482,12 +482,10 @@ public class ChartInstantiator : MonoBehaviour
 
             foreach (var hold in chart.holds)
             {
-
-                //Debug.Log(hold);
-                // 创建一个空物体作为hold实例的父物体，用于统一管理和规范命名
+                // 创建一个空物体作为 hold 实例的父物体，用于统一管理和规范命名
                 GameObject holdParent = new GameObject($"Hold{holdIndex}");
                 holdParent.transform.position = new Vector3(0, 0, 0);
-                // 将holdParent设置为ChartGameObjects的子物体
+                // 将 holdParent 设置为 ChartGameObjects 的子物体
                 holdParent.transform.SetParent(HoldsParent.transform);
 
                 JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
@@ -499,74 +497,70 @@ public class ChartInstantiator : MonoBehaviour
                         float startY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.startT);
                         float endY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.endT);
 
-                        // 根据SubHold的函数类型来决定如何处理
-                        switch (subHold.XLeftFunction, subHold.XRightFunction)
+                        // 检查 SubHold 所在的 SubJudgePlane 是否为 Linear
+                        bool isSubJudgePlaneLinear = associatedJudgePlaneObject.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
+
+                        // 只有当两侧变化函数均为 Linear，且所在的 SubJudgePlane 为 Linear 时，才能一次性初始化
+                        if (subHold.XLeftFunction == TransFunctionType.Linear && subHold.XRightFunction == TransFunctionType.Linear && isSubJudgePlaneLinear)
                         {
-                            //只有当两侧变化函数均为Linear时，才能一次性初始化
-                            case (TransFunctionType.Linear, TransFunctionType.Linear):
-                                float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0)) * subHold.startXMin / ChartParams.XaxisMax;
-                                float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0)) * subHold.startXMax / ChartParams.XaxisMax;
-                                float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0)) * subHold.endXMin / ChartParams.XaxisMax;
-                                float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0)) * subHold.endXMax / ChartParams.XaxisMax;
+                            float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0)) * subHold.startXMin / ChartParams.XaxisMax;
+                            float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0)) * subHold.startXMax / ChartParams.XaxisMax;
+                            float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0)) * subHold.endXMin / ChartParams.XaxisMax;
+                            float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0)) * subHold.endXMax / ChartParams.XaxisMax;
 
-                                // 根据startT和endT计算Z轴位置
-                                float zPositionForStartT = CalculateZAxisPosition(subHold.startT);
-                                float zPositionForEndT = CalculateZAxisPosition(subHold.endT);
+                            // 根据 startT 和 endT 计算 Z 轴位置
+                            float zPositionForStartT = CalculateZAxisPosition(subHold.startT);
+                            float zPositionForEndT = CalculateZAxisPosition(subHold.endT);
 
-                                // 一次性生成整个SubHold
-                                GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
-                                    startY, endY, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent);
-                                break;
-                            //否则要分割成多个子块，生成后拼接
-                            default:
-                                // 精细度设为8，用于分割时间区间（可根据实际需求调整精细度）
-                                int segments = FinenessParams.Segment;
-                                float timeStep = (subHold.endT - subHold.startT) / segments;
-                                // 用于存储细分的Instance，以便后续合并
-                                List<GameObject> segmentInstances = new List<GameObject>();
+                            // 一次性生成整个 SubHold
+                            GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
+                                startY, endY, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent);
+                        }
+                        else
+                        {
+                            // 精细度设为 8，用于分割时间区间（可根据实际需求调整精细度）
+                            int segments = FinenessParams.Segment;
+                            float timeStep = (subHold.endT - subHold.startT) / segments;
+                            // 用于存储细分的 Instance，以便后续合并
+                            List<GameObject> segmentInstances = new List<GameObject>();
 
-                                for (int i = 0; i < segments; i++)
-                                {
-                                    float startT = subHold.startT + i * timeStep;
-                                    float endT = subHold.startT + (i + 1) * timeStep;
-                                    float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
-                                    float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
+                            for (int i = 0; i < segments; i++)
+                            {
+                                float startT = subHold.startT + i * timeStep;
+                                float endT = subHold.startT + (i + 1) * timeStep;
+                                float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
+                                float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
 
-                                    float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-                                    float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
-                                    float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-                                    float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+                                float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                                float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+                                float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                                float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
 
-                                    //Debug.Log("startXMin: " + startXMin + ", endXMin: " + endXMin + ", startXMax: " + startXMax + ", endXMax: " + endXMax);
-                                    float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0)) * startXMin / ChartParams.XaxisMax;
-                                    float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0)) * startXMax / ChartParams.XaxisMax;
-                                    float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0)) * endXMin / ChartParams.XaxisMax;
-                                    float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0)) * endXMax / ChartParams.XaxisMax;
+                                float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0)) * startXMin / ChartParams.XaxisMax;
+                                float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0)) * startXMax / ChartParams.XaxisMax;
+                                float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0)) * endXMin / ChartParams.XaxisMax;
+                                float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0)) * endXMax / ChartParams.XaxisMax;
 
-                                    //Debug.Log("startXMin: " + startXMinWorld_Inner + ", endXMin: " + endXMinWorld_Inner + ", startXMax: " + startXMaxWorld_Inner + ", endXMax: " + endXMaxWorld_Inner);
+                                // 根据 startT 和 endT 计算 Z 轴位置
+                                float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
+                                float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
 
-                                    // 根据startT和endT计算Z轴位置
-                                    float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
-                                    float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
-                                    //Debug.Log("zPositionForStartT: " + zPositionForStartT_Inner + ", zPositionForEndT: " + zPositionForEndT_Inner);
+                                GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
+                                    startY_Inner, endY_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent);
+                                segmentInstances.Add(instance);
+                            }
 
-                                    GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                        startY_Inner, endY_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent);
-                                    segmentInstances.Add(instance);
-                                }
+                            // 合并细分的 Instance 为一个新的 GameObject
+                            GameObject combinedInstance = CombineInstances(segmentInstances);
+                            combinedInstance.name = $"SubHold{subHoldIndex}";
+                            // 将合并后的 Instance 设置为对应的父物体的子物体
+                            combinedInstance.transform.SetParent(holdParent.transform);
 
-                                // 合并细分的Instance为一个新的GameObject
-                                GameObject combinedInstance = CombineInstances(segmentInstances);
-                                combinedInstance.name = $"SubHold{subHoldIndex}";
-                                // 将合并后的Instance设置为对应的父物体的子物体
-                                combinedInstance.transform.SetParent(holdParent.transform);
-
-                                // 删除合并前的实例
-                                foreach (GameObject segmentInstance in segmentInstances)
-                                {
-                                    Destroy(segmentInstance);
-                                }
-                                break;
+                            // 删除合并前的实例
+                            foreach (GameObject segmentInstance in segmentInstances)
+                            {
+                                Destroy(segmentInstance);
+                            }
                         }
                         subHoldIndex++;
                     }
@@ -599,6 +593,7 @@ public class ChartInstantiator : MonoBehaviour
                 int starIndex = 1;
                 foreach (var star in chart.stars)
                 {
+                    //Debug.Log(star.starHeadT);
                     // 实例化starhead预制体
                     GameObject starheadInstance = Instantiate(starheadPrefab);
                     starheadInstance.name = $"StarHead{starIndex}"; // 命名
