@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using UnityEngine.UIElements;
 using System;
 using Unity.VisualScripting;
-using static Note.Star;
+using Note;
+using static JudgePlane;
 
 
 
@@ -53,7 +54,85 @@ public class ChartInstantiator : MonoBehaviour
         videoPlayerContainer = animatorContainer;
     }
 
-    public void InstantiateJudgePlanesAndJudgeLines(Chart chart)
+    public void InstantiateAll(Chart chart)
+    {
+        InstantiateJudgePlanes(chart);
+        InstantiateJudgeLines(chart);
+        InstantiateTaps(chart);
+        InstantiateSlides(chart);
+        InstantiateFlicks(chart);
+        InstantiateHolds(chart);
+        InstantiateStarHeads(chart);
+        InstantiateSubStars(chart);
+    }
+
+    public void InstantiateJudgePlanes(Chart chart)
+    {
+        if (chart != null && chart.judgePlanes != null)
+        {
+            foreach (var judgePlane in chart.judgePlanes)
+            {
+                int judgePlaneIndex = judgePlane.id;
+                // 创建一个空物体作为JudgePlane实例的父物体，用于统一管理和规范命名
+                GameObject judgePlaneParent = new GameObject($"JudgePlane{judgePlaneIndex}");
+                judgePlaneParent.transform.position = new Vector3(0, 0, 0);
+                // 将judgePlaneParent设置为ChartGameObjects的子物体
+                judgePlaneParent.transform.SetParent(JudgePlanesParent.transform);
+                int subJudgePlaneIndex = 1;
+                GameObject firstSubJudgePlaneInstance = null;
+
+                foreach (var subJudgePlane in judgePlane.subJudgePlaneList)
+                {
+                    // 根据SubJudgePlane的函数类型来决定如何处理
+                    switch (subJudgePlane.yAxisFunction)
+                    {
+                        case TransFunctionType.Linear:
+                            firstSubJudgePlaneInstance = CreateJudgePlaneQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
+                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent);
+                            break;
+                        case TransFunctionType.Sin:
+                        case TransFunctionType.Cos:
+                            // 精细度设为8，用于分割时间区间
+                            int segments = FinenessParams.Segment;
+                            float timeStep = (subJudgePlane.endT - subJudgePlane.startT) / segments;
+                            // 用于存储细分的Instance，以便后续合并
+                            List<GameObject> segmentInstances = new List<GameObject>();
+
+                            for (int i = 0; i < segments; i++)
+                            {
+                                float startT = subJudgePlane.startT + i * timeStep;
+                                float endT = subJudgePlane.startT + (i + 1) * timeStep;
+                                float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
+                                float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
+                                GameObject instance = CreateJudgePlaneQuad(startY, endY, startT, endT, JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", judgePlaneParent);
+                                if (i == 0)
+                                {
+                                    firstSubJudgePlaneInstance = instance;
+                                }
+                                segmentInstances.Add(instance);
+                            }
+
+                            // 合并细分的Instance为一个新的GameObject
+                            GameObject combinedInstance = CombineInstances(segmentInstances);
+                            combinedInstance.name = $"Sub{subJudgePlaneIndex}";
+                            // 将合并后的Instance设置为对应的父物体的子物体
+                            combinedInstance.transform.SetParent(judgePlaneParent.transform);
+
+                            // 删除合并前的实例
+                            foreach (GameObject segmentInstance in segmentInstances)
+                            {
+                                Destroy(segmentInstance);
+                            }
+
+                            break;
+                    }
+                    subJudgePlaneIndex++;
+                }
+            }
+        }
+    }
+
+    public void InstantiateJudgeLines(Chart chart)
     {
         if (chart != null && chart.judgePlanes != null)
         {
@@ -61,94 +140,32 @@ public class ChartInstantiator : MonoBehaviour
             GameObject judgeLinePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/JudgeLine.prefab", typeof(GameObject));
             if (judgeLinePrefab != null)
             {
-                foreach (var judgePlane in chart.judgePlanes)
+                foreach (JudgePlane judgePlane in chart.judgePlanes)
                 {
                     int judgePlaneIndex = judgePlane.id;
-                    // 创建一个空物体作为JudgePlane实例的父物体，用于统一管理和规范命名
-                    GameObject judgePlaneParent = new GameObject($"JudgePlane{judgePlaneIndex}");
-                    judgePlaneParent.transform.position = new Vector3(0, 0, 0);
-                    // 将judgePlaneParent设置为ChartGameObjects的子物体
-                    judgePlaneParent.transform.SetParent(JudgePlanesParent.transform);
-                    int subJudgePlaneIndex = 1;
-                    GameObject firstSubJudgePlaneInstance = null;
-
-                    foreach (var subJudgePlane in judgePlane.subJudgePlaneList)
-                    {
-                        // 根据SubJudgePlane的函数类型来决定如何处理
-                        switch (subJudgePlane.yAxisFunction)
-                        {
-                            case TransFunctionType.Linear:
-                                firstSubJudgePlaneInstance = CreateJudgePlaneQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
-                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent);
-                                break;
-                            case TransFunctionType.Sin:
-                            case TransFunctionType.Cos:
-                                // 精细度设为8，用于分割时间区间
-                                int segments = FinenessParams.Segment;
-                                float timeStep = (subJudgePlane.endT - subJudgePlane.startT) / segments;
-                                // 用于存储细分的Instance，以便后续合并
-                                List<GameObject> segmentInstances = new List<GameObject>();
-
-                                for (int i = 0; i < segments; i++)
-                                {
-                                    float startT = subJudgePlane.startT + i * timeStep;
-                                    float endT = subJudgePlane.startT + (i + 1) * timeStep;
-                                    float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
-                                    float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
-                                    GameObject instance = CreateJudgePlaneQuad(startY, endY, startT, endT, JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", judgePlaneParent);
-                                    if (i == 0)
-                                    {
-                                        firstSubJudgePlaneInstance = instance;
-                                    }
-                                    segmentInstances.Add(instance);
-                                }
-
-                                // 合并细分的Instance为一个新的GameObject
-                                GameObject combinedInstance = CombineInstances(segmentInstances);
-                                combinedInstance.name = $"Sub{subJudgePlaneIndex}";
-                                // 将合并后的Instance设置为对应的父物体的子物体
-                                combinedInstance.transform.SetParent(judgePlaneParent.transform);
-
-                                // 删除合并前的实例
-                                foreach (GameObject segmentInstance in segmentInstances)
-                                {
-                                    Destroy(segmentInstance);
-                                }
-
-                                break;
-                        }
-                        // 如果为第一个subJudgePlane
-                        if (subJudgePlaneIndex == 1)
-                        {
-                            // 实例化JudgeLine预制体，命名为JudgeLine1、JudgeLine2等
-                            GameObject judgeLineInstance = Instantiate(judgeLinePrefab, firstSubJudgePlaneInstance.transform);
-                            judgeLineInstance.name = $"JudgeLine{judgePlaneIndex}";
-                            judgeLineInstance.transform.SetParent(JudgeLinesParent.transform);
-                            // 初始化JudgeLine实例的位置与JudgePlane下第一个SubJudgePlane的位置一致
-                            judgeLineInstance.transform.position = firstSubJudgePlaneInstance.transform.position;
-                            // 设置y轴坐标为subJudgePlane的startT对应的y轴坐标
-                            float newYAxis = judgePlane.GetPlaneYAxis(subJudgePlane.startT);
-                            //Debug.Log(newYAxis);
-                            Vector3 position = judgeLineInstance.transform.position;
-                            position.y = newYAxis;
-                            judgeLineInstance.transform.position = position;
-                            //Debug.Log(judgeLineInstance.transform.position);
-                            //默认不显示
-                            judgeLineInstance.SetActive(false);
-                            //Debug.Log(firstSubJudgePlaneInstance.transform.position.z);
-                        }
-                        subJudgePlaneIndex++;
-                    }
+                    //获取第一个SubJudgePlane
+                    SubJudgePlane subJudgePlane= judgePlane.subJudgePlaneList[0];
+                    // 实例化JudgeLine预制体，命名为JudgeLine1、JudgeLine2等
+                    GameObject judgeLineInstance = Instantiate(judgeLinePrefab);
+                    judgeLineInstance.name = $"JudgeLine{judgePlaneIndex}";
+                    RectTransform judgeLineRectTransform = judgeLineInstance.GetComponent<RectTransform>();
+                    judgeLineInstance.transform.SetParent(JudgeLinesParent.transform);
+                    //获取初始Y轴坐标并转化为屏幕坐标
+                    float YAxisUniform = judgePlane.GetPlaneYAxis(subJudgePlane.startT)/ HeightParams.HeightDefault;
+                    Vector2 Position = Utility.ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
+                    judgeLineRectTransform.anchoredPosition3D = new Vector3(Position.x, Position.y, 0);
+                    judgeLineRectTransform.localRotation = Quaternion.Euler(0, 0, 0);
+                    judgeLineRectTransform.localScale = new Vector3(1000000, 50, 1);
                 }
             }
             else
             {
-                Debug.LogError("无法加载JudgePlane预制体或JudgeLine预制体！");
+                Debug.LogError("无法加载JudgeLine预制体！");
             }
         }
     }
 
-    private GameObject CombineInstances(List<GameObject> instances)
+            private GameObject CombineInstances(List<GameObject> instances)
     {
         GameObject combined = new GameObject("CombinedInstance");
 
@@ -455,7 +472,7 @@ public class ChartInstantiator : MonoBehaviour
                         flickArrowInstance.transform.localPosition = new Vector3(0, 0.3f, 0); // 示例，可根据实际调整
 
                         // 根据Flick的缩放比例同步缩放箭头（仅针对Y轴缩放，即缩放箭头长度）
-                        flickArrowInstance.transform.localScale = new Vector3(0.6f, xAxisScale*0.3f, 1);
+                        flickArrowInstance.transform.localScale = new Vector3(0.6f, xAxisScale * 0.3f, 1);
                     }
 
                     // 检查Flick相关的范围等条件是否满足（这里简单示例输出警告，按实际需求完善检查逻辑）
@@ -673,13 +690,12 @@ public class ChartInstantiator : MonoBehaviour
         }
     }
 
-    public void InitiateStarArrows(Note.Star.SubStar subStar, int starIndex, int subStarIndex, float numArrows, float rateStep)
+    public void InitiateStarArrows(Star.SubStar subStar, int starIndex, int subStarIndex, float numArrows, float rateStep)
     {
         GameObject StarArrowPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/StarArrow.prefab", typeof(GameObject));
         if (StarArrowPrefab != null)
         {
             float currentRate = 0.0f;
-
 
             GameObject subStarArrowContainer = new GameObject($"Star{starIndex}SubStar{subStarIndex}Arrows", typeof(RectTransform));
             RectTransform subStarArrowContainerRectTransform = subStarArrowContainer.GetComponent<RectTransform>();
@@ -690,17 +706,15 @@ public class ChartInstantiator : MonoBehaviour
             subStarArrowContainerRectTransform.localScale = Vector3.one;
             subStarArrowContainerRectTransform.sizeDelta = SubStarsParent.sizeDelta;
 
-
-            // 存储所有箭头实例的列表
-            //List<GameObject> arrowInstances = new List<GameObject>();
-
-
             //先将subStar的起点和终点转换为画布上的坐标
             Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
             Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
-            Vector2 subStarStartScreen = ScalePositionToScreen(subStarStart);
-            Vector2 subStarEndScreen = ScalePositionToScreen(subStarEnd);
-
+            //Debug.Log(subStarStart);
+            //Debug.Log(subStarEnd);
+            Vector2 subStarStartScreen = Utility.ScalePositionToScreen(subStarStart, SubStarsParent);
+            Vector2 subStarEndScreen = Utility.ScalePositionToScreen(subStarEnd, SubStarsParent);
+            //Debug.Log(subStarStartScreen);
+            //Debug.Log(subStarEndScreen);
 
             if (subStarIndex == 1)
             {
@@ -749,6 +763,63 @@ public class ChartInstantiator : MonoBehaviour
             //}
         }
     }
+
+    private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
+        float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject)
+    {
+        //Hold的Y轴坐标需要上移一点，以显示在JudgePlane上方
+        //startY += 0.05f;
+        //endY += 0.05f;
+        //注意四边形顶点顺序
+        Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
+        Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
+        Vector3 point3 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
+        Vector3 point4 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
+
+        // 假设CreateQuadFromPoints.CreateQuad方法直接返回游戏物体实例
+        return CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject);
+    }
+
+    // 封装计算Z轴坐标的方法（参考InstantiateJudgePlanesAndJudgeLines方法里的逻辑，根据实际情况传入对应的开始时间等参数）
+    private float CalculateZAxisPosition(float startTime)
+    {
+        // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
+        return -startTime * SpeedParams.NoteSpeedDefault;
+    }
+    // 封装计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度的方法（示例，参数需传入合适的世界坐标点，这里参考InstantiateJudgePlanesAndJudgeLines方法里的逻辑）
+    private float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition)
+    {
+        // 获取屏幕宽度
+        float screenWidth = Screen.width;
+        float targetHorizontalMargin = HorizontalParams.HorizontalMargin; // 目标水平边距，即离屏幕边缘10%的距离，可根据需求调整
+
+        // 计算水平可视范围（考虑边距后的有效宽度）
+        float horizontalVisibleRange = screenWidth * (1 - 2 * targetHorizontalMargin);
+
+        Vector3 Point = worldPosition;
+
+        float WorldUnitToScreenPixelX = Utility.CalculateWorldUnitToScreenPixelAtDistance(Point);
+
+        float XWorld = horizontalVisibleRange / 2 / WorldUnitToScreenPixelX;
+
+        return XWorld;
+    }
+    //根据judgePlane的id找到对应的JudgePlane
+    private JudgePlane GetCorrespondingJudgePlane(Chart chart, int judgePlaneId)
+    {
+        if (chart != null && chart.judgePlanes != null)
+        {
+            foreach (var judgePlane in chart.judgePlanes)
+            {
+                if (judgePlane.id == judgePlaneId)
+                {
+                    return judgePlane;
+                }
+            }
+        }
+        return null;
+    }
+
 
     //private GameObject CombineArrowInstances(List<GameObject> instances, RectTransform subStarArrowContainerRectTransform)
     //{
@@ -814,84 +885,32 @@ public class ChartInstantiator : MonoBehaviour
 
     //    return combined;
     //}
+ 
+    //private Vector2 ScalePositionToScreen(Vector2 position)
+    //{
+    //    //注意这里获取的是画布的长宽，而不是屏幕的长宽
+    //    float screenWidth = SubStarsParent.sizeDelta.x;
+    //    float screenHeight = SubStarsParent.sizeDelta.y;
+    //    //Debug.Log(screenHeight);
 
-    private Vector2 ScalePositionToScreen(Vector2 position)
-    {
-        //注意这里获取的是画布的长宽，而不是屏幕的长宽
-        float screenWidth = SubStarsParent.sizeDelta.x;
-        float screenHeight = SubStarsParent.sizeDelta.y;
-        //Debug.Log(screenHeight);
+    //    float screenXMin = screenWidth * HorizontalParams.HorizontalMargin;
+    //    float screenXMax = screenWidth * (1 - HorizontalParams.HorizontalMargin);
+    //    float screenXRange = screenXMax - screenXMin;
 
-        float screenXMin = screenWidth * HorizontalParams.HorizontalMargin;
-        float screenXMax = screenWidth * (1 - HorizontalParams.HorizontalMargin);
-        float screenXRange = screenXMax - screenXMin;
+    //    Vector3 worldYBottom = new Vector3(0, 0, 0);
+    //    Vector3 worldYCeiling = new Vector3(0, HeightParams.HeightDefault, 0);
+    //    //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
+    //    float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
+    //    float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
+    //    //Debug.Log(ScreenYCeiling);
+    //    //Debug.Log(ScreenYBottom);
 
-        Vector3 worldYBottom = new Vector3(0, 0, 0);
-        Vector3 worldYCeiling = new Vector3(0, HeightParams.HeightDefault, 0);
-        //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
-        float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
-        float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
-
-        float scaledX = position.x / ChartParams.XaxisMax * screenXRange / 2;
-        float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
+    //    float scaledX = position.x / ChartParams.XaxisMax * screenXRange / 2;
+    //    float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
+    //    //Debug.Log(position.y);
+    //    //Debug.Log(scaledY);
 
 
-        return new Vector2(scaledX, scaledY);
-    }
-
-    private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
-        float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject)
-    {
-        //Hold的Y轴坐标需要上移一点，以显示在JudgePlane上方
-        //startY += 0.05f;
-        //endY += 0.05f;
-        //注意四边形顶点顺序
-        Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
-        Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
-        Vector3 point3 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
-        Vector3 point4 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
-
-        // 假设CreateQuadFromPoints.CreateQuad方法直接返回游戏物体实例
-        return CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject);
-    }
-
-    // 封装计算Z轴坐标的方法（参考InstantiateJudgePlanesAndJudgeLines方法里的逻辑，根据实际情况传入对应的开始时间等参数）
-    private float CalculateZAxisPosition(float startTime)
-    {
-        // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
-        return -startTime * SpeedParams.NoteSpeedDefault;
-    }
-    // 封装计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度的方法（示例，参数需传入合适的世界坐标点，这里参考InstantiateJudgePlanesAndJudgeLines方法里的逻辑）
-    private float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition)
-    {
-        // 获取屏幕宽度
-        float screenWidth = Screen.width;
-        float targetHorizontalMargin = HorizontalParams.HorizontalMargin; // 目标水平边距，即离屏幕边缘10%的距离，可根据需求调整
-
-        // 计算水平可视范围（考虑边距后的有效宽度）
-        float horizontalVisibleRange = screenWidth * (1 - 2 * targetHorizontalMargin);
-
-        Vector3 Point = worldPosition;
-
-        float WorldUnitToScreenPixelX = Utility.CalculateWorldUnitToScreenPixelAtDistance(Point);
-
-        float XWorld = horizontalVisibleRange / 2 / WorldUnitToScreenPixelX;
-
-        return XWorld;
-    }
-    //根据judgePlane的id找到对应的JudgePlane
-    private JudgePlane GetCorrespondingJudgePlane(Chart chart, int judgePlaneId)
-    {
-        if (chart != null && chart.judgePlanes != null)
-        {
-            foreach (var judgePlane in chart.judgePlanes)
-            {
-                if (judgePlane.id == judgePlaneId)
-                {
-                    return judgePlane;
-                }
-            }
-        }
-        return null;
-    }
+    //    return new Vector2(scaledX, scaledY);
+    //}
 }

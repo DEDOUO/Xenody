@@ -117,13 +117,8 @@ public class AutoPlay : MonoBehaviour
         MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
         player.enabled = false;
 
-        instantiator.InstantiateJudgePlanesAndJudgeLines(chart);
-        instantiator.InstantiateTaps(chart);
-        instantiator.InstantiateSlides(chart);
-        instantiator.InstantiateFlicks(chart);
-        instantiator.InstantiateHolds(chart);
-        instantiator.InstantiateStarHeads(chart);
-        instantiator.InstantiateSubStars(chart); 
+        instantiator.InstantiateAll(chart);
+
         // 播放音乐和更新谱面位置
         player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent,
             TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, chart);

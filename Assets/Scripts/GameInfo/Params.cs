@@ -56,4 +56,10 @@ namespace Params
         // 每单位长度的 SubArrow 数量
         public static int subArrowsPerUnitLength = 8;
     }
+    public static class AlphaParams
+    {
+        // JudgePlane的最小和最大透明度
+        public static float JudgePlaneAlphaMin = 0.5f;
+        public static float JudgePlaneAlphaMax = 0.9f;
+    }
 }

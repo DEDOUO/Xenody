@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 //using UnityEngine.Experimental.Rendering.Universal;
 //using UnityEngine.Rendering.Universal;
 using Note;
+using static JudgePlane;
 
 public class MusicAndChartPlayer : MonoBehaviour
 {
@@ -36,7 +37,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private bool isMusicPlayingStarted; // 用于标识是否已经开始音乐播放阶段
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
-    private float audioTime = 0f;
+    //private float audioTime = 0f;
     public float updateInterval = 0.00833333f;  // 更新间隔，固定为120帧
 
     //public float StarAppearTime = 1.0f;
@@ -80,6 +81,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         HoldSoundEffect = holdSoundEffect;
         StarHeadSoundEffect = starheadSoundEffect;
         this.chart = chart;
+        //Debug.Log(FlickSoundEffect);
     }
 
     public void PlayMusicAndChart(Chart chart)
@@ -115,9 +117,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 float currentTime = audioSource.time;
                 //Debug.Log("1. " + currentTime);
-                // 未知原因，时间为0时就执行了UpdatePositions(chart)导致Z轴坐标偏后了，先额外加个判断，之后再查问题……
-                //if (currentTime > 0)
-                //{
+
                 // 使用双指针来维护从上一帧到这一帧的时间，包含哪些note
                 while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
                 {
@@ -145,70 +145,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                         }
                         else if (instanceName.StartsWith("Hold"))
                         {
-                            //hold游戏物体实例
-                            GameObject holdObject = GameObject.Find(instanceName);
-                            // 从instanceName中提取数字部分，用于查找对应的Hold
-                            int holdIndex = GetHoldIndexFromInstanceName(instanceName);
-                            if (holdIndex >= 0 && holdIndex < chart.holds.Count)
-                            {
-                                Hold hold = chart.holds[holdIndex];
-                                KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
-                                float holdEndTime = holdEndTimes[instanceName];
-                                bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
-                                bool isEnd = currentTime >= holdEndTime;
-                                //Debug.Log($"InstanceName: {instanceName}, currentTime: {currentTime}, isStart: {isStart}, isEnd: {isEnd}");
-
-                                // 获取Subhold的X轴左侧和右侧坐标
-                                float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
-                                float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
-                                // 计算X轴坐标均值
-                                float x = (subholdLeftX + subholdRightX) / 2;
-
-                                JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
-                                float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
-                                //Debug.Log(yAxisPosition);
-                                Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
-                                float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
-                                //Debug.Log(worldUnitToScreenPixelX);
-                                float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
-                                float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
-                                //Debug.Log(noteSizeWorldLengthPerUnit);
-
-                                float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
-                                //Debug.Log(x_width);
-
-                                // 获取所在JudgePlane当时刻坐标
-                                float y = 0f;
-                                JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
-                                if (correspondingJudgePlane != null)
-                                {
-                                    y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
-                                }
-                                //HoldHitEffect的位置（注意挂载在Hold物体下，需要根据父物体坐标折算子物体相对坐标））
-                                Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
-                                if (isStart && !holdKeyInfo.isSoundPlayedAtStart) // 仅在开始判定且还没播放过开始音效时播放
-                                {
-                                    HoldSoundEffect.Play();
-                                    holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
-                                                                             // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
-                                    currentHoldInstanceNames.Add(instanceName);
-                                    //Debug.Log(holdHitEffectPosition);
-                                    GameObject holdHitEffect = new GameObject($"HoldHitEffect{holdIndex + 1}");
-                                    holdHitEffect.transform.parent = HoldsParent.transform;
-                                    holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
-                                    holdHitEffect.transform.position = holdHitEffectPosition;
-                                    holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
-                                    holdHitEffect.AddComponent<SpriteRenderer>();
-
-                                    //动画组件加载和状态设置
-                                    Animator holdAnimator = holdHitEffect.AddComponent<Animator>();
-                                    holdAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-                                    int holdStartHash = Animator.StringToHash($"HoldStart");
-                                    //设置状态为HoldStart
-                                    holdAnimator.SetTrigger(holdStartHash);
-
-                                }
-                            }
+                            PlayHoldAnimation(instanceName, currentTime);
                         }
                         else if (instanceName.StartsWith("StarHead"))
                         {
@@ -225,7 +162,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                 //更新所有Arrow的透明度
                 CheckArrowVisibility(chart, currentTime);
                 //Debug.Log("2. " + audioTime);
-                //}
             }
             else
             {
@@ -234,6 +170,77 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
     }
+
+    private void PlayHoldAnimation(string instanceName, float currentTime)
+    {
+        //hold游戏物体实例
+        GameObject holdObject = GameObject.Find(instanceName);
+        // 从instanceName中提取数字部分，用于查找对应的Hold
+        int holdIndex = GetHoldIndexFromInstanceName(instanceName);
+        if (holdIndex >= 0 && holdIndex < chart.holds.Count)
+        {
+            Hold hold = chart.holds[holdIndex];
+            KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
+            float holdEndTime = holdEndTimes[instanceName];
+            bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
+            bool isEnd = currentTime >= holdEndTime;
+            //Debug.Log($"InstanceName: {instanceName}, currentTime: {currentTime}, isStart: {isStart}, isEnd: {isEnd}");
+
+            // 获取Subhold的X轴左侧和右侧坐标
+            float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
+            float subholdRightX = hold.GetCurrentSubHoldRightX(currentTime);
+            // 计算X轴坐标均值
+            float x = (subholdLeftX + subholdRightX) / 2;
+
+            JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
+            float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
+            //Debug.Log(yAxisPosition);
+            Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+            float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+            //Debug.Log(worldUnitToScreenPixelX);
+            float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
+            float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
+            //Debug.Log(noteSizeWorldLengthPerUnit);
+
+            float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
+            //Debug.Log(x_width);
+
+            // 获取所在JudgePlane当时刻坐标
+            float y = 0f;
+            JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlaneBasedOnTime(currentTime, chart, hold);
+            if (correspondingJudgePlane != null)
+            {
+                y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+            }
+            //HoldHitEffect的位置（注意挂载在Hold物体下，需要根据父物体坐标折算子物体相对坐标）
+            Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
+
+            // 仅在开始判定且还没播放过开始音效时播放
+            if (isStart && !holdKeyInfo.isSoundPlayedAtStart)
+            {
+                HoldSoundEffect.Play();
+                holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
+                                                         // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
+                currentHoldInstanceNames.Add(instanceName);
+                //Debug.Log(holdHitEffectPosition);
+                GameObject holdHitEffect = new GameObject($"HoldHitEffect{holdIndex + 1}");
+                holdHitEffect.transform.parent = HoldsParent.transform;
+                holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+                holdHitEffect.transform.position = holdHitEffectPosition;
+                holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
+                holdHitEffect.AddComponent<SpriteRenderer>();
+
+                //动画组件加载和状态设置
+                Animator holdAnimator = holdHitEffect.AddComponent<Animator>();
+                holdAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
+                int holdStartHash = Animator.StringToHash($"HoldStart");
+                //设置状态为HoldStart
+                holdAnimator.SetTrigger(holdStartHash);
+
+            }
+        }
+    }
+
     private void CheckArrowVisibility(Chart chart, float currentTime)
     {
         if (chart.stars != null)
@@ -247,10 +254,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                     var subStar = star.subStarList[j];
                     int subStarIndex = j;
 
-                    //if (!subStarArrows.ContainsKey(subStarIndex))
-                    //{
-                    //    subStarArrows[subStarIndex] = new List<GameObject>();
-                    //}
                     string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
                     //Debug.Log(instanceName);
                     GameObject SubStarArrowParent = GameObject.Find(instanceName);
@@ -525,14 +528,11 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     private void UpdatePositions(Chart chart, float currentTime)
     {
-        //Debug.Log($"当前帧率: {1.0f / Time.deltaTime}");
-        // 计算每帧对应的Z轴坐标减少量，假设帧率是固定的（比如60帧每秒），然后根据每秒钟变化单位计算每帧变化量
-        //Debug.Log("2. " + audioSource.time);
+        // 计算每帧对应的 Z 轴坐标减少量，假设帧率是固定的（比如 60 帧每秒），然后根据每秒钟变化单位计算每帧变化量
         float audioTimeDelta = currentTime - audioPrevTime;
         float zAxisDecreasePerFrame = SpeedParams.NoteSpeedDefault * audioTimeDelta;
-        audioTime += audioTimeDelta;
-        //Debug.Log(zAxisDecreasePerFrame);
-        // 如果已经创建了JudgePlanesParent并且音频正在播放，更新其子物体的Z轴坐标
+
+        // 如果已经创建了 JudgePlanesParent 并且音频正在播放，更新其子物体的 Z 轴坐标
         if (JudgePlanesParent != null)
         {
             for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
@@ -544,62 +544,66 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
 
-        // 如果已经创建了JudgeLinesParent并且音频正在播放，更新其子物体的Y轴坐标
+        // 如果已经创建了 JudgeLinesParent 并且音频正在播放，更新其子物体的 Y 轴坐标
         if (JudgeLinesParent != null)
         {
             for (int i = 0; i < JudgeLinesParent.transform.childCount; i++)
             {
-                Transform judgeLineTransform = JudgeLinesParent.transform.GetChild(i);
-                if (judgeLineTransform != null)
+                RectTransform judgeLineRectTransform = JudgeLinesParent.transform.GetChild(i) as RectTransform;
+                if (judgeLineRectTransform != null)
                 {
-                    // 通过名字获取对应的JudgePlane
-                    JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlane(chart, judgeLineTransform.name);
+                    // 通过名字获取对应的 JudgePlane
+                    JudgePlane correspondingJudgePlane = GetCorrespondingJudgePlane(chart, judgeLineRectTransform.name);
                     if (correspondingJudgePlane != null)
                     {
-
                         // 获取该 JudgeLine 的开始时间
                         float startT = JudgePlanesStartT[i];
 
-                        //只有当当前时间大于开始时间时，才更新JudgeLine的位置
+                        // 只有当当前时间大于开始时间时，才更新 JudgeLine 的位置
                         if (currentTime > startT)
                         {
-                            // 调用JudgePlane的GetPlaneYAxis方法获取当前时间的Y轴坐标，并更新JudgeLine的Y轴坐标
-                            float newYAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
-                            Vector3 position = judgeLineTransform.position;
-                            position.y = newYAxis;
-                            judgeLineTransform.position = position;
-                            // 根据newYAxis的值，实时改变correspondingJudgePlane下所有SubJudgePlane实例的透明度
-                            ChangeSubJudgePlaneTransparency(correspondingJudgePlane, newYAxis);
+                            // 获取当前时间的 Y 轴坐标，转化为屏幕坐标，更新 JudgeLine 的 Y 轴坐标
+                            float YAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                            float YAxisUniform = YAxis / HeightParams.HeightDefault;
+                            ////Debug.Log(YAxis);
+                            Vector2 Position = Utility.ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
+                            judgeLineRectTransform.anchoredPosition = Position;
+                            // 根据 YAxis 的值，实时改变 correspondingJudgePlane 下所有 SubJudgePlane 实例的透明度
+                            ChangeSubJudgePlaneTransparency(correspondingJudgePlane, YAxis);
                         }
 
                         // 判断当前时间与开始时间的关系
                         if (currentTime < startT - ChartParams.JudgeLineAppearTime)
                         {
                             // 当当前时间小于开始时间 - 出现时间时，不进行操作
-                            judgeLineTransform.gameObject.SetActive(false);
+                            judgeLineRectTransform.gameObject.SetActive(false);
                         }
                         else if (currentTime >= startT - ChartParams.JudgeLineAppearTime && currentTime <= startT)
                         {
                             // 当当前时间介于开始时间 - 出现时间与开始时间之间时，设置 JudgeLine 为 active，且透明度线性地由 0 变为 1
-                            judgeLineTransform.gameObject.SetActive(true);
+                            judgeLineRectTransform.gameObject.SetActive(true);
                             float t = (currentTime - (startT - ChartParams.JudgeLineAppearTime)) / ChartParams.JudgeLineAppearTime;
-                            SetJudgeLineAlpha(judgeLineTransform.gameObject, t);
+                            SetJudgeLineAlpha(judgeLineRectTransform.gameObject, t);
                         }
                         else if (currentTime >= startT)
                         {
                             // 当当前时间大于开始时间时，设置 JudgeLine 为 active，且透明度为 1
-                            judgeLineTransform.gameObject.SetActive(true);
-                            SetJudgeLineAlpha(judgeLineTransform.gameObject, 1f);
+                            judgeLineRectTransform.gameObject.SetActive(true);
+                            SetJudgeLineAlpha(judgeLineRectTransform.gameObject, 1f);
                         }
                     }
                 }
             }
         }
 
+
         // 其他键型的位置
         UpdateKeysPosition(zAxisDecreasePerFrame);
+
+
         audioPrevTime = currentTime;
     }
+
     private void SetJudgeLineAlpha(GameObject judgeLine, float alpha)
     {
         SpriteRenderer spriteRenderer = judgeLine.GetComponent<SpriteRenderer>();
@@ -738,6 +742,16 @@ public class MusicAndChartPlayer : MonoBehaviour
                     Destroy(childTransform.gameObject);
                 }
             }
+            //如果是Hold类型的键，则删除对应的Hold物体
+            if (instanceName.StartsWith("HoldHitEffect"))
+            {
+                string numberPart = instanceName.Substring(13);
+                if (int.TryParse(numberPart, out int holdIndex))
+                {
+                    GameObject gameobject = GameObject.Find($"Hold{holdIndex}");
+                    Destroy(gameobject);
+                }
+            }
 
             // 根据不同的动画名称加载对应的动画控制器（这里假设路径和名称是固定的，需按实际调整）
             RuntimeAnimatorController controller = null;
@@ -770,31 +784,10 @@ public class MusicAndChartPlayer : MonoBehaviour
 
             // 正常播放动画
             animator.Play("TapHitEffect");
-            // 检查动画是否播放完毕（这里使用一个简单的方法来模拟，实际可能需要更精确的判断）
+            // 检查动画是否播放完毕
             StartCoroutine(CheckAnimationEnd(animator, keyGameObject));
         }
     }
-
-    // 协程方法用于控制动画帧在第1帧和第6帧之间循环
-    //private IEnumerator LoopAnimationFrames(Animator animator, int startFrame, int endFrame)
-    //{
-    //    // 获取动画的帧率（假设动画剪辑已经设置好帧率）
-    //    float frameRate = animator.GetCurrentAnimatorClipInfo(0)[0].clip.frameRate;
-    //    // 计算第1帧和第6帧对应的时间
-    //    float startFrameTime = (float)startFrame / frameRate;
-    //    float endFrameTime = (float)endFrame / frameRate;
-
-    //    while (true)
-    //    {
-    //        // 设置动画时间到第1帧时间
-    //        animator.Play(animator.GetCurrentAnimatorClipInfo(0)[0].clip.name, 0, startFrameTime);
-    //        // 等待直到动画时间到达第6帧时间
-    //        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < endFrameTime)
-    //        {
-    //            yield return null;
-    //        }
-    //    }
-    //}
 
     // 协程方法用于检查动画是否播放完毕，播放完毕后销毁对应的游戏物体（这里统一处理，根据实际情况可调整）
     private IEnumerator CheckAnimationEnd(Animator animator, GameObject keyGameObject)
@@ -845,11 +838,13 @@ public class MusicAndChartPlayer : MonoBehaviour
     //方法用于根据给定的Y轴坐标值改变对应JudgePlane下所有SubJudgePlane实例的透明度
     private void ChangeSubJudgePlaneTransparency(JudgePlane judgePlane, float yAxisValue)
     {
-        // 计算透明度差值，根据给定的对应关系计算斜率
-        float alphaDelta = (0.5f - 0.8f) / 6f;
-        // 根据线性关系计算当前透明度值，确保透明度范围在0到1之间
-        float currentAlpha = Mathf.Clamp(0.8f + alphaDelta * yAxisValue, 0, 1);
 
+        // 计算透明度差值，根据给定的对应关系计算斜率
+        float alphaDelta = (AlphaParams.JudgePlaneAlphaMin - AlphaParams.JudgePlaneAlphaMax) / HeightParams.HeightDefault;
+        //Debug.Log(alphaDelta);
+        // 根据线性关系计算当前透明度值，确保透明度范围在0到1之间
+        float currentAlpha = Mathf.Clamp(AlphaParams.JudgePlaneAlphaMax + alphaDelta * yAxisValue, 0, 1);
+        //Debug.Log(currentAlpha);
         // 获取JudgePlane对应的游戏物体（假设其命名规则是"JudgePlane + id"，可根据实际调整获取方式）
         GameObject judgePlaneObject = GetJudgePlaneGameObject(judgePlane);
         if (judgePlaneObject != null)
@@ -936,5 +931,26 @@ public class MusicAndChartPlayer : MonoBehaviour
 //    {
 //        Destroy(holdHitEffect);
 //        holdHitEffectDictionary.Remove(instanceName);
+//    }
+//}
+
+// 协程方法用于控制动画帧在第1帧和第6帧之间循环
+//private IEnumerator LoopAnimationFrames(Animator animator, int startFrame, int endFrame)
+//{
+//    // 获取动画的帧率（假设动画剪辑已经设置好帧率）
+//    float frameRate = animator.GetCurrentAnimatorClipInfo(0)[0].clip.frameRate;
+//    // 计算第1帧和第6帧对应的时间
+//    float startFrameTime = (float)startFrame / frameRate;
+//    float endFrameTime = (float)endFrame / frameRate;
+
+//    while (true)
+//    {
+//        // 设置动画时间到第1帧时间
+//        animator.Play(animator.GetCurrentAnimatorClipInfo(0)[0].clip.name, 0, startFrameTime);
+//        // 等待直到动画时间到达第6帧时间
+//        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < endFrameTime)
+//        {
+//            yield return null;
+//        }
 //    }
 //}

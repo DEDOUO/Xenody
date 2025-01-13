@@ -50,7 +50,7 @@ public class Utility
         float TimePeriod = endTime - startTime;
         float ValPeriod = endVal - startVal;
         float currentTimeStandard = (currentTime - startTime) / TimePeriod;
-        
+
         switch (functionType)
         {
             case TransFunctionType.Linear:
@@ -119,7 +119,7 @@ public class Utility
                     offset.y = subStar.endY;
                 }
                 k = Mathf.Tan(theta);
-                t = Mathf.Atan(k*a/b);
+                t = Mathf.Atan(k * a / b);
                 result.x = offset.x + a * Mathf.Cos(t);
                 result.y = offset.y + b * Mathf.Sin(t);
                 break;
@@ -129,7 +129,7 @@ public class Utility
                 b = Mathf.Abs(subStar.endY - subStar.startY);
                 if (subStar.startX < subStar.endX && subStar.startY < subStar.endY)
                 {
-                    theta = 1.5f*Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    theta = 1.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
                     offset.x = subStar.startX;
                     offset.y = subStar.endY;
                 }
@@ -141,13 +141,13 @@ public class Utility
                 }
                 if (subStar.startX > subStar.endX && subStar.startY < subStar.endY)
                 {
-                    theta = 1.5f * Mathf.PI  - currentRate * 0.5f * Mathf.PI;
+                    theta = 1.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
                     offset.x = subStar.startX;
                     offset.y = subStar.endY;
                 }
                 if (subStar.startX > subStar.endX && subStar.startY > subStar.endY)
                 {
-                    theta = - currentRate * 0.5f * Mathf.PI;
+                    theta = -currentRate * 0.5f * Mathf.PI;
                     offset.x = subStar.endX;
                     offset.y = subStar.startY;
                 }
@@ -282,7 +282,22 @@ public class Utility
         {
             case TrackFunctionType.Linear:
                 // 线性函数计算当前位置
-                theta = Mathf.Atan((y2 - y1) / (x2 - x1));
+                if (x1 < x2 && y1 < y2)
+                {
+                    theta = Mathf.Atan((y2 - y1) / (x2 - x1));
+                }
+                if (x1 < x2 && y1 > y2)
+                {
+                    theta = Mathf.Atan((y2 - y1) / (x2 - x1));
+                }
+                if (x1 > x2 && y1 < y2)
+                {
+                    theta = Mathf.Atan((y2 - y1) / (x2 - x1)) + Mathf.PI;
+                }
+                if (x1 > x2 && y1 > y2)
+                {
+                    theta = Mathf.Atan((y2 - y1) / (x2 - x1)) + Mathf.PI;
+                }
                 result = (theta - 0.5f * Mathf.PI) * Mathf.Rad2Deg;
                 break;
             case TrackFunctionType.UpperCir:
@@ -343,7 +358,7 @@ public class Utility
                 // 对于圆弧，这里使用简单的椭圆周长近似公式：π * (3 * (a + b) - Mathf.Sqrt((3 * a + b) * (a + 3 * b)))
                 float a = Mathf.Abs(subStar.endX - subStar.startX);
                 float b = Mathf.Abs(subStar.endY - subStar.startY);
-                length = Mathf.PI * (3 * (a + b) - Mathf.Sqrt((3 * a + b) * (a + 3 * b)))/4;
+                length = Mathf.PI * (3 * (a + b) - Mathf.Sqrt((3 * a + b) * (a + 3 * b))) / 4;
                 break;
             default:
                 // 对于其他未定义的情况，可以添加相应的处理或抛出异常
@@ -394,6 +409,33 @@ public class Utility
         float halfNoteSize = noteSize / 2;
         return startX - halfNoteSize >= ChartParams.XaxisMin - 0.01f && startX + halfNoteSize <= ChartParams.XaxisMax + 0.01f;
     }
+
+    public static Vector2 ScalePositionToScreen(Vector2 position, RectTransform canvas)
+    {
+        //注意这里获取的是画布的长宽，而不是屏幕的长宽
+        float screenWidth = canvas.sizeDelta.x;
+        float screenHeight = canvas.sizeDelta.y;
+        //Debug.Log(screenHeight);
+
+        float screenXMin = screenWidth * HorizontalParams.HorizontalMargin;
+        float screenXMax = screenWidth * (1 - HorizontalParams.HorizontalMargin);
+        float screenXRange = screenXMax - screenXMin;
+
+        Vector3 worldYBottom = new Vector3(0, 0, 0);
+        Vector3 worldYCeiling = new Vector3(0, HeightParams.HeightDefault, 0);
+        //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
+        float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
+        float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
+        //Debug.Log(ScreenYCeiling);
+        //Debug.Log(ScreenYBottom);
+
+        float scaledX = position.x / ChartParams.XaxisMax * screenXRange / 2;
+        float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
+
+        
+        return new Vector2(scaledX, scaledY);
+    }
+
 
 }
 
