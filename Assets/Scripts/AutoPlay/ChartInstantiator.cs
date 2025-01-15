@@ -8,6 +8,7 @@ using System;
 using Unity.VisualScripting;
 using Note;
 using static JudgePlane;
+using UnityEngine.Rendering;
 
 
 
@@ -72,12 +73,14 @@ public class ChartInstantiator : MonoBehaviour
         {
             foreach (var judgePlane in chart.judgePlanes)
             {
+                int RenderQueue = 3000;
                 int judgePlaneIndex = judgePlane.id;
                 // 创建一个空物体作为JudgePlane实例的父物体，用于统一管理和规范命名
                 GameObject judgePlaneParent = new GameObject($"JudgePlane{judgePlaneIndex}");
                 judgePlaneParent.transform.position = new Vector3(0, 0, 0);
                 // 将judgePlaneParent设置为ChartGameObjects的子物体
                 judgePlaneParent.transform.SetParent(JudgePlanesParent.transform);
+
                 int subJudgePlaneIndex = 1;
                 GameObject firstSubJudgePlaneInstance = null;
 
@@ -88,7 +91,7 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         case TransFunctionType.Linear:
                             firstSubJudgePlaneInstance = CreateJudgePlaneQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
-                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent);
+                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent, RenderQueue);
                             break;
                         case TransFunctionType.Sin:
                         case TransFunctionType.Cos:
@@ -104,7 +107,7 @@ public class ChartInstantiator : MonoBehaviour
                                 float endT = subJudgePlane.startT + (i + 1) * timeStep;
                                 float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
                                 float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
-                                GameObject instance = CreateJudgePlaneQuad(startY, endY, startT, endT, JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", judgePlaneParent);
+                                GameObject instance = CreateJudgePlaneQuad(startY, endY, startT, endT, JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", judgePlaneParent, RenderQueue);
                                 if (i == 0)
                                 {
                                     firstSubJudgePlaneInstance = instance;
@@ -216,7 +219,7 @@ public class ChartInstantiator : MonoBehaviour
         return combined;
     }
 
-    private GameObject CreateJudgePlaneQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject)
+    private GameObject CreateJudgePlaneQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
     {
         // 将StartY和EndY映射为世界坐标并放大到合适范围（0 - HeightParams.HeightDefault，这里假设HeightParams.HeightDefault为6）
         float startYWorld = startY * HeightParams.HeightDefault;
@@ -242,7 +245,7 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
         Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
 
-        GameObject instance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject);
+        GameObject instance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue);
         return instance;
     }
 
@@ -496,7 +499,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.holds != null)
         {
             int holdIndex = 1;
-
+            int RenderQueue = 2000;
             foreach (var hold in chart.holds)
             {
                 // 创建一个空物体作为 hold 实例的父物体，用于统一管理和规范命名
@@ -531,7 +534,7 @@ public class ChartInstantiator : MonoBehaviour
 
                             // 一次性生成整个 SubHold
                             GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
-                                startY, endY, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent);
+                                startY, endY, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent, RenderQueue);
                         }
                         else
                         {
@@ -563,7 +566,7 @@ public class ChartInstantiator : MonoBehaviour
                                 float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
 
                                 GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                    startY_Inner, endY_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent);
+                                    startY_Inner, endY_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue);
                                 segmentInstances.Add(instance);
                             }
 
@@ -765,7 +768,7 @@ public class ChartInstantiator : MonoBehaviour
     }
 
     private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
-        float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject)
+        float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
     {
         //Hold的Y轴坐标需要上移一点，以显示在JudgePlane上方
         //startY += 0.05f;
@@ -777,7 +780,7 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 point4 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
 
         // 假设CreateQuadFromPoints.CreateQuad方法直接返回游戏物体实例
-        return CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject);
+        return CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue);
     }
 
     // 封装计算Z轴坐标的方法（参考InstantiateJudgePlanesAndJudgeLines方法里的逻辑，根据实际情况传入对应的开始时间等参数）

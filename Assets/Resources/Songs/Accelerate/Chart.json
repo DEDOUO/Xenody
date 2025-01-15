@@ -8,14 +8,14 @@
                     "startY": 0.0,
                     "endT": 0.427,
                     "endY": 0.0,
-                    "Func": "Cos"
+                    "Func": "Linear"
                 },
                 {
                     "startT": 0.427,
                     "startY": 0.0,
                     "endT": 1.246,
                     "endY": 1.0,
-                    "Func": "Linear"
+                    "Func": "Sin"
                 },
                 {
                     "startT": 1.246,
@@ -452,7 +452,7 @@
         },
         {
             "startT": 16.135999999999985,
-            "startX": 1.5,
+            "startX": 1.7,
             "Size": 0.6,
             "Pid": 2
         },
@@ -464,7 +464,7 @@
         },
         {
             "startT": 16.335999999999988,
-            "startX": 1.7,
+            "startX": 1.1,
             "Size": 0.6,
             "Pid": 2
         },
@@ -524,13 +524,13 @@
         },
         {
             "startT": 19.23600000000003,
-            "startX": 0.0,
+            "startX": -0.7,
             "Size": 0.6,
             "Pid": 1
         },
         {
             "startT": 19.33600000000003,
-            "startX": 1.2,
+            "startX": 0.5,
             "Size": 0.6,
             "Pid": 1
         },
@@ -573,25 +573,25 @@
         {
             "startT": 21.898,
             "startX": -0.5,
-            "Size": 0.7,
+            "Size": 0.6,
             "Pid": 1
         },
         {
             "startT": 21.969,
             "startX": 0.0,
-            "Size": 0.7,
+            "Size": 0.6,
             "Pid": 1
         },
         {
             "startT": 22.036,
-            "startX": -0.2,
-            "Size": 0.7,
+            "startX": -0.6,
+            "Size": 0.6,
             "Pid": 1
         },
         {
             "startT": 22.136000000000003,
             "startX": 0.8,
-            "Size": 0.7,
+            "Size": 0.6,
             "Pid": 1
         },
         {
@@ -603,145 +603,451 @@
         {
             "startT": 22.53600000000001,
             "startX": -1.0,
-            "Size": 0.8,
+            "Size": 0.7,
             "Pid": 1
         },
         {
             "startT": 22.63600000000001,
             "startX": 0.6,
-            "Size": 0.8,
+            "Size": 0.7,
             "Pid": 1
         },
         {
             "startT": 23.036,
             "startX": -0.8,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.036,
             "startX": 0.8,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.33600000000002,
             "startX": -1.4,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.33600000000002,
             "startX": 0.2,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.536000000000023,
             "startX": 1.1,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.636000000000024,
             "startX": -0.2,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.636000000000024,
             "startX": 1.4,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.836000000000027,
             "startX": -0.8,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 23.836000000000027,
             "startX": 0.8,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.03600000000003,
-            "startX": -1.1,
-            "Size": 1.2,
+            "startX": -1.0,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.03600000000003,
             "startX": 0.5,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.13600000000003,
-            "startX": -1.4,
-            "Size": 1.2,
+            "startX": -1.5,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.13600000000003,
-            "startX": 0.2,
-            "Size": 1.2,
+            "startX": 0.0,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.336000000000034,
             "startX": -0.8,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.336000000000034,
             "startX": 0.8,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.63600000000004,
             "startX": 1.4,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.73600000000004,
             "startX": 0.0,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 24.936000000000043,
             "startX": -1.2,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 25.036000000000044,
             "startX": 0.7,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 25.136000000000045,
-            "startX": 0.5,
-            "Size": 1.2,
+            "startX": 0.3,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 25.33600000000005,
             "startX": 0.0,
-            "Size": 1.2,
+            "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 25.43600000000005,
+            "startX": -0.4,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 26.236,
+            "startX": -0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 26.236,
+            "startX": 0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 26.536,
             "startX": -0.2,
-            "Size": 1.2,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 26.536,
+            "startX": 1.4,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 26.736,
+            "startX": -1.1,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 26.836,
+            "startX": -1.4,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 26.836,
+            "startX": 0.2,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 27.036,
+            "startX": -0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 27.036,
+            "startX": 0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 27.236,
+            "startX": 1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 27.336,
+            "startX": 0.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 27.436,
+            "startX": 1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 27.636,
+            "startX": -1.2,
+            "Size": 1.6,
+            "Pid": 1
+        },
+        {
+            "startT": 27.636,
+            "startX": 0.5,
+            "Size": 1.6,
+            "Pid": 1
+        },
+        {
+            "startT": 27.736000000000082,
+            "startX": -0.9,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 27.836000000000084,
+            "startX": 0.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 27.936000000000085,
+            "startX": -1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 28.036000000000087,
+            "startX": 0.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 28.136000000000088,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 28.23600000000009,
+            "startX": -0.2,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 28.33600000000009,
+            "startX": -0.8,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 28.436000000000092,
+            "startX": 0.4,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 28.536000000000094,
+            "startX": -0.4,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 28.636000000000095,
+            "startX": 1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 28.736000000000097,
+            "startX": -1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 28.836000000000098,
+            "startX": -0.9,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 28.9360000000001,
+            "startX": 0.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 29.0360000000001,
+            "startX": 0.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 29.136000000000102,
+            "startX": -1.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 29.436,
+            "startX": 0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 29.436,
+            "startX": -0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 29.73600000000002,
+            "startX": 1.4,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 29.73600000000002,
+            "startX": -0.2,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 29.93600000000002,
+            "startX": -1.1,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.036000000000023,
+            "startX": 0.2,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.036000000000023,
+            "startX": -1.4,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.236000000000026,
+            "startX": 0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.236000000000026,
+            "startX": -0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.43600000000003,
+            "startX": 1.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.43600000000003,
+            "startX": -0.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.53600000000003,
+            "startX": 1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.53600000000003,
+            "startX": 0.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.736000000000033,
+            "startX": 0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 30.736000000000033,
+            "startX": -0.8,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 31.036000000000037,
+            "startX": -1.4,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 31.13600000000004,
+            "startX": 0.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 31.33600000000004,
+            "startX": 1.2,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 31.436000000000043,
+            "startX": -0.7,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 31.536,
+            "startX": -0.3,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 31.736,
+            "startX": 0.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 31.836,
+            "startX": 0.4,
+            "Size": 1.0,
             "Pid": 1
         }
     ],
@@ -1079,10 +1385,90 @@
                 {
                     "startT": 25.036000000000044,
                     "startXMin": -2.0,
-                    "startXMax": -0.6,
+                    "startXMax": -1.0,
                     "endT": 25.43600000000005,
                     "endXMin": -2.0,
-                    "endXMax": -0.6,
+                    "endXMax": -1.0,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 18,
+            "sub": [
+                {
+                    "startT": 25.636,
+                    "startXMin": -2.0,
+                    "startXMax": -0.5,
+                    "endT": 25.936,
+                    "endXMin": 0.5,
+                    "endXMax": 2.0,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 19,
+            "sub": [
+                {
+                    "startT": 25.636,
+                    "startXMin": 0.0,
+                    "startXMax": 1.5,
+                    "endT": 25.936,
+                    "endXMin": 0.5,
+                    "endXMax": 2.0,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 20,
+            "sub": [
+                {
+                    "startT": 31.436,
+                    "startXMin": 1.0,
+                    "startXMax": 2.0,
+                    "endT": 31.836,
+                    "endXMin": 1.0,
+                    "endXMax": 2.0,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 21,
+            "sub": [
+                {
+                    "startT": 32.036,
+                    "startXMin": 0.5,
+                    "startXMax": 2.0,
+                    "endT": 32.336,
+                    "endXMin": -2.0,
+                    "endXMax": -0.5,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 22,
+            "sub": [
+                {
+                    "startT": 32.036,
+                    "startXMin": -1.5,
+                    "startXMax": 0.0,
+                    "endT": 32.336,
+                    "endXMin": -2.0,
+                    "endXMax": -0.5,
                     "LFunc": "Linear",
                     "RFunc": "Linear"
                 }
@@ -1269,6 +1655,48 @@
         },
         {
             "startT": 22.836,
+            "startX": 1,
+            "Size": 1.6,
+            "Dir": 0.25,
+            "Pid": 1
+        },
+        {
+            "startT": 26.036,
+            "startX": -1,
+            "Size": 1.6,
+            "Dir": 0.75,
+            "Pid": 1
+        },
+        {
+            "startT": 26.036,
+            "startX": 1,
+            "Size": 1.6,
+            "Dir": 0.25,
+            "Pid": 1
+        },
+        {
+            "startT": 29.236,
+            "startX": -1,
+            "Size": 1.6,
+            "Dir": 0.75,
+            "Pid": 1
+        },
+        {
+            "startT": 29.236,
+            "startX": 1,
+            "Size": 1.6,
+            "Dir": 0.25,
+            "Pid": 1
+        },
+        {
+            "startT": 32.436,
+            "startX": -1,
+            "Size": 1.6,
+            "Dir": 0.75,
+            "Pid": 1
+        },
+        {
+            "startT": 32.436,
             "startX": 1,
             "Size": 1.6,
             "Dir": 0.25,

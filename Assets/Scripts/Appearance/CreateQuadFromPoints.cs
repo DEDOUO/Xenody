@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class CreateQuadFromPoints : MonoBehaviour
 {
     // 通过函数来创建四边形游戏物体，传入四个点坐标、要赋予的精灵、游戏物体名称和父物体
-    public static GameObject CreateQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4,  Sprite sprite, string objectName, GameObject parentObject)
+    public static GameObject CreateQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4,  Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
     {
         // 创建四边形游戏物体
         GameObject quadObject = new GameObject(objectName);
@@ -55,6 +55,23 @@ public class CreateQuadFromPoints : MonoBehaviour
             return null;
         }
         Material material = new Material(shader);
+        //自定义渲染队列
+        material.renderQueue = RenderQueue;
+
+        // 获取 Shader 的 Pass 信息
+        //var shad = material.shader;
+        //var subshader = shad.GetSubshader(0);
+        //var passCount = subshader.passCount;
+        //// 遍历 Pass，修改 ShaderTagId 的 Queue 信息
+        //for (int i = 0; i < passCount; i++)
+        //{
+        //    var pass = subshader.GetPass(i);
+        //    var tagValue = pass.probeTagValue("Queue");
+        //    if (tagValue == "Transparent")
+        //    {
+        //        pass.SetShaderTagId("Queue", RenderQueue.ToString());
+        //    }
+        //}
 
         //Material material = new Material(Shader.Find("Sprites/Default"));
 

@@ -4,16 +4,15 @@ Shader "MaskMaterial"
     {
         _MainTex ("Base (RGB)", 2D) = "white" {}
         _Color ("Color", Color) = (1, 1, 1, 1)
-        _Opacity ("Opacity", Range(0, 1)) = 1 // 添加这一行，用于控制透明度，默认值为1（完全不透明）
+        _Opacity ("Opacity", Range(0, 1)) = 1
+        _RenderQueue ("Render Queue", Int) = 3000 // 添加渲染队列作为可调节的参数，默认值为 3000（Transparent 队列）
     }
     SubShader
     {
-        Tags { "RenderType" = "Transparent"  "Queue" = "Transparent" }
-        // Tags { "RenderType" = "Opaque"  "Queue" = "Geometry" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent" } // 恢复默认的 Queue 标签
 
         Pass
         {
-            // ZWrite On
             ZWrite Off
             ZTest Less
             Blend SrcAlpha OneMinusSrcAlpha
@@ -21,10 +20,8 @@ Shader "MaskMaterial"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // 声明新添加的_Opacity变量，使其在后续代码中可被识别和使用
-            uniform float _Opacity; 
-
-            // 包含必要的头文件
+            uniform float _Opacity;
+            uniform int _RenderQueue; // 声明_RenderQueue 变量，使其在后续代码中可被识别和使用
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
@@ -59,12 +56,11 @@ Shader "MaskMaterial"
                 half4 finalColor;
                 if (z > 0)
                 {
-                    finalColor = fixed4(c.rgb, 0); // Z轴坐标大于0的部分，透明度保持为0
+                    finalColor = fixed4(c.rgb, 0);
                 }
                 else
                 {
-                    // 根据新的透明度属性来设置透明度，这里将纹理颜色的alpha值乘以_Opacity属性值
-                    finalColor = half4(c.rgb, c.a * _Opacity); 
+                    finalColor = half4(c.rgb, c.a * _Opacity);
                 }
                 return finalColor;
             }

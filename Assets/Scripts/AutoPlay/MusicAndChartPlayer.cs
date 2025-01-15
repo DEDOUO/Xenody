@@ -131,6 +131,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                         if (instanceName.StartsWith("Tap"))
                         {
                             TapSoundEffect.Play();
+                            //FlickSoundEffect.Play();
                             PlayAnimation(instanceName, "TapHitEffect");
                         }
                         else if (instanceName.StartsWith("Slide"))
@@ -140,6 +141,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                         }
                         else if (instanceName.StartsWith("Flick"))
                         {
+                            TapSoundEffect.Play();
                             FlickSoundEffect.Play();
                             PlayAnimation(instanceName, "FlickEffect");
                         }
