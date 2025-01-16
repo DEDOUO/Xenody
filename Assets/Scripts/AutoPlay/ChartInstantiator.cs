@@ -21,7 +21,7 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject FlicksParent;
     private GameObject HoldsParent;
     private GameObject StarsParent;
-    private RectTransform SubStarsParent;
+    private GameObject SubStarsParent;
 
     //public GameObject StarArrowPrefab;
     private Sprite JudgePlaneSprite;
@@ -38,7 +38,7 @@ public class ChartInstantiator : MonoBehaviour
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
     public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent,
-        RectTransform subStarsParent,
+        GameObject subStarsParent,
         Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer)
     {
         JudgePlanesParent = judgePlanesParent;
@@ -80,6 +80,9 @@ public class ChartInstantiator : MonoBehaviour
                 judgePlaneParent.transform.position = new Vector3(0, 0, 0);
                 // 将judgePlaneParent设置为ChartGameObjects的子物体
                 judgePlaneParent.transform.SetParent(JudgePlanesParent.transform);
+                // 继承父物体的图层
+                int parentLayer = JudgePlanesParent.layer;
+                judgePlaneParent.layer = parentLayer;
 
                 int subJudgePlaneIndex = 1;
                 GameObject firstSubJudgePlaneInstance = null;
@@ -120,6 +123,9 @@ public class ChartInstantiator : MonoBehaviour
                             combinedInstance.name = $"Sub{subJudgePlaneIndex}";
                             // 将合并后的Instance设置为对应的父物体的子物体
                             combinedInstance.transform.SetParent(judgePlaneParent.transform);
+                            // 继承父物体的图层
+                            int parentLayer2 = judgePlaneParent.layer;
+                            combinedInstance.layer = parentLayer2;
 
                             // 删除合并前的实例
                             foreach (GameObject segmentInstance in segmentInstances)
@@ -153,6 +159,10 @@ public class ChartInstantiator : MonoBehaviour
                     judgeLineInstance.name = $"JudgeLine{judgePlaneIndex}";
                     RectTransform judgeLineRectTransform = judgeLineInstance.GetComponent<RectTransform>();
                     judgeLineInstance.transform.SetParent(JudgeLinesParent.transform);
+                    // 继承父物体的图层
+                    int parentLayer = JudgeLinesParent.layer;
+                    judgeLineInstance.layer = parentLayer;
+
                     //获取初始Y轴坐标并转化为屏幕坐标
                     float YAxisUniform = judgePlane.GetPlaneYAxis(subJudgePlane.startT)/ HeightParams.HeightDefault;
                     Vector2 Position = Utility.ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
@@ -168,7 +178,7 @@ public class ChartInstantiator : MonoBehaviour
         }
     }
 
-            private GameObject CombineInstances(List<GameObject> instances)
+    private GameObject CombineInstances(List<GameObject> instances)
     {
         GameObject combined = new GameObject("CombinedInstance");
 
@@ -235,7 +245,6 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 StartPoint = new Vector3(0, startYWorld, 0);
         Vector3 EndPoint = new Vector3(0, endYWorld, 0);
 
-
         // 计算StartXWorld和EndXWorld，确保在屏幕左右各留10%的距离
         float startXWorld = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint);
         float endXWorld = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint);
@@ -278,6 +287,9 @@ public class ChartInstantiator : MonoBehaviour
                     tapInstance.name = $"Tap{tapIndex}"; // 命名
                     // 将Tap设置为ChartGameObjects的子物体
                     tapInstance.transform.SetParent(TapsParent.transform);
+                    // 继承父物体的图层
+                    int parentLayer = TapsParent.layer;
+                    tapInstance.layer = parentLayer;
 
                     // 获取关联的JudgePlane实例
                     JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, tap.associatedPlaneId);
@@ -354,6 +366,9 @@ public class ChartInstantiator : MonoBehaviour
 
                     // 将Slide设置为合适的父物体的子物体，这里假设和Taps类似，有个SlidesParent，你可根据实际调整
                     slideInstance.transform.SetParent(SlidesParent.transform);
+                    // 继承父物体的图层
+                    int parentLayer = SlidesParent.layer;
+                    slideInstance.layer = parentLayer;
 
                     // 获取关联的JudgePlane实例（假设Slide也有关联的JudgePlane，根据实际情况调整获取逻辑）
                     JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, slide.associatedPlaneId);
@@ -430,6 +445,9 @@ public class ChartInstantiator : MonoBehaviour
 
                     // 将Flick设置为合适的父物体的子物体，这里假设和Taps、Slides类似，有个FlicksParent，你可根据实际调整
                     flickInstance.transform.SetParent(FlicksParent.transform);
+                    // 继承父物体的图层
+                    int parentLayer = FlicksParent.layer;
+                    flickInstance.layer = parentLayer;
 
                     // 获取关联的JudgePlane实例（假设Flick也有关联的JudgePlane，根据实际情况调整获取逻辑）
                     JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, flick.associatedPlaneId);
@@ -464,6 +482,9 @@ public class ChartInstantiator : MonoBehaviour
 
                         // 设置Flick箭头实例的父物体为当前Flick实例，使其覆盖在Flick上
                         flickArrowInstance.transform.SetParent(flickInstance.transform);
+                        // 继承父物体的图层
+                        int parentLayer2 = flickInstance.layer;
+                        flickArrowInstance.layer = parentLayer2;
 
                         // 根据flickDirection设置箭头的旋转角度，将其方向与定义的方向一致（这里假设flickDirection表示角度相关的值，需根据实际含义调整转换逻辑）
                         //Debug.Log(flick.flickDirection);
@@ -507,6 +528,9 @@ public class ChartInstantiator : MonoBehaviour
                 holdParent.transform.position = new Vector3(0, 0, 0);
                 // 将 holdParent 设置为 ChartGameObjects 的子物体
                 holdParent.transform.SetParent(HoldsParent.transform);
+                // 继承父物体的图层
+                int parentLayer = HoldsParent.layer;
+                holdParent.layer = parentLayer;
 
                 JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(chart, hold.associatedPlaneId);
                 if (associatedJudgePlaneObject != null)
@@ -575,6 +599,9 @@ public class ChartInstantiator : MonoBehaviour
                             combinedInstance.name = $"SubHold{subHoldIndex}";
                             // 将合并后的 Instance 设置为对应的父物体的子物体
                             combinedInstance.transform.SetParent(holdParent.transform);
+                            // 继承父物体的图层
+                            int parentLayer2 = holdParent.layer;
+                            combinedInstance.layer = parentLayer2;
 
                             // 删除合并前的实例
                             foreach (GameObject segmentInstance in segmentInstances)
@@ -619,6 +646,9 @@ public class ChartInstantiator : MonoBehaviour
                     starheadInstance.name = $"StarHead{starIndex}"; // 命名
                     // 将starhead设置为ChartGameObjects的子物体
                     starheadInstance.transform.SetParent(StarsParent.transform);
+                    // 继承父物体的图层
+                    int parentLayer = StarsParent.layer;
+                    starheadInstance.layer = parentLayer;
 
                     // 获取开始的X轴和Y轴坐标
                     Vector2 firstStarCoodinate = star.GetFirstSubStarCoordinates();
@@ -700,22 +730,27 @@ public class ChartInstantiator : MonoBehaviour
         {
             float currentRate = 0.0f;
 
+            RectTransform SubStarsParentRect = SubStarsParent.GetComponent<RectTransform>();
             GameObject subStarArrowContainer = new GameObject($"Star{starIndex}SubStar{subStarIndex}Arrows", typeof(RectTransform));
             RectTransform subStarArrowContainerRectTransform = subStarArrowContainer.GetComponent<RectTransform>();
-            subStarArrowContainerRectTransform.SetParent(SubStarsParent);
+            subStarArrowContainerRectTransform.SetParent(SubStarsParentRect);
+            // 继承父物体的图层
+            int parentLayer = SubStarsParent.layer;
+            subStarArrowContainer.layer = parentLayer;
+
             // 将 subStarArrowContainer 的位置、旋转和缩放设置为默认值
             subStarArrowContainerRectTransform.anchoredPosition3D = Vector3.zero;
             subStarArrowContainerRectTransform.localRotation = Quaternion.identity;
             subStarArrowContainerRectTransform.localScale = Vector3.one;
-            subStarArrowContainerRectTransform.sizeDelta = SubStarsParent.sizeDelta;
+            subStarArrowContainerRectTransform.sizeDelta = SubStarsParentRect.sizeDelta;
 
             //先将subStar的起点和终点转换为画布上的坐标
             Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
             Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
             //Debug.Log(subStarStart);
             //Debug.Log(subStarEnd);
-            Vector2 subStarStartScreen = Utility.ScalePositionToScreen(subStarStart, SubStarsParent);
-            Vector2 subStarEndScreen = Utility.ScalePositionToScreen(subStarEnd, SubStarsParent);
+            Vector2 subStarStartScreen = Utility.ScalePositionToScreen(subStarStart, SubStarsParentRect);
+            Vector2 subStarEndScreen = Utility.ScalePositionToScreen(subStarEnd, SubStarsParentRect);
             //Debug.Log(subStarStartScreen);
             //Debug.Log(subStarEndScreen);
 
@@ -730,6 +765,10 @@ public class ChartInstantiator : MonoBehaviour
                 arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{0 + 1}";
                 RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
                 arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
+                // 继承父物体的图层
+                int parentLayer2 = subStarArrowContainer.layer;
+                arrow.layer = parentLayer2;
+
                 arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
                 arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
                 arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
@@ -749,6 +788,10 @@ public class ChartInstantiator : MonoBehaviour
                 arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{i + 1}";
                 RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
                 arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
+                // 继承父物体的图层
+                int parentLayer2 = subStarArrowContainer.layer;
+                arrow.layer = parentLayer2;
+
                 arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
                 arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
                 arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;

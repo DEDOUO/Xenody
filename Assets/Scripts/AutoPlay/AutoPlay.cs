@@ -19,8 +19,8 @@ public class AutoPlay : MonoBehaviour
     public GameObject FlicksParent;
     public GameObject HoldsParent;
     public GameObject StarsParent;
-    public GameObject subStarsParentObj;
-    public RectTransform SubStarsParent;
+    public GameObject subStarsParent;
+    //public RectTransform SubStarsParentRect;
 
     public Sprite JudgePlaneSprite;
     public Sprite HoldSprite;
@@ -40,8 +40,8 @@ public class AutoPlay : MonoBehaviour
         FlicksParent = GameObject.Find("FlicksParent");
         HoldsParent = GameObject.Find("HoldsParent");
         StarsParent = GameObject.Find("StarsParent");
-        subStarsParentObj = GameObject.Find("SubStarsParent");
-        SubStarsParent = subStarsParentObj.GetComponent<RectTransform>();
+        subStarsParent = GameObject.Find("SubStarsParent");
+        //SubStarsParentRect = subStarsParent.GetComponent<RectTransform>();
 
         // 加载Sprite
         JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack");
@@ -109,7 +109,7 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent, SubStarsParent,
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent, subStarsParent,
             JudgePlaneSprite, HoldSprite, 
             renderOrderManager, AnimatorContainer);
 

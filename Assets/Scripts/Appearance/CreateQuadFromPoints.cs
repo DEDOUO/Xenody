@@ -11,6 +11,9 @@ public class CreateQuadFromPoints : MonoBehaviour
         if (parentObject != null)
         {
             quadObject.transform.SetParent(parentObject.transform);
+            // 继承父物体的图层
+            int parentLayer = parentObject.layer;
+            quadObject.layer = parentLayer;
         }
 
         // 添加MeshFilter组件，用于定义网格形状（四边形的顶点、三角形索引等信息）
@@ -58,29 +61,12 @@ public class CreateQuadFromPoints : MonoBehaviour
         //自定义渲染队列
         material.renderQueue = RenderQueue;
 
-        // 获取 Shader 的 Pass 信息
-        //var shad = material.shader;
-        //var subshader = shad.GetSubshader(0);
-        //var passCount = subshader.passCount;
-        //// 遍历 Pass，修改 ShaderTagId 的 Queue 信息
-        //for (int i = 0; i < passCount; i++)
-        //{
-        //    var pass = subshader.GetPass(i);
-        //    var tagValue = pass.probeTagValue("Queue");
-        //    if (tagValue == "Transparent")
-        //    {
-        //        pass.SetShaderTagId("Queue", RenderQueue.ToString());
-        //    }
-        //}
-
-        //Material material = new Material(Shader.Find("Sprites/Default"));
-
         // 将给定的精灵赋值给材质的主纹理属性
         //Debug.Log(material);
         material.mainTexture = sprite.texture;
 
         // 设置新的透明度属性值（这里设置为0.8，可根据需求调整）
-        material.SetFloat("_Opacity", 0.8f);
+        //material.SetFloat("_Opacity", 0.8f);
 
         // 将材质赋值给MeshRenderer组件，使其能够按照设置渲染出带有精灵的四边形并应用遮罩效果
         meshRenderer.material = material;
