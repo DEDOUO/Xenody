@@ -72,21 +72,6 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
         return subJudgePlaneList;
     }
 
-    // 根据给定的参数列表初始化判定面实例，创建可视化的平面游戏对象并设置其属性
-    //public void Initialize()
-    //{
-    //    // 创建一个平面游戏对象来表示判定面
-    //    planeObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
-    //    planeRenderer = planeObject.GetComponent<MeshRenderer>();
-
-    //    // 设置平面的一些属性，比如颜色等（这里简单设置为半透明灰色，可根据美术需求调整）
-    //    planeRenderer.material.color = new Color(0.5f, 0.5f, 0.5f, 0.3f);
-
-    //    // 初始时先将平面的位置和缩放设置为默认值，后续根据子判定面参数更新
-    //    planeObject.transform.position = Vector3.zero;
-    //    planeObject.transform.localScale = Vector3.one;
-    //}
-
     // 根据当前时间更新判定面的整体Y轴坐标，使其各子判定面按设定的函数变化
     public float GetPlaneYAxis(float currentTime)
     {
@@ -142,5 +127,47 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
         }
         return true;
     }
+
+    // 简单示例方法，获取JudgePlane实例对应的游戏物体
+    public GameObject GetJudgePlaneGameObject(GameObject JudgePlanesParent)
+    {
+        string judgePlaneObjectName = $"JudgePlane{id}";
+        foreach (Transform child in JudgePlanesParent.transform)
+        {
+            if (child.gameObject.name == judgePlaneObjectName)
+            {
+                return child.gameObject;
+            }
+        }
+        return null;
+    }
+
+    //方法用于根据给定的Y轴坐标值改变对应JudgePlane下所有SubJudgePlane实例的透明度
+    public void ChangeSubJudgePlaneTransparency(GameObject JudgePlanesParent, float yAxisValue)
+    {
+
+        // 计算透明度差值，根据给定的对应关系计算斜率
+        float alphaDelta = (AlphaParams.JudgePlaneAlphaMin - AlphaParams.JudgePlaneAlphaMax) / HeightParams.HeightDefault;
+        //Debug.Log(alphaDelta);
+        // 根据线性关系计算当前透明度值，确保透明度范围在0到1之间
+        float currentAlpha = Mathf.Clamp(AlphaParams.JudgePlaneAlphaMax + alphaDelta * yAxisValue, 0, 1);
+        //Debug.Log(currentAlpha);
+        // 获取JudgePlane对应的游戏物体（假设其命名规则是"JudgePlane + id"，可根据实际调整获取方式）
+        GameObject judgePlaneObject = GetJudgePlaneGameObject(JudgePlanesParent);
+        if (judgePlaneObject != null)
+        {
+            // 直接遍历JudgePlane游戏物体下的所有子物体
+            foreach (Transform child in judgePlaneObject.transform)
+            {
+                // 获取物体的MeshRenderer组件（前提是子物体有这个组件用于渲染）
+                MeshRenderer meshRenderer = child.gameObject.GetComponent<MeshRenderer>();
+                if (meshRenderer != null)
+                {
+                    meshRenderer.material.SetFloat("_Opacity", currentAlpha);
+                }
+            }
+        }
+    }
+
 }
 

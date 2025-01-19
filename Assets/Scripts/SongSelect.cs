@@ -7,7 +7,7 @@ using TMPro;
 using System.IO;
 
 // 选歌界面的脚本，负责处理歌曲列表展示和选择歌曲后跳转到播放场景的逻辑
-public class SongSelectScript : MonoBehaviour
+public class SongSelect : MonoBehaviour
 {
     public ScrollRect songListScrollView; // 在Unity中拖拽赋值，指向展示歌曲列表的滚动视图
     private List<string> songList = new List<string>(); // 用于存储歌曲名称的列表

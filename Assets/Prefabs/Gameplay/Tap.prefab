@@ -81,11 +81,9 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 5adbbd82202a7453597b3aa5d471f0be,
         type: 3}
       propertyPath: m_Name
-      value: Tap 1
+      value: Tap
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: -5754084199372789682, guid: 5adbbd82202a7453597b3aa5d471f0be, type: 3}
-    - {fileID: -7511558181221131132, guid: 5adbbd82202a7453597b3aa5d471f0be, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -141,7 +139,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: e2e574235a007dd43b0310c02f4cabe0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b25143cfa00061e4cb1333d9e7e37675, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

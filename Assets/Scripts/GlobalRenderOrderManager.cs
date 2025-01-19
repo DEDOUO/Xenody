@@ -21,20 +21,20 @@ public class GlobalRenderOrderManager : MonoBehaviour
 
     void Start()
     {
-        // 收集各个父物体下的子物体
-        foreach (RenderObjectGroup group in renderObjectGroups)
-        {
-            if (group.parentGameObject != null)
-            {
-                foreach (Transform child in group.parentGameObject.transform)
-                {
-                    group.childObjects.Add(child.gameObject);
-                }
-            }
-        }
+        //// 收集各个父物体下的子物体
+        //foreach (RenderObjectGroup group in renderObjectGroups)
+        //{
+        //    if (group.parentGameObject != null)
+        //    {
+        //        foreach (Transform child in group.parentGameObject.transform)
+        //        {
+        //            group.childObjects.Add(child.gameObject);
+        //        }
+        //    }
+        //}
 
-        // 可以在这里进行一些初始化排序等操作，确保顺序正确（虽然按照添加顺序一般没问题，但以防万一）
-        renderObjectGroups.Sort((a, b) => a.groupRenderOrder.CompareTo(b.groupRenderOrder));
+        //// 可以在这里进行一些初始化排序等操作，确保顺序正确（虽然按照添加顺序一般没问题，但以防万一）
+        //renderObjectGroups.Sort((a, b) => a.groupRenderOrder.CompareTo(b.groupRenderOrder));
     }
 
     void LateUpdate()

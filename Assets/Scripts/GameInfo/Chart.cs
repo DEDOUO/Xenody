@@ -164,4 +164,49 @@ public class Chart
         Debug.LogError("指定的谱面文件不存在！");
         return null;
     }
+    public JudgePlane GetCorrespondingJudgePlane(string judgeLineName)
+    {
+        int judgePlaneId;
+        if (int.TryParse(judgeLineName.Replace("JudgeLine", ""), out judgePlaneId))
+        {
+            if (judgePlanes != null)
+            {
+                foreach (var judgePlane in judgePlanes)
+                {
+                    if (judgePlane.id == judgePlaneId)
+                    {
+                        return judgePlane;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    public JudgePlane GetCorrespondingJudgePlane(int judgePlaneId)
+    {
+        if (judgePlanes != null)
+        {
+            foreach (var judgePlane in judgePlanes)
+            {
+                if (judgePlane.id == judgePlaneId)
+                {
+                    return judgePlane;
+                }
+            }
+        }
+        return null;
+    }
+
+    public JudgePlane GetCorrespondingJudgePlaneBasedOnTime(float currentTime, Hold hold)
+    {
+        JudgePlane associatedJudgePlaneObject = GetCorrespondingJudgePlane(hold.associatedPlaneId);
+        if (associatedJudgePlaneObject != null)
+        {
+            return associatedJudgePlaneObject;
+        }
+        return null;
+    }
+
+    
+
 }

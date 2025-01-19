@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
- 
+
 
 public class AutoPlay : MonoBehaviour
 {
@@ -27,7 +27,7 @@ public class AutoPlay : MonoBehaviour
     //public Sprite StarArrowSprite;
     public GlobalRenderOrderManager renderOrderManager;
     public GameObject AnimatorContainer;
-    
+
 
     private Dictionary<GameObject, bool> tapReachedJudgmentLine = new Dictionary<GameObject, bool>();
     private void Awake()
@@ -71,19 +71,6 @@ public class AutoPlay : MonoBehaviour
 
             StarHeadSoundEffect = audioSources[3];
 
-            // 检查并处理AudioClip
-            //if (TapSoundEffect.clip != null)
-            //{
-            //    Debug.Log(TapSoundEffect.clip);
-            //}
-            //if (SlideSoundEffect.clip != null)
-            //{
-            //    Debug.Log(SlideSoundEffect.clip);
-            //}
-            //if (FlickSoundEffect.clip != null)
-            //{
-            //    Debug.Log(FlickSoundEffect.clip);
-            //}
         }
 
         // 查找包含GlobalRenderOrderManager的GameObject
@@ -110,7 +97,7 @@ public class AutoPlay : MonoBehaviour
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
         instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent, subStarsParent,
-            JudgePlaneSprite, HoldSprite, 
+            JudgePlaneSprite, HoldSprite,
             renderOrderManager, AnimatorContainer);
 
         // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰

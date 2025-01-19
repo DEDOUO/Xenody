@@ -219,6 +219,158 @@
                     "Func": "Linear"
                 }
             ]
+        },
+        {
+            "id": 3,
+            "sub": [
+                {
+                    "startT": 35.536,
+                    "startY": 0.0,
+                    "endT": 36.336,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 36.336,
+                    "startY": 1.0,
+                    "endT": 37.135999999999996,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "sub": [
+                {
+                    "startT": 36.336,
+                    "startY": 0.0,
+                    "endT": 37.135999999999996,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 37.135999999999996,
+                    "startY": 1.0,
+                    "endT": 37.93599999999999,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "sub": [
+                {
+                    "startT": 37.135999999999996,
+                    "startY": 0.0,
+                    "endT": 37.93599999999999,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 37.93599999999999,
+                    "startY": 1.0,
+                    "endT": 38.73599999999999,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "sub": [
+                {
+                    "startT": 37.93599999999999,
+                    "startY": 0.0,
+                    "endT": 38.73599999999999,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 38.73599999999999,
+                    "startY": 1.0,
+                    "endT": 39.53599999999999,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "sub": [
+                {
+                    "startT": 38.73599999999999,
+                    "startY": 0.0,
+                    "endT": 39.53599999999999,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 39.53599999999999,
+                    "startY": 1.0,
+                    "endT": 40.335999999999984,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "sub": [
+                {
+                    "startT": 39.53599999999999,
+                    "startY": 0.0,
+                    "endT": 40.335999999999984,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 40.335999999999984,
+                    "startY": 1.0,
+                    "endT": 41.13599999999998,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "sub": [
+                {
+                    "startT": 40.335999999999984,
+                    "startY": 0.0,
+                    "endT": 41.13599999999998,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 41.13599999999998,
+                    "startY": 1.0,
+                    "endT": 41.93599999999998,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "sub": [
+                {
+                    "startT": 41.13599999999998,
+                    "startY": 0.0,
+                    "endT": 41.93599999999998,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 41.93599999999998,
+                    "startY": 1.0,
+                    "endT": 42.735999999999976,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
         }
     ],
     "taps": [
@@ -470,25 +622,25 @@
         },
         {
             "startT": 17.035999999999998,
-            "startX": -1.0,
+            "startX": 0.8,
             "Size": 0.8,
             "Pid": 1
         },
         {
             "startT": 17.336000000000002,
-            "startX": 1.0,
+            "startX": -0.8,
             "Size": 0.8,
             "Pid": 1
         },
         {
             "startT": 17.636000000000006,
-            "startX": -1.0,
+            "startX": 0.8,
             "Size": 0.8,
             "Pid": 1
         },
         {
             "startT": 17.93600000000001,
-            "startX": 1.0,
+            "startX": -0.8,
             "Size": 0.8,
             "Pid": 1
         },
@@ -1049,6 +1201,84 @@
             "startX": 0.4,
             "Size": 1.0,
             "Pid": 1
+        },
+        {
+            "startT": 32.836,
+            "startX": -1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 33.136,
+            "startX": -0.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 33.236,
+            "startX": 0.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 33.436,
+            "startX": 0.75,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 34.036,
+            "startX": -1.2,
+            "Size": 1.6,
+            "Pid": 1
+        },
+        {
+            "startT": 34.136,
+            "startX": -1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 34.336,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 34.536,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 34.736,
+            "startX": 1.2,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 34.936,
+            "startX": -1.2,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 35.136,
+            "startX": 1.2,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 35.236,
+            "startX": -1.2,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 35.436,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 1
         }
     ],
     "holds": [
@@ -1473,6 +1703,94 @@
                     "RFunc": "Linear"
                 }
             ]
+        },
+        {
+            "Pid": 1,
+            "id": 23,
+            "sub": [
+                {
+                    "startT": 32.436,
+                    "startXMin": -2.0,
+                    "startXMax": 2.0,
+                    "endT": 33.836,
+                    "endXMin": -0.5,
+                    "endXMax": 0.5,
+                    "LFunc": "Sin",
+                    "RFunc": "Sin"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 24,
+            "sub": [
+                {
+                    "startT": 34.036,
+                    "startXMin": 0.4,
+                    "startXMax": 2.0,
+                    "endT": 34.336,
+                    "endXMin": -2.0,
+                    "endXMax": -1.2,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                },
+                {
+                    "startT": 34.336,
+                    "startXMin": -2.0,
+                    "startXMax": -1.2,
+                    "endT": 34.536,
+                    "endXMin": 1.2,
+                    "endXMax": 2.0,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                },
+                {
+                    "startT": 34.536,
+                    "startXMin": 1.2,
+                    "startXMax": 2.0,
+                    "endT": 34.736,
+                    "endXMin": -1.6,
+                    "endXMax": -0.8,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                },
+                {
+                    "startT": 34.736,
+                    "startXMin": -1.6,
+                    "startXMax": -0.8,
+                    "endT": 34.936,
+                    "endXMin": 0.8,
+                    "endXMax": 1.6,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                },
+                {
+                    "startT": 34.936,
+                    "startXMin": 0.8,
+                    "startXMax": 1.6,
+                    "endT": 35.136,
+                    "endXMin": -1.6,
+                    "endXMax": -0.8,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 25,
+            "sub": [
+                {
+                    "startT": 35.536,
+                    "startXMin": -2.0,
+                    "startXMax": 2.0,
+                    "endT": 10000.0,
+                    "endXMin": -2.0,
+                    "endXMax": 2.0,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
         }
     ],
     "slides": [
@@ -1539,7 +1857,7 @@
         {
             "startT": 9.636000000000001,
             "startX": 0.0,
-            "Size": 0.8,
+            "Size": 1.5,
             "Pid": 2
         },
         {
@@ -1600,6 +1918,24 @@
             "startT": 19.036000000000026,
             "startX": 0.7,
             "Size": 0.6,
+            "Pid": 1
+        },
+        {
+            "startT": 33.636,
+            "startX": 1.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 33.736,
+            "startX": 0.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 33.836,
+            "startX": 0.0,
+            "Size": 1.0,
             "Pid": 1
         }
     ],
@@ -1683,20 +2019,6 @@
         },
         {
             "startT": 29.236,
-            "startX": 1,
-            "Size": 1.6,
-            "Dir": 0.25,
-            "Pid": 1
-        },
-        {
-            "startT": 32.436,
-            "startX": -1,
-            "Size": 1.6,
-            "Dir": 0.75,
-            "Pid": 1
-        },
-        {
-            "startT": 32.436,
             "startX": 1,
             "Size": 1.6,
             "Dir": 0.25,
@@ -1872,9 +2194,9 @@
                 {
                     "startT": 16.835999999999995,
                     "endT": 16.935999999999996,
-                    "startX": -1,
+                    "startX": 0,
                     "startY": 1,
-                    "endX": -1.6,
+                    "endX": -0.6,
                     "endY": 0,
                     "Func": "Linear"
                 }
@@ -1888,9 +2210,9 @@
                 {
                     "startT": 17.136,
                     "endT": 17.236,
-                    "startX": 1,
+                    "startX": 0,
                     "startY": 1,
-                    "endX": 1.6,
+                    "endX": 0.6,
                     "endY": 0,
                     "Func": "Linear"
                 }
@@ -1904,9 +2226,9 @@
                 {
                     "startT": 17.436000000000003,
                     "endT": 17.536000000000005,
-                    "startX": -1,
+                    "startX": 0,
                     "startY": 1,
-                    "endX": -1.6,
+                    "endX": -0.6,
                     "endY": 0,
                     "Func": "Linear"
                 }
@@ -1920,9 +2242,9 @@
                 {
                     "startT": 17.736000000000008,
                     "endT": 17.83600000000001,
-                    "startX": 1,
+                    "startX": 0,
                     "startY": 1,
-                    "endX": 1.6,
+                    "endX": 0.6,
                     "endY": 0,
                     "Func": "Linear"
                 }
@@ -1936,9 +2258,9 @@
                 {
                     "startT": 18.036000000000012,
                     "endT": 18.136000000000013,
-                    "startX": -1,
+                    "startX": 0,
                     "startY": 1,
-                    "endX": -1.6,
+                    "endX": -0.6,
                     "endY": 0,
                     "Func": "Linear"
                 }

@@ -123,6 +123,16 @@ namespace Note
             }
             return true;
         }
+        public static void SetArrowAlpha(GameObject arrow, float alpha)
+        {
+            SpriteRenderer arrowSpriteRenderer = arrow.GetComponent<SpriteRenderer>();
+            if (arrowSpriteRenderer != null)
+            {
+                Color color = arrowSpriteRenderer.color;
+                color.a = alpha;
+                arrowSpriteRenderer.color = color;
+            }
+        }
 
     }
 }

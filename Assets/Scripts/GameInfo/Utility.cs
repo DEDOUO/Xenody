@@ -5,9 +5,10 @@ using Note;
 using Params;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using static Note.Star;
+using System.Collections.Generic;
 //using static Utility;
 
-public class Utility
+public class Utility:MonoBehaviour
 {
     // 定义X轴/Y轴坐标变化函数的枚举类型
     //适用JudgePlane和Hold类
@@ -436,6 +437,169 @@ public class Utility
         return new Vector2(scaledX, scaledY);
     }
 
+    public static float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition)
+    {
+        // 获取屏幕宽度
+        float screenWidth = Screen.width;
+        float targetHorizontalMargin = HorizontalParams.HorizontalMargin; // 目标水平边距，即离屏幕边缘10%的距离，可根据需求调整
+
+        // 计算水平可视范围（考虑边距后的有效宽度）
+        float horizontalVisibleRange = screenWidth * (1 - 2 * targetHorizontalMargin);
+
+        Vector3 Point = worldPosition;
+
+        float WorldUnitToScreenPixelX = Utility.CalculateWorldUnitToScreenPixelAtDistance(Point);
+
+        float XWorld = horizontalVisibleRange / 2 / WorldUnitToScreenPixelX;
+
+        return XWorld;
+    }
+
+    public static void CheckArrowVisibility(Chart chart, float currentTime)
+    {
+        if (chart.stars != null)
+        {
+            for (int i = 0; i < chart.stars.Count; i++)
+            {
+                var star = chart.stars[i];
+                float starHeadT = star.starHeadT;
+                for (int j = 0; j < star.subStarList.Count; j++)
+                {
+                    var subStar = star.subStarList[j];
+                    int subStarIndex = j;
+
+                    string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
+                    //Debug.Log(instanceName);
+                    GameObject SubStarArrowParent = GameObject.Find(instanceName);
+                    //Debug.Log(SubStarArrowParent);
+                    List<GameObject> arrows = new List<GameObject>();
+
+                    if (SubStarArrowParent != null)
+                    {
+                        for (int k = 0; k < SubStarArrowParent.transform.childCount; k++)
+                        {
+                            GameObject arrow = SubStarArrowParent.transform.GetChild(k).gameObject;
+                            arrows.Add(arrow);
+                        }
+
+                        if (currentTime >= starHeadT - ChartParams.StarAppearTime && currentTime < starHeadT)
+                        {
+                            // 当时间处于 starHeadT - StarAppearTime 和 substar.startT 之间时，将该 substar 下对应 Arrow 均设置为可见，该 substar 下所有 arrow 的透明度由 0 线性地变为 1
+                            if (arrows.Count != 0)
+                            {
+                                float t = (currentTime - (starHeadT - ChartParams.StarAppearTime)) / ChartParams.StarAppearTime;
+                                foreach (var arrow in arrows)
+                                {
+                                    arrow.SetActive(true);
+                                    Star.SetArrowAlpha(arrow, t);
+                                }
+                            }
+                        }
+                        else if (currentTime >= subStar.starTrackStartT && currentTime < subStar.starTrackEndT)
+                        {
+                            if (arrows.Count != 0)
+                            {
+                                // 计算时间间隔和每个箭头的时间间隔
+                                float totalTime = subStar.starTrackEndT - subStar.starTrackStartT;
+                                float arrowTimeInterval = totalTime / arrows.Count;
+
+                                // 计算当前时间所在的箭头索引
+                                int arrowIndex = Mathf.FloorToInt((currentTime - subStar.starTrackStartT) / arrowTimeInterval);
+
+                                // 确保箭头索引不越界
+                                arrowIndex = Mathf.Clamp(arrowIndex, 0, arrows.Count - 1);
+
+                                // 遍历箭头，根据时间设置透明度
+                                for (int k = 0; k < arrows.Count; k++)
+                                {
+                                    float alpha = 1.0f;
+                                    if (k <= arrowIndex)
+                                    {
+                                        // 对于当前箭头及之前的箭头，根据时间线性改变透明度
+                                        if (k == arrowIndex)
+                                        {
+                                            float timeInInterval = (currentTime - (subStar.starTrackStartT + k * arrowTimeInterval)) / arrowTimeInterval;
+                                            alpha = 1.0f - timeInInterval;
+                                        }
+                                        else
+                                        {
+                                            alpha = 0.0f;
+                                        }
+                                    }
+                                    Star.SetArrowAlpha(arrows[k], alpha);
+                                }
+                            }
+                        }
+                        else if (currentTime >= subStar.starTrackEndT)
+                        {
+                            if (arrows.Count != 0)
+                            {
+                                // 当时间大于 starTrackEndT 时，删除所有 substar 下的 arrow 实例
+                                SubStarArrowParent.SetActive(false);
+                                //subStarArrows.Remove(subStarIndex);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static GameObject CombineInstances(List<GameObject> instances)
+    {
+        GameObject combined = new GameObject("CombinedInstance");
+
+        // 用于存储所有顶点、三角形索引和UV坐标
+        List<Vector3> vertices = new List<Vector3>();
+        List<int> triangles = new List<int>();
+        List<Vector2> uv = new List<Vector2>();
+
+        int vertexOffset = 0;
+        foreach (GameObject instance in instances)
+        {
+            MeshFilter meshFilter = instance.GetComponent<MeshFilter>();
+            if (meshFilter != null)
+            {
+                Mesh mesh = meshFilter.mesh;
+                // 添加顶点
+                vertices.AddRange(mesh.vertices);
+                // 处理三角形索引，添加偏移量
+                for (int i = 0; i < mesh.triangles.Length; i++)
+                {
+                    triangles.Add(mesh.triangles[i] + vertexOffset);
+                }
+                // 添加UV坐标（如果有的话）
+                if (mesh.uv.Length > 0)
+                {
+                    uv.AddRange(mesh.uv);
+                }
+                vertexOffset += mesh.vertices.Length;
+            }
+        }
+
+        // 创建新的网格
+        Mesh combinedMesh = new Mesh();
+        combinedMesh.vertices = vertices.ToArray();
+        combinedMesh.triangles = triangles.ToArray();
+        if (uv.Count > 0)
+        {
+            combinedMesh.uv = uv.ToArray();
+        }
+        combinedMesh.RecalculateNormals();
+
+        // 添加网格组件和渲染器组件
+        MeshFilter combinedMeshFilter = combined.AddComponent<MeshFilter>();
+        combinedMeshFilter.mesh = combinedMesh;
+        MeshRenderer combinedRenderer = combined.AddComponent<MeshRenderer>();
+        combinedRenderer.material = instances[0].GetComponentInChildren<MeshRenderer>().material;
+
+        return combined;
+    }
+    public static float CalculateZAxisPosition(float startTime)
+    {
+        // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
+        return -startTime * SpeedParams.NoteSpeedDefault;
+    }
 
 }
 
