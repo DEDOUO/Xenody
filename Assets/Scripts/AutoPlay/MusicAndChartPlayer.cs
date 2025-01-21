@@ -9,7 +9,9 @@ using UnityEngine.SceneManagement;
 //using UnityEngine.Rendering.Universal;
 using Note;
 using UnityEngine.EventSystems;
-using Unity.VisualScripting;
+using UnityEngine.UI;
+using static Utility;
+//using Unity.VisualScripting;
 
 public class MusicAndChartPlayer : MonoBehaviour
 {
@@ -21,6 +23,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject FlicksParent;
     private GameObject HoldsParent;
     private GameObject StarsParent;
+    private GameObject MusicSlider;
 
     private AudioSource TapSoundEffect;
     private AudioSource SlideSoundEffect;
@@ -43,6 +46,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
     private float updateInterval = 0.00833333f;  // 更新间隔，固定为120帧
+    private float totalTime;
 
 
     // 内部类，用于存储键的相关信息以及判定状态
@@ -81,11 +85,15 @@ public class MusicAndChartPlayer : MonoBehaviour
         HoldSoundEffect = holdSoundEffect;
         StarHeadSoundEffect = starheadSoundEffect;
         this.chart = chart;
+        totalTime = audioSource.clip.length;
         //Debug.Log(FlickSoundEffect);
     }
 
     public void PlayMusicAndChart(Chart chart)
     {
+        MusicSlider = GameObject.Find("MusicSlider");
+        MusicSlider.SetActive(false);
+        //Debug.Log(MusicSlider);
         // 提前加工Chart里所有键（Tap和Slide等）的startT与对应实例名的映射关系，并按照startT排序
         PrepareChartMapping(chart);
         audioSource.Play();
@@ -113,78 +121,76 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     private void Updateall()
     {
-        if (isMusicPlaying) // 只有当明确进入音乐播放阶段才进行后续判断
+        // 只有当明确进入音乐播放阶段才进行后续判断
+        if (isMusicPlaying&& audioSource.isPlaying) 
         {
-            if (audioSource.isPlaying)
-            {
-                float currentTime = audioSource.time;
-                //Debug.Log("1. " + currentTime);
+            float currentTime = audioSource.time;
+            //Debug.Log("1. " + currentTime);
 
-                // 将所有已经结束的 JudgePlane（endT 小于 currentTime）设置为 setActive(false)
-                foreach (var pair in judgePlaneEndTimes)
+            // 将所有已经结束的 JudgePlane（endT 小于 currentTime）设置为 setActive(false)
+            foreach (var pair in judgePlaneEndTimes)
+            {
+                if (pair.Value < currentTime)
                 {
-                    if (pair.Value < currentTime)
+                    var judgePlaneObject = JudgePlanesParent.transform.Find(pair.Key);
+                    if (judgePlaneObject != null)
                     {
-                        var judgePlaneObject = JudgePlanesParent.transform.Find(pair.Key);
-                        if (judgePlaneObject != null)
-                        {
-                            judgePlaneObject.gameObject.SetActive(false);
-                        }
+                        judgePlaneObject.gameObject.SetActive(false);
                     }
                 }
+            }
 
-                // 使用双指针来维护从上一帧到这一帧的时间，包含哪些note
-                while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
-                {
-                    List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
-                    foreach (var instanceName in instanceNames)
-                    {
-                        //Debug.Log(instanceName);
-                        KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                        keyInfo.isJudged = true;
-                        // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
-                        if (instanceName.StartsWith("Tap"))
-                        {
-                            TapSoundEffect.Play();
-                            //FlickSoundEffect.Play();
-                            PlayAnimation(instanceName, "TapHitEffect");
-                        }
-                        else if (instanceName.StartsWith("Slide"))
-                        {
-                            SlideSoundEffect.Play();
-                            PlayAnimation(instanceName, "SlideEffect");
-                        }
-                        else if (instanceName.StartsWith("Flick"))
-                        {
-                            TapSoundEffect.Play();
-                            FlickSoundEffect.Play();
-                            PlayAnimation(instanceName, "FlickEffect");
-                        }
-                        else if (instanceName.StartsWith("Hold"))
-                        {
-                            PlayHoldAnimation(instanceName, currentTime);
-                        }
-                        else if (instanceName.StartsWith("StarHead"))
-                        {
-                            StarHeadSoundEffect.Play();
-                            PlayAnimation(instanceName, "StarHeadEffect");
-                        }
-                    }
-                    currentIndex++;
-                }
-                // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
-                UpdateHoldStates(currentTime);
-                //更新所有Note位置
-                UpdatePositions(chart, currentTime);
-                //更新所有Arrow的透明度
-                Utility.CheckArrowVisibility(chart, currentTime);
-                //Debug.Log("2. " + audioTime);
-            }
-            else
+            // 使用双指针来维护从上一帧到这一帧的时间，包含哪些note
+            while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
             {
-                // 歌曲播放结束后，跳回选歌场景
-                SceneManager.LoadScene("SongSelect");
+                List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
+                foreach (var instanceName in instanceNames)
+                {
+                    //Debug.Log(instanceName);
+                    KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                    keyInfo.isJudged = true;
+                    // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
+                    if (instanceName.StartsWith("Tap"))
+                    {
+                        TapSoundEffect.Play();
+                        //FlickSoundEffect.Play();
+                        PlayAnimation(instanceName, "TapHitEffect");
+                    }
+                    else if (instanceName.StartsWith("Slide"))
+                    {
+                        SlideSoundEffect.Play();
+                        PlayAnimation(instanceName, "SlideEffect");
+                    }
+                    else if (instanceName.StartsWith("Flick"))
+                    {
+                        TapSoundEffect.Play();
+                        FlickSoundEffect.Play();
+                        PlayAnimation(instanceName, "FlickEffect");
+                    }
+                    else if (instanceName.StartsWith("Hold"))
+                    {
+                        PlayHoldAnimation(instanceName, currentTime);
+                    }
+                    else if (instanceName.StartsWith("StarHead"))
+                    {
+                        StarHeadSoundEffect.Play();
+                        PlayAnimation(instanceName, "StarHeadEffect");
+                    }
+                }
+                currentIndex++;
             }
+            // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
+            UpdateHoldStates(currentTime);
+            //更新所有Note位置
+            UpdatePositions(currentTime);
+            //更新所有Arrow的透明度
+            CheckArrowVisibility(chart, currentTime);
+            //Debug.Log("2. " + audioTime);
+        }
+        else
+        {
+            // 歌曲播放结束后，跳回选歌场景
+            SceneManager.LoadScene("SongSelect");
         }
     }
 
@@ -389,8 +395,10 @@ public class MusicAndChartPlayer : MonoBehaviour
                 float startT = judgePlane.subJudgePlaneList[0].startT;
                 float endT = judgePlane.subJudgePlaneList[judgePlane.subJudgePlaneList.Count - 1].endT;
                 JudgePlanesStartT.Add(startT);
-                string judgePlaneName = $"JudgePlane{i + 1}";
-                judgePlaneEndTimes[judgePlaneName] = endT;
+                string instanceName = $"JudgePlane{i + 1}";
+                judgePlaneEndTimes[instanceName] = endT;
+                allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+                keyReachedJudgment[instanceName] = new KeyInfo(startT);
             }
         }
 
@@ -466,7 +474,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
-    private void UpdatePositions(Chart chart, float currentTime)
+    private void UpdatePositions(float currentTime)
     {
         // 计算每帧对应的 Z 轴坐标减少量，假设帧率是固定的（比如 60 帧每秒），然后根据每秒钟变化单位计算每帧变化量
         float audioTimeDelta = currentTime - audioPrevTime;
@@ -692,7 +700,10 @@ public class MusicAndChartPlayer : MonoBehaviour
                 if (int.TryParse(numberPart, out int holdIndex))
                 {
                     GameObject gameobject = GameObject.Find($"Hold{holdIndex}");
-                    gameobject.SetActive(false);
+                    if (gameobject != null) 
+                    { 
+                        gameobject.SetActive(false);
+                    }
                 }
             }
 
@@ -749,6 +760,11 @@ public class MusicAndChartPlayer : MonoBehaviour
         //Debug.Log("TogglePause");
         if (isPaused)
         {
+            Slider slider = MusicSlider.GetComponent<Slider>();
+            audioSource.time = slider.value * totalTime;
+            ResetAllNotes(audioSource.time);
+            MusicSlider.SetActive(false);
+
             audioSource.Play();
             isPaused = false;
             isMusicPlaying = true;
@@ -758,8 +774,214 @@ public class MusicAndChartPlayer : MonoBehaviour
             audioSource.Pause();
             isPaused = true;
             isMusicPlaying = false;
+
+            MusicSlider.SetActive(true);
+            Slider slider = MusicSlider.GetComponent<Slider>();
+            slider.value = audioSource.time / totalTime;
         }
     }
 
+    public void ResetAllNotes(float currentTime)
+    {
+
+        //重置所有JudgePlane的激活状态
+        foreach (var pair in judgePlaneEndTimes)
+        {
+            if (pair.Value >= currentTime)
+            {
+                var judgePlaneObject = JudgePlanesParent.transform.Find(pair.Key);
+                if (judgePlaneObject != null)
+                {
+                    judgePlaneObject.gameObject.SetActive(true);
+                }
+            }
+        }
+
+        //重置所有Note的判定和激活状态
+        currentIndex = 0;
+        while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
+        {
+            List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
+            foreach (var instanceName in instanceNames)
+            {
+                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                // 设置当前时间前的note为已判定
+                keyInfo.isJudged = true;
+                // 设置该Note为非激活状态
+                if (instanceName.StartsWith("Tap"))
+                {
+                    GameObject NoteInstance = TapsParent.transform.Find(instanceName).gameObject; 
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(false);
+                    }
+                }
+                else if (instanceName.StartsWith("Slide"))
+                {
+                    GameObject NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(false);
+                    }
+                }
+                else if (instanceName.StartsWith("Flick"))
+                {
+                    GameObject NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(false);
+                    }
+                }
+                else if (instanceName.StartsWith("Hold"))
+                {
+                    GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(false);
+                    }
+                }
+                else if (instanceName.StartsWith("StarHead"))
+                {
+                    GameObject NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(false);
+                    }
+                }
+                //GameObject NoteInstance = GameObject.Find(instanceName);
+                //if (NoteInstance != null)
+                //{
+                //    NoteInstance.SetActive(false);
+                //}
+                //else
+                //{
+                //    Debug.Log("已判定" + instanceName + "未找到");
+                //};
+            }
+            currentIndex++;
+        }
+
+        int notJudgedIndex = currentIndex;
+        while (notJudgedIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(notJudgedIndex).Key >= currentTime)
+        {
+            List<string> instanceNames = startTimeToInstanceNames.ElementAt(notJudgedIndex).Value;
+            foreach (var instanceName in instanceNames)
+            {
+                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                // 设置当前时间后的note为未判定
+                keyInfo.isJudged = false;
+                // 设置该Note为激活状态
+                if (instanceName.StartsWith("Tap"))
+                {
+                    GameObject NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(true);
+                    }
+                }
+                else if (instanceName.StartsWith("Slide"))
+                {
+                    GameObject NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(true);
+                    }
+                }
+                else if (instanceName.StartsWith("Flick"))
+                {
+                    GameObject NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(true);
+                    }
+                }
+                else if (instanceName.StartsWith("Hold"))
+                {
+                    GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(true);
+                    }
+                }
+                else if (instanceName.StartsWith("StarHead"))
+                {
+                    GameObject NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+                    if (NoteInstance != null)
+                    {
+                        NoteInstance.SetActive(true);
+                    }
+                }
+            }
+             notJudgedIndex++;
+        }
+
+        ResetNotesPosition(currentTime);
+    }
+
+    private void ResetNotesPosition(float currentTime)
+    {
+        int Index = 0;
+        while (Index < startTimeToInstanceNames.Count)
+        {
+            float startT = startTimeToInstanceNames.ElementAt(Index).Key;
+            List<string> instanceNames = startTimeToInstanceNames.ElementAt(Index).Value;
+            foreach (var instanceName in instanceNames)
+            {
+                // 设置该Note的位置
+                if (instanceName.StartsWith("JudgePlane"))
+                {
+                    GameObject NoteInstance = JudgePlanesParent.transform.Find(instanceName).gameObject;
+                    Vector3 currentPosition = NoteInstance.transform.position;
+                    currentPosition.z = CalculateZAxisPosition(-currentTime);
+                    NoteInstance.transform.position = currentPosition;
+
+                    string childName = NoteInstance.name;
+                    //Debug.Log(childName+"...."+ startT);
+                    int judgePlaneId = int.Parse(childName.Substring("JudgePlane".Length));
+                    JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
+                    float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
+                    // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
+                    currentJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
+                }
+                if (instanceName.StartsWith("Tap"))
+                {
+                    GameObject NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
+                    Vector3 currentPosition = NoteInstance.transform.position;
+                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
+                    NoteInstance.transform.position = currentPosition;
+                }
+                else if (instanceName.StartsWith("Slide"))
+                {
+                    GameObject NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
+                    Vector3 currentPosition = NoteInstance.transform.position;
+                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
+                    NoteInstance.transform.position = currentPosition;
+                }
+                else if (instanceName.StartsWith("Flick"))
+                {
+                    GameObject NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+                    Vector3 currentPosition = NoteInstance.transform.position;
+                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
+                    NoteInstance.transform.position = currentPosition;
+                }
+                else if (instanceName.StartsWith("Hold"))
+                {
+                    GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
+                    Vector3 currentPosition = NoteInstance.transform.position;
+                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
+                    NoteInstance.transform.position = currentPosition;
+                }
+                else if (instanceName.StartsWith("StarHead"))
+                {
+                    GameObject NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+                    Vector3 currentPosition = NoteInstance.transform.position;
+                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
+                    NoteInstance.transform.position = currentPosition;
+                }
+            }
+            Index++;
+        }
+        audioPrevTime = currentTime;
+    }
 }
 
