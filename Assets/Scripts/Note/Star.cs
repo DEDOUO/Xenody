@@ -7,6 +7,18 @@ using Params;
 
 namespace Note
 {
+    public class SubStarInfo
+    {
+        public GameObject SubStarArrowParent;
+        public List<GameObject> arrows;
+        public float totalTime;
+        public float arrowTimeInterval;
+        public float starTrackStartT;
+        public float starTrackEndT;
+        public float starHeadT;
+    }
+
+
     // 星星（Star）类
     public class Star
     {
@@ -133,6 +145,60 @@ namespace Note
                 arrowSpriteRenderer.color = color;
             }
         }
+
+        // 初始化 SubStar 信息的方法
+        public static Dictionary<(int, int), SubStarInfo> InitializeSubStarInfo(Chart chart, GameObject SubStarsParent)
+        {
+            Dictionary<(int, int), SubStarInfo> subStarInfoDict = new Dictionary<(int, int), SubStarInfo>();
+
+            if (chart.stars != null)
+            {
+                for (int i = 0; i < chart.stars.Count; i++)
+                {
+                    var star = chart.stars[i];
+                    float starHeadT = star.starHeadT;
+                    for (int j = 0; j < star.subStarList.Count; j++)
+                    {
+                        var subStar = star.subStarList[j];
+                        string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
+                        GameObject SubStarArrowParent = SubStarsParent.transform.Find(instanceName)?.gameObject;
+
+                        if (SubStarArrowParent != null)
+                        {
+                            List<GameObject> arrows = new List<GameObject>();
+                            for (int k = 0; k < SubStarArrowParent.transform.childCount; k++)
+                            {
+                                GameObject arrow = SubStarArrowParent.transform.GetChild(k).gameObject;
+                                arrows.Add(arrow);
+                            }
+
+                            float totalTime = subStar.starTrackEndT - subStar.starTrackStartT;
+                            float arrowTimeInterval = totalTime / arrows.Count;
+
+                            SubStarInfo info = new SubStarInfo
+                            {
+                                SubStarArrowParent = SubStarArrowParent,
+                                arrows = arrows,
+                                totalTime = totalTime,
+                                arrowTimeInterval = arrowTimeInterval,
+                                starTrackStartT = subStar.starTrackStartT,
+                                starTrackEndT = subStar.starTrackEndT,
+                                starHeadT = starHeadT
+                            };
+
+                            subStarInfoDict[(i, j)] = info;
+                        }
+                        else
+                        {
+                            Debug.Log(instanceName + "未找到！");
+                        }
+                    }
+                }
+            }
+
+            return subStarInfoDict;
+        }
+
 
     }
 }

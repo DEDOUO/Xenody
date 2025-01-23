@@ -11,6 +11,8 @@ using Note;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static Utility;
+//using UnityEditor.Experimental.GraphView;
+using UnityEditor;
 //using Unity.VisualScripting;
 
 public class MusicAndChartPlayer : MonoBehaviour
@@ -23,7 +25,13 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject FlicksParent;
     private GameObject HoldsParent;
     private GameObject StarsParent;
+    private GameObject SubStarsParent;
     private GameObject MusicSlider;
+
+    private Sprite TapSprite;
+    private Sprite SlideSprite;
+    private Sprite FlickSprite;
+    private Sprite StarHeadSprite;
 
     private AudioSource TapSoundEffect;
     private AudioSource SlideSoundEffect;
@@ -33,11 +41,12 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     private float audioPrevTime = 0f;
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
-    private Dictionary<string, float> holdEndTimes = new Dictionary<string, float>(); // 存储Hold实例名到其结束时间的映射
+    private Dictionary<string, List<float>> holdTimes = new Dictionary<string, List<float>>(); // 存储Hold实例名到其开始/结束时间的映射
     private Dictionary<string, KeyInfo> keyReachedJudgment = new Dictionary<string, KeyInfo>(); // 存储实例名到键信息的映射
     private List<float> JudgePlanesStartT = new List<float>(); // 判定面的开始时间（用于JudgeLine出现时间计算
     private Dictionary<string, float> judgePlaneEndTimes = new Dictionary<string, float>();
     public List<Star.SubStar> subStars = new List<Star.SubStar>();
+    public Dictionary<(int, int), SubStarInfo> subStarInfoDict = new Dictionary<(int, int), SubStarInfo>();
 
     // 新增一个列表用于存储当前正在处理的Hold对应的instanceName
     private List<string> currentHoldInstanceNames = new List<string>();
@@ -47,7 +56,8 @@ public class MusicAndChartPlayer : MonoBehaviour
     private int currentIndex = 0;
     private float updateInterval = 0.00833333f;  // 更新间隔，固定为120帧
     private float totalTime;
-
+    private float AnimationScaleAdjust = 772f / 165f;  // 播放动画时x轴缩放调整
+    private float HoldAnimationScaleAdjust = 0.7f;  // 播放Hold动画时x轴缩放调整
 
     // 内部类，用于存储键的相关信息以及判定状态
     private class KeyInfo
@@ -67,7 +77,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent,
-        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent,
+        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent, GameObject substarsParent,
         AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect,
         Chart chart)
     {
@@ -79,6 +89,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         FlicksParent = flicksParent;
         HoldsParent = holdsParent;
         StarsParent = starsParent;
+        SubStarsParent = substarsParent;
         TapSoundEffect = tapSoundEffect;
         SlideSoundEffect = slideSoundEffect;
         FlickSoundEffect = flickSoundEffect;
@@ -96,6 +107,8 @@ public class MusicAndChartPlayer : MonoBehaviour
         //Debug.Log(MusicSlider);
         // 提前加工Chart里所有键（Tap和Slide等）的startT与对应实例名的映射关系，并按照startT排序
         PrepareChartMapping(chart);
+        subStarInfoDict = Star.InitializeSubStarInfo(chart, SubStarsParent);
+        LoadNoteSprites();
         audioSource.Play();
         isMusicPlaying = true;
         isPaused = false;
@@ -122,7 +135,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private void Updateall()
     {
         // 只有当明确进入音乐播放阶段才进行后续判断
-        if (isMusicPlaying&& audioSource.isPlaying) 
+        if (isMusicPlaying && audioSource.isPlaying)
         {
             float currentTime = audioSource.time;
             //Debug.Log("1. " + currentTime);
@@ -184,7 +197,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             //更新所有Note位置
             UpdatePositions(currentTime);
             //更新所有Arrow的透明度
-            CheckArrowVisibility(chart, currentTime);
+            CheckArrowVisibility(SubStarsParent, currentTime, subStarInfoDict);
             //Debug.Log("2. " + audioTime);
         }
         else
@@ -246,8 +259,9 @@ public class MusicAndChartPlayer : MonoBehaviour
         {
             Hold hold = chart.holds[holdIndex];
             KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
-            float holdEndTime = holdEndTimes[instanceName];
-            bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
+            float holdStartTime = holdTimes[instanceName][0];
+            float holdEndTime = holdTimes[instanceName][1];
+            bool isStart = currentTime >= holdStartTime && currentTime < holdEndTime;
             bool isEnd = currentTime >= holdEndTime;
             //Debug.Log($"InstanceName: {instanceName}, currentTime: {currentTime}, isStart: {isStart}, isEnd: {isEnd}");
 
@@ -261,13 +275,13 @@ public class MusicAndChartPlayer : MonoBehaviour
             float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
             //Debug.Log(yAxisPosition);
             Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
-            float worldUnitToScreenPixelX = Utility.CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+            float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
             //Debug.Log(worldUnitToScreenPixelX);
             float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
             float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
             //Debug.Log(noteSizeWorldLengthPerUnit);
 
-            float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
+            float x_width = noteSizeWorldLengthPerUnit * HoldAnimationScaleAdjust * (subholdRightX - subholdLeftX);
             //Debug.Log(x_width);
 
             // 获取所在JudgePlane当时刻坐标
@@ -285,18 +299,35 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 HoldSoundEffect.Play();
                 holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
-                                                         // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
+                // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
                 currentHoldInstanceNames.Add(instanceName);
-                //Debug.Log(holdHitEffectPosition);
-                GameObject holdHitEffect = new GameObject($"HoldHitEffect{holdIndex + 1}");
-                holdHitEffect.transform.parent = HoldsParent.transform;
+
+                string holdHitEffectName = $"HoldHitEffect{holdIndex + 1}";
+                Transform holdHitEffectTransform = HoldsParent.transform.Find(holdHitEffectName);
+                GameObject holdHitEffect;
+
+                Animator holdAnimator = null;
+                if (holdHitEffectTransform != null)
+                {
+                    // 如果找到该游戏物体，设置其为激活状态
+                    holdHitEffect = holdHitEffectTransform.gameObject;
+                    holdHitEffect.SetActive(true);
+                    holdAnimator = holdHitEffect.GetComponent<Animator>();
+                }
+                else
+                {
+                    // 如果未找到，则创建新的游戏物体
+                    holdHitEffect = new GameObject(holdHitEffectName);
+                    holdHitEffect.transform.parent = HoldsParent.transform;
+                    holdHitEffect.AddComponent<SpriteRenderer>();
+                    holdAnimator = holdHitEffect.AddComponent<Animator>();
+                }
+
                 holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
                 holdHitEffect.transform.position = holdHitEffectPosition;
                 holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
-                holdHitEffect.AddComponent<SpriteRenderer>();
 
-                //动画组件加载和状态设置
-                Animator holdAnimator = holdHitEffect.AddComponent<Animator>();
+                //动画组件状态设置
                 holdAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
                 int holdStartHash = Animator.StringToHash($"HoldStart");
                 //设置状态为HoldStart
@@ -317,8 +348,9 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 Hold hold = chart.holds[holdIndex];
                 KeyInfo holdKeyInfo = keyReachedJudgment[instanceName];
-                float holdEndTime = holdEndTimes[instanceName];
-                bool isStart = currentTime >= holdKeyInfo.startT && currentTime < holdEndTime;
+                float holdStartTime = holdTimes[instanceName][0];
+                float holdEndTime = holdTimes[instanceName][1];
+                bool isStart = currentTime >= holdStartTime && currentTime < holdEndTime;
                 bool isEnd = currentTime >= holdEndTime;
 
                 float subholdLeftX = hold.GetCurrentSubHoldLeftX(currentTime);
@@ -328,17 +360,17 @@ public class MusicAndChartPlayer : MonoBehaviour
                 JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
                 float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(currentTime);
                 Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
-                float worldUnitToScreenPixelX = Utility.CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+                float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
                 float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
                 float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
 
-                float x_width = noteSizeWorldLengthPerUnit / 1.18f * (subholdRightX - subholdLeftX);
+                float x_width = noteSizeWorldLengthPerUnit * HoldAnimationScaleAdjust * (subholdRightX - subholdLeftX);
 
-                float y = 0f;
                 JudgePlane correspondingJudgePlane = chart.GetCorrespondingJudgePlaneBasedOnTime(currentTime, hold);
-                y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                float y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                 Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
 
+                //判定结束
                 if (isEnd && !holdKeyInfo.isSoundPlayedAtEnd)
                 {
                     HoldSoundEffect.Play();
@@ -347,6 +379,20 @@ public class MusicAndChartPlayer : MonoBehaviour
                     currentHoldInstanceNames.RemoveAt(i);
 
                     GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
+                    //Debug.Log(holdHitEffectPosition);
+                    
+                    //结束时的特效缩放由holdEndTime对应X轴宽度决定
+                    subholdLeftX = hold.GetCurrentSubHoldLeftX(holdEndTime);
+                    subholdRightX = hold.GetCurrentSubHoldRightX(holdEndTime);
+                    x = (subholdLeftX + subholdRightX) / 2;
+                    startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
+                    holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
+                    x_width = noteSizeWorldLengthPerUnit * HoldAnimationScaleAdjust * (subholdRightX - subholdLeftX);
+
+                    holdHitEffect.transform.position = holdHitEffectPosition;
+                    holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
+                    //Debug.Log(holdHitEffect.transform.localScale);
+
                     if (holdHitEffect != null)
                     {
                         Animator animator = holdHitEffect.GetComponent<Animator>();
@@ -362,8 +408,11 @@ public class MusicAndChartPlayer : MonoBehaviour
                         }
                     }
                 }
+
+                //在判定过程中
                 else if (isStart && !isEnd)
                 {
+                    //Debug.Log(x_width);
                     GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
                     holdHitEffect.transform.position = holdHitEffectPosition;
                     holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
@@ -385,9 +434,9 @@ public class MusicAndChartPlayer : MonoBehaviour
     private void PrepareChartMapping(Chart chart)
     {
         List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
-        
 
-        if(chart.judgePlanes != null)
+
+        if (chart.judgePlanes != null)
         {
             for (int i = 0; i < chart.judgePlanes.Count; i++)
             {
@@ -442,7 +491,13 @@ public class MusicAndChartPlayer : MonoBehaviour
                 string instanceName = $"Hold{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
                 keyReachedJudgment[instanceName] = new KeyInfo(startT);
-                holdEndTimes[instanceName] = endT; // 记录Hold的结束时间
+                if (!holdTimes.ContainsKey(instanceName))
+                {
+                    holdTimes[instanceName] = new List<float>();
+                }
+                // 记录Hold的开始和结束时间
+                holdTimes[instanceName].Add(startT);
+                holdTimes[instanceName].Add(endT);
             }
         }
 
@@ -535,7 +590,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                             float YAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                             float YAxisUniform = YAxis / HeightParams.HeightDefault;
                             ////Debug.Log(YAxis);
-                            Vector2 Position = Utility.ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
+                            Vector2 Position = ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
                             judgeLineRectTransform.anchoredPosition = Position;
                             // 根据 YAxis 的值，实时改变 correspondingJudgePlane 下所有 SubJudgePlane 实例的透明度
                             correspondingJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
@@ -620,7 +675,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
 
-        // 针对Hold键进行额外的位置或属性更新（示例）
+        // 针对Hold键进行额外的位置或属性更新
         if (HoldsParent != null)
         {
             for (int i = 0; i < HoldsParent.transform.childCount; i++)
@@ -678,10 +733,14 @@ public class MusicAndChartPlayer : MonoBehaviour
                 animator = keyGameObject.AddComponent<Animator>();
             }
 
-            //临时调整一下动画效果的缩放，用以跟Note大小匹配
-            Vector3 currentScale = keyGameObject.transform.localScale;
-            currentScale.x *= 247 / 165f;
-            keyGameObject.transform.localScale = currentScale;
+            //HoldHitEffect不需要调整大小
+            if (!instanceName.StartsWith("HoldHitEffect"))
+            { 
+                //临时调整一下动画效果的缩放，用以跟Note大小匹配
+                Vector3 currentScale = keyGameObject.transform.localScale;
+                currentScale.x *= AnimationScaleAdjust;
+                keyGameObject.transform.localScale = currentScale;
+            }
 
             // 判断是否是Flick类型的键，如果是则先删除其所有子物体（如FlickArrow）
             if (instanceName.StartsWith("Flick"))
@@ -700,8 +759,8 @@ public class MusicAndChartPlayer : MonoBehaviour
                 if (int.TryParse(numberPart, out int holdIndex))
                 {
                     GameObject gameobject = GameObject.Find($"Hold{holdIndex}");
-                    if (gameobject != null) 
-                    { 
+                    if (gameobject != null)
+                    {
                         gameobject.SetActive(false);
                     }
                 }
@@ -763,6 +822,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             Slider slider = MusicSlider.GetComponent<Slider>();
             audioSource.time = slider.value * totalTime;
             ResetAllNotes(audioSource.time);
+            CheckArrowVisibility(SubStarsParent, audioSource.time, subStarInfoDict);
             MusicSlider.SetActive(false);
 
             audioSource.Play();
@@ -798,6 +858,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
 
         //重置所有Note的判定和激活状态
+        //将所有已经判定的Note状态设定为未激活
         currentIndex = 0;
         while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
         {
@@ -808,46 +869,28 @@ public class MusicAndChartPlayer : MonoBehaviour
                 // 设置当前时间前的note为已判定
                 keyInfo.isJudged = true;
                 // 设置该Note为非激活状态
+                GameObject NoteInstance = null;
                 if (instanceName.StartsWith("Tap"))
                 {
-                    GameObject NoteInstance = TapsParent.transform.Find(instanceName).gameObject; 
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(false);
-                    }
+                    NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
                 }
                 else if (instanceName.StartsWith("Slide"))
                 {
-                    GameObject NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(false);
-                    }
+                    NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
                 }
                 else if (instanceName.StartsWith("Flick"))
                 {
-                    GameObject NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(false);
-                    }
-                }
-                else if (instanceName.StartsWith("Hold"))
-                {
-                    GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(false);
-                    }
+                    NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
                 }
                 else if (instanceName.StartsWith("StarHead"))
                 {
-                    GameObject NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(false);
-                    }
+                    NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
                 }
+                if (NoteInstance != null)
+                {
+                    NoteInstance.SetActive(false);
+                }
+
                 //GameObject NoteInstance = GameObject.Find(instanceName);
                 //if (NoteInstance != null)
                 //{
@@ -861,9 +904,50 @@ public class MusicAndChartPlayer : MonoBehaviour
             currentIndex++;
         }
 
+        //Hold只要没到达结束时间就设置为激活
+        int holdIndex = 0;
+        while (holdIndex < holdTimes.Count)
+        {
+            string instanceName = holdTimes.ElementAt(holdIndex).Key;
+            GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
+            if (NoteInstance != null)
+            {
+                float startT = holdTimes.ElementAt(holdIndex).Value[0];
+                float endT = holdTimes.ElementAt(holdIndex).Value[1];
+                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                //如果未开始判定
+                if (currentTime <= startT)
+                {
+                    keyInfo.isJudged = false;
+                    keyInfo.isSoundPlayedAtStart = false;
+                    keyInfo.isSoundPlayedAtEnd = false;
+                    NoteInstance.SetActive(true);
+                }
+                //如果处于判定中
+                else if (currentTime > startT && currentTime < endT)
+                {
+                    keyInfo.isJudged = true;
+                    keyInfo.isSoundPlayedAtStart = true;
+                    keyInfo.isSoundPlayedAtEnd = false;
+                    NoteInstance.SetActive(true);
+                }
+                //如果结束判定
+                else if (currentTime >= endT)
+                {
+                    keyInfo.isJudged = true;
+                    keyInfo.isSoundPlayedAtStart = true;
+                    keyInfo.isSoundPlayedAtEnd = true;
+                    NoteInstance.SetActive(false);
+                }
+            }
+            holdIndex++;
+        }
+
+        //将所有尚未判定的Note状态设定为已激活
         int notJudgedIndex = currentIndex;
         while (notJudgedIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(notJudgedIndex).Key >= currentTime)
         {
+
             List<string> instanceNames = startTimeToInstanceNames.ElementAt(notJudgedIndex).Value;
             foreach (var instanceName in instanceNames)
             {
@@ -871,67 +955,54 @@ public class MusicAndChartPlayer : MonoBehaviour
                 // 设置当前时间后的note为未判定
                 keyInfo.isJudged = false;
                 // 设置该Note为激活状态
+                GameObject NoteInstance = null;
                 if (instanceName.StartsWith("Tap"))
                 {
-                    GameObject NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(true);
-                    }
+                    NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
                 }
                 else if (instanceName.StartsWith("Slide"))
                 {
-                    GameObject NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(true);
-                    }
+                    NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
                 }
                 else if (instanceName.StartsWith("Flick"))
                 {
-                    GameObject NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(true);
-                    }
-                }
-                else if (instanceName.StartsWith("Hold"))
-                {
-                    GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(true);
-                    }
+                    NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
                 }
                 else if (instanceName.StartsWith("StarHead"))
                 {
-                    GameObject NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
-                    if (NoteInstance != null)
-                    {
-                        NoteInstance.SetActive(true);
-                    }
+                    NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+                }
+                if (NoteInstance != null)
+                {
+                    NoteInstance.SetActive(true);
                 }
             }
-             notJudgedIndex++;
+            notJudgedIndex++;
         }
 
-        ResetNotesPosition(currentTime);
+        ResetNotesPositionAndSprite(currentTime);
+        //ResetNotesSprite(currentTime);
     }
 
-    private void ResetNotesPosition(float currentTime)
+    private void ResetNotesPositionAndSprite(float currentTime)
     {
         int Index = 0;
         while (Index < startTimeToInstanceNames.Count)
         {
             float startT = startTimeToInstanceNames.ElementAt(Index).Key;
             List<string> instanceNames = startTimeToInstanceNames.ElementAt(Index).Value;
+            //Debug.Log(instanceNames);
             foreach (var instanceName in instanceNames)
             {
-                // 设置该Note的位置
+                //Debug.Log(instanceName);
+                GameObject NoteInstance = null;
+                Sprite sprite = null;
+                // 设置该Note的位置和外观
                 if (instanceName.StartsWith("JudgePlane"))
                 {
-                    GameObject NoteInstance = JudgePlanesParent.transform.Find(instanceName).gameObject;
+                    NoteInstance = JudgePlanesParent.transform.Find(instanceName).gameObject;
                     Vector3 currentPosition = NoteInstance.transform.position;
+                    //注意JudgePlane的Z轴坐标计算逻辑不一样
                     currentPosition.z = CalculateZAxisPosition(-currentTime);
                     NoteInstance.transform.position = currentPosition;
 
@@ -943,37 +1014,63 @@ public class MusicAndChartPlayer : MonoBehaviour
                     // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
                     currentJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
                 }
-                if (instanceName.StartsWith("Tap"))
-                {
-                    GameObject NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
-                    Vector3 currentPosition = NoteInstance.transform.position;
-                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
-                    NoteInstance.transform.position = currentPosition;
-                }
-                else if (instanceName.StartsWith("Slide"))
-                {
-                    GameObject NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
-                    Vector3 currentPosition = NoteInstance.transform.position;
-                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
-                    NoteInstance.transform.position = currentPosition;
-                }
-                else if (instanceName.StartsWith("Flick"))
-                {
-                    GameObject NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
-                    Vector3 currentPosition = NoteInstance.transform.position;
-                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
-                    NoteInstance.transform.position = currentPosition;
-                }
                 else if (instanceName.StartsWith("Hold"))
                 {
-                    GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
+                    NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
                     Vector3 currentPosition = NoteInstance.transform.position;
-                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
+                    //注意Hold的Z轴坐标计算逻辑不一样
+                    currentPosition.z = CalculateZAxisPosition(-currentTime);
                     NoteInstance.transform.position = currentPosition;
                 }
-                else if (instanceName.StartsWith("StarHead"))
+                //对于非JudgePlane和非Hold的其他游戏物体，统一处理位置和外观
+                else
                 {
-                    GameObject NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+                    if (instanceName.StartsWith("Tap"))
+                    {
+                        //Debug.Log(instanceName);
+                        NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
+                        sprite = TapSprite;
+                    }
+                    else if (instanceName.StartsWith("Slide"))
+                    {
+                        NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
+                        sprite = SlideSprite;
+                    }
+                    else if (instanceName.StartsWith("Flick"))
+                    {
+                        NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+                        sprite = FlickSprite;
+                    }
+                    else if (instanceName.StartsWith("StarHead"))
+                    {
+                        NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+                        sprite = StarHeadSprite;
+                    }
+
+                    //删除Note的Animator组件（如果有）
+                    Animator animator = NoteInstance.GetComponent<Animator>();
+                    if (animator != null)
+                    {
+                        Destroy(animator);
+                        //将Note的Sprite重置为初始Sprite
+                        if (sprite != null)
+                        {
+                            // 获取SpriteRenderer组件
+                            SpriteRenderer spriteRenderer = NoteInstance.GetComponent<SpriteRenderer>();
+
+                            if (spriteRenderer != null)
+                            {
+                                // 将加载的Sprite赋值给SpriteRenderer
+                                spriteRenderer.sprite = sprite;
+                            }
+
+                            //Note在播放动画时，x轴缩放进行了一步放缩，需要再放缩回去
+                            Vector3 currentScale = NoteInstance.transform.localScale;
+                            currentScale.x /= AnimationScaleAdjust;
+                            NoteInstance.transform.localScale = currentScale;
+                        }
+                    }
+                    //更新Note位置
                     Vector3 currentPosition = NoteInstance.transform.position;
                     currentPosition.z = CalculateZAxisPosition(startT - currentTime);
                     NoteInstance.transform.position = currentPosition;
@@ -983,5 +1080,13 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
         audioPrevTime = currentTime;
     }
+    private void LoadNoteSprites()
+    {
+        TapSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/TapNote.png", typeof(Sprite));
+        SlideSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/SlideNote.png", typeof(Sprite));
+        FlickSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/FlickNote.png", typeof(Sprite));
+        StarHeadSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/StarHead.png", typeof(Sprite));
+    }
+
 }
 

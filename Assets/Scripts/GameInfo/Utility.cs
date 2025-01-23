@@ -8,7 +8,8 @@ using static Note.Star;
 using System.Collections.Generic;
 //using static Utility;
 
-public class Utility:MonoBehaviour
+
+public class Utility : MonoBehaviour
 {
     // 定义X轴/Y轴坐标变化函数的枚举类型
     //适用JudgePlane和Hold类
@@ -433,7 +434,7 @@ public class Utility:MonoBehaviour
         float scaledX = position.x / ChartParams.XaxisMax * screenXRange / 2;
         float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
 
-        
+
         return new Vector2(scaledX, scaledY);
     }
 
@@ -448,102 +449,190 @@ public class Utility:MonoBehaviour
 
         Vector3 Point = worldPosition;
 
-        float WorldUnitToScreenPixelX = Utility.CalculateWorldUnitToScreenPixelAtDistance(Point);
+        float WorldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelAtDistance(Point);
 
         float XWorld = horizontalVisibleRange / 2 / WorldUnitToScreenPixelX;
 
         return XWorld;
     }
 
-    public static void CheckArrowVisibility(Chart chart, float currentTime)
+
+    public static void CheckArrowVisibility(GameObject SubStarsParent, float currentTime, Dictionary<(int, int), SubStarInfo> subStarInfoDict)
     {
-        if (chart.stars != null)
+        foreach (var infoPair in subStarInfoDict)
         {
-            for (int i = 0; i < chart.stars.Count; i++)
+            SubStarInfo info = infoPair.Value;
+            List<GameObject> arrows = info.arrows;
+            GameObject SubStarArrowParent = info.SubStarArrowParent;
+            float totalTime = info.totalTime;
+            float arrowTimeInterval = info.arrowTimeInterval;
+            float starTrackStartT = info.starTrackStartT;
+            float starTrackEndT = info.starTrackEndT;
+            float starHeadT = info.starHeadT;
+
+            // 当时间处于 starHeadT - StarAppearTime 和 starHeadT 之间时，将该 substar 下对应 Arrow 均设置为可见，该 substar 下所有 arrow 的透明度由 0 线性地变为 1
+            if (currentTime >= starHeadT - ChartParams.StarAppearTime && currentTime <= starHeadT)
             {
-                var star = chart.stars[i];
-                float starHeadT = star.starHeadT;
-                for (int j = 0; j < star.subStarList.Count; j++)
+                SubStarArrowParent.SetActive(true);
+                if (arrows.Count != 0)
                 {
-                    var subStar = star.subStarList[j];
-                    int subStarIndex = j;
-
-                    string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
-                    //Debug.Log(instanceName);
-                    GameObject SubStarArrowParent = GameObject.Find(instanceName);
-                    //Debug.Log(SubStarArrowParent);
-                    List<GameObject> arrows = new List<GameObject>();
-
-                    if (SubStarArrowParent != null)
+                    float t = (currentTime - (starHeadT - ChartParams.StarAppearTime)) / ChartParams.StarAppearTime;
+                    foreach (var arrow in arrows)
                     {
-                        for (int k = 0; k < SubStarArrowParent.transform.childCount; k++)
-                        {
-                            GameObject arrow = SubStarArrowParent.transform.GetChild(k).gameObject;
-                            arrows.Add(arrow);
-                        }
-
-                        if (currentTime >= starHeadT - ChartParams.StarAppearTime && currentTime < starHeadT)
-                        {
-                            // 当时间处于 starHeadT - StarAppearTime 和 substar.startT 之间时，将该 substar 下对应 Arrow 均设置为可见，该 substar 下所有 arrow 的透明度由 0 线性地变为 1
-                            if (arrows.Count != 0)
-                            {
-                                float t = (currentTime - (starHeadT - ChartParams.StarAppearTime)) / ChartParams.StarAppearTime;
-                                foreach (var arrow in arrows)
-                                {
-                                    arrow.SetActive(true);
-                                    Star.SetArrowAlpha(arrow, t);
-                                }
-                            }
-                        }
-                        else if (currentTime >= subStar.starTrackStartT && currentTime < subStar.starTrackEndT)
-                        {
-                            if (arrows.Count != 0)
-                            {
-                                // 计算时间间隔和每个箭头的时间间隔
-                                float totalTime = subStar.starTrackEndT - subStar.starTrackStartT;
-                                float arrowTimeInterval = totalTime / arrows.Count;
-
-                                // 计算当前时间所在的箭头索引
-                                int arrowIndex = Mathf.FloorToInt((currentTime - subStar.starTrackStartT) / arrowTimeInterval);
-
-                                // 确保箭头索引不越界
-                                arrowIndex = Mathf.Clamp(arrowIndex, 0, arrows.Count - 1);
-
-                                // 遍历箭头，根据时间设置透明度
-                                for (int k = 0; k < arrows.Count; k++)
-                                {
-                                    float alpha = 1.0f;
-                                    if (k <= arrowIndex)
-                                    {
-                                        // 对于当前箭头及之前的箭头，根据时间线性改变透明度
-                                        if (k == arrowIndex)
-                                        {
-                                            float timeInInterval = (currentTime - (subStar.starTrackStartT + k * arrowTimeInterval)) / arrowTimeInterval;
-                                            alpha = 1.0f - timeInInterval;
-                                        }
-                                        else
-                                        {
-                                            alpha = 0.0f;
-                                        }
-                                    }
-                                    Star.SetArrowAlpha(arrows[k], alpha);
-                                }
-                            }
-                        }
-                        else if (currentTime >= subStar.starTrackEndT)
-                        {
-                            if (arrows.Count != 0)
-                            {
-                                // 当时间大于 starTrackEndT 时，删除所有 substar 下的 arrow 实例
-                                SubStarArrowParent.SetActive(false);
-                                //subStarArrows.Remove(subStarIndex);
-                            }
-                        }
+                        arrow.SetActive(true);
+                        SetArrowAlpha(arrow, t);
                     }
+                }
+            }
+            // 当时间处于 starTrackStartT 和 starTrackEndT 之间时，按箭头顺序，将该 substar 下所有 arrow 的透明度由 1 线性地变为 0
+            else if (currentTime >= starTrackStartT && currentTime <= starTrackEndT)
+            {
+                SubStarArrowParent.SetActive(true);
+                if (arrows.Count != 0)
+                {
+                    int arrowIndex = Mathf.FloorToInt((currentTime - starTrackStartT) / arrowTimeInterval);
+                    arrowIndex = Mathf.Clamp(arrowIndex, 0, arrows.Count - 1);
+
+                    for (int k = 0; k < arrows.Count; k++)
+                    {
+                        float alpha = 1.0f;
+                        if (k <= arrowIndex)
+                        {
+                            if (k == arrowIndex)
+                            {
+                                float timeInInterval = (currentTime - (starTrackStartT + k * arrowTimeInterval)) / arrowTimeInterval;
+                                alpha = 1.0f - timeInInterval;
+                            }
+                            else
+                            {
+                                alpha = 0.0f;
+                            }
+                        }
+                        SetArrowAlpha(arrows[k], alpha);
+                    }
+                }
+            }
+            else if (currentTime > starTrackEndT)
+            {
+                if (arrows.Count != 0)
+                {
+                    SubStarArrowParent.SetActive(false);
+                }
+            }
+            else if (currentTime < starHeadT - ChartParams.StarAppearTime)
+            {
+                if (arrows.Count != 0)
+                {
+                    SubStarArrowParent.SetActive(false);
                 }
             }
         }
     }
+
+
+
+    //public static void CheckArrowVisibility(Chart chart, GameObject SubStarsParent, float currentTime)
+    //{
+    //    if (chart.stars != null)
+    //    {
+    //        for (int i = 0; i < chart.stars.Count; i++)
+    //        {
+    //            var star = chart.stars[i];
+    //            float starHeadT = star.starHeadT;
+    //            for (int j = 0; j < star.subStarList.Count; j++)
+    //            {
+    //                var subStar = star.subStarList[j];
+    //                int subStarIndex = j;
+
+    //                string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
+    //                //Debug.Log(instanceName);
+    //                GameObject SubStarArrowParent = SubStarsParent.transform.Find(instanceName).gameObject;
+    //                //Debug.Log(SubStarArrowParent);
+    //                List<GameObject> arrows = new List<GameObject>();
+
+    //                if (SubStarArrowParent != null)
+    //                {
+    //                    for (int k = 0; k < SubStarArrowParent.transform.childCount; k++)
+    //                    {
+    //                        GameObject arrow = SubStarArrowParent.transform.GetChild(k).gameObject;
+    //                        arrows.Add(arrow);
+    //                    }
+
+    //                    if (currentTime >= starHeadT - ChartParams.StarAppearTime && currentTime < starHeadT)
+    //                    {
+    //                        SubStarArrowParent.SetActive(true);
+    //                        // 当时间处于 starHeadT - StarAppearTime 和 substar.startT 之间时，将该 substar 下对应 Arrow 均设置为可见，该 substar 下所有 arrow 的透明度由 0 线性地变为 1
+    //                        if (arrows.Count != 0)
+    //                        {
+    //                            float t = (currentTime - (starHeadT - ChartParams.StarAppearTime)) / ChartParams.StarAppearTime;
+    //                            foreach (var arrow in arrows)
+    //                            {
+    //                                arrow.SetActive(true);
+    //                                SetArrowAlpha(arrow, t);
+    //                            }
+    //                        }
+    //                    }
+    //                    else if (currentTime >= subStar.starTrackStartT && currentTime < subStar.starTrackEndT)
+    //                    {
+    //                        SubStarArrowParent.SetActive(true);
+    //                        if (arrows.Count != 0)
+    //                        {
+    //                            // 计算时间间隔和每个箭头的时间间隔
+    //                            float totalTime = subStar.starTrackEndT - subStar.starTrackStartT;
+    //                            float arrowTimeInterval = totalTime / arrows.Count;
+
+    //                            // 计算当前时间所在的箭头索引
+    //                            int arrowIndex = Mathf.FloorToInt((currentTime - subStar.starTrackStartT) / arrowTimeInterval);
+
+    //                            // 确保箭头索引不越界
+    //                            arrowIndex = Mathf.Clamp(arrowIndex, 0, arrows.Count - 1);
+
+    //                            // 遍历箭头，根据时间设置透明度
+    //                            for (int k = 0; k < arrows.Count; k++)
+    //                            {
+    //                                float alpha = 1.0f;
+    //                                if (k <= arrowIndex)
+    //                                {
+    //                                    // 对于当前箭头及之前的箭头，根据时间线性改变透明度
+    //                                    if (k == arrowIndex)
+    //                                    {
+    //                                        float timeInInterval = (currentTime - (subStar.starTrackStartT + k * arrowTimeInterval)) / arrowTimeInterval;
+    //                                        alpha = 1.0f - timeInInterval;
+    //                                    }
+    //                                    else
+    //                                    {
+    //                                        alpha = 0.0f;
+    //                                    }
+    //                                }
+    //                                SetArrowAlpha(arrows[k], alpha);
+    //                            }
+    //                        }
+    //                    }
+    //                    else if (currentTime >= subStar.starTrackEndT)
+    //                    {
+    //                        if (arrows.Count != 0)
+    //                        {
+    //                            // 当时间大于 starTrackEndT 时，将 substar 下的 arrow 实例均设为非激活
+    //                            SubStarArrowParent.SetActive(false);
+    //                        }
+    //                    }
+    //                    else if (currentTime < starHeadT - ChartParams.StarAppearTime)
+    //                    {
+    //                        if (arrows.Count != 0)
+    //                        {
+    //                            // 当时间小于 starHeadT - ChartParams.StarAppearTime 时，将 substar 下的 arrow 实例均设为非激活
+    //                            SubStarArrowParent.SetActive(false);
+    //                        }
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    Debug.Log(instanceName + "未找到！");
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
     public static GameObject CombineInstances(List<GameObject> instances)
     {
