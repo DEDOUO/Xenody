@@ -652,7 +652,7 @@ public class ChartInstantiator : MonoBehaviour
                     }
 
                     // 计算 subStar 的曲线长度
-                    float curveLength = Utility.CalculateSubStarCurveLength(subStar);
+                    float curveLength = CalculateSubStarCurveLength(subStar);
                     //Debug.Log(curveLength);
                     // 根据曲线长度和每单位长度的 SubArrow 数量，计算需要初始化的 SubArrow 数量
                     //四舍五入

@@ -162,6 +162,36 @@ public class Utility : MonoBehaviour
         return result;
     }
 
+    public static float ConvertAngle(float theta, float a, float b)
+    {
+        float k = Mathf.Tan(theta);
+        float t = Mathf.Atan(k * a / b);
+
+        // 判断 theta 所在的象限并进行调整
+        if (theta >= 0 && theta < Mathf.PI / 2)
+        {
+            // 第一象限，t 本身就在正确区间，无需调整
+            return t;
+        }
+        else if (theta >= Mathf.PI / 2 && theta < Mathf.PI)
+        {
+            // 第二象限，将 t 调整到第二象限
+            return Mathf.PI + t;
+        }
+        else if (theta >= -Mathf.PI && theta < -Mathf.PI / 2)
+        {
+            // 第三象限，将 t 调整到第三象限
+            return -Mathf.PI + t;
+        }
+        else if (theta >= -Mathf.PI / 2 && theta < 0)
+        {
+            // 第四象限，t 本身就在正确区间，无需调整
+            return t;
+        }
+
+        return t;
+    }
+
     public static Vector2 CalculateSubArrowPosition(float currentRate, Vector2 subStarStartScreen, Vector2 subStarEndScreen, TrackFunctionType trackFunction)
     {
         float x1 = subStarStartScreen.x;
@@ -174,7 +204,7 @@ public class Utility : MonoBehaviour
         float a = 0f;
         float b = 0f;
         float theta = 0f;
-        float k = 0f;
+        //float k = 0f;
         float t = 0f;
         switch (trackFunction)
         {
@@ -220,8 +250,7 @@ public class Utility : MonoBehaviour
                     result.y = offset.y + b;
                     break;
                 }
-                k = Mathf.Tan(theta);
-                t = Mathf.Atan(k * a / b);
+                t = ConvertAngle(theta, a, b);
                 result.x = offset.x + a * Mathf.Cos(t);
                 result.y = offset.y + b * Mathf.Sin(t);
                 //Debug.Log(result);
@@ -232,19 +261,21 @@ public class Utility : MonoBehaviour
                 b = Mathf.Abs(y2 - y1);
                 if (x1 < x2 && y1 < y2)
                 {
-                    theta = 1.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    theta = -0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
                     offset.x = x1;
                     offset.y = y2;
                 }
                 if (x1 < x2 && y1 > y2)
                 {
-                    theta = Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    theta = -Mathf.PI + currentRate * 0.5f * Mathf.PI;
                     offset.x = x2;
                     offset.y = y1;
+                    //Debug.Log(theta);
+                    //Debug.Log(offset);
                 }
                 if (x1 > x2 && y1 < y2)
                 {
-                    theta = 1.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    theta = -0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
                     offset.x = x1;
                     offset.y = y2;
                 }
@@ -261,25 +292,38 @@ public class Utility : MonoBehaviour
                     result.y = offset.y - b;
                     break;
                 }
-                k = Mathf.Tan(theta);
-                t = Mathf.Atan(k * a / b);
+                t = ConvertAngle(theta, a, b);
                 result.x = offset.x + a * Mathf.Cos(t);
                 result.y = offset.y + b * Mathf.Sin(t);
                 break;
         }
         return result;
     }
+
     public static float CalculateSubArrowRotation(float currentRate, Vector2 subStarStartScreen, Vector2 subStarEndScreen, TrackFunctionType trackFunction)
     {
+        //注意Camera在画布背面，Arrow旋转好像需要镜像？
         float x1 = subStarStartScreen.x;
         float y1 = subStarStartScreen.y;
         float x2 = subStarEndScreen.x;
         float y2 = subStarEndScreen.y;
 
-        float result = 0f;
+        //float result = 0f;
         float theta = 0f;
+
+        //先处理x轴坐标相同的情况
         if (x1 == x2)
-        { return result; }
+        {
+            if (y1 < y2)
+            {
+                return 0f;
+            }
+            else 
+            {
+                return 180f;
+            }
+        }
+
         switch (trackFunction)
         {
             case TrackFunctionType.Linear:
@@ -288,62 +332,63 @@ public class Utility : MonoBehaviour
                 {
                     theta = Mathf.Atan((y2 - y1) / (x2 - x1));
                 }
-                if (x1 < x2 && y1 > y2)
+                else if (x1 < x2 && y1 > y2)
                 {
                     theta = Mathf.Atan((y2 - y1) / (x2 - x1));
                 }
-                if (x1 > x2 && y1 < y2)
+                else if (x1 > x2 && y1 < y2)
                 {
                     theta = Mathf.Atan((y2 - y1) / (x2 - x1)) + Mathf.PI;
                 }
-                if (x1 > x2 && y1 > y2)
+                else if (x1 > x2 && y1 > y2)
                 {
                     theta = Mathf.Atan((y2 - y1) / (x2 - x1)) + Mathf.PI;
                 }
-                result = (theta - 0.5f * Mathf.PI) * Mathf.Rad2Deg;
+                theta -= 0.5f * Mathf.PI;
+                theta *= Mathf.Rad2Deg;
                 break;
             case TrackFunctionType.UpperCir:
                 // UpperCir指向上凸起的圆弧（详见说明）
                 if (x1 < x2 && y1 < y2)
                 {
-                    theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
-                }
-                if (x1 < x2 && y1 > y2)
-                {
-                    theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
-                }
-                if (x1 > x2 && y1 < y2)
-                {
                     theta = currentRate * 0.5f * Mathf.PI;
                 }
-                if (x1 > x2 && y1 > y2)
+                else if (x1 < x2 && y1 > y2)
                 {
                     theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
                 }
-                result = (theta - Mathf.PI) * Mathf.Rad2Deg;
+                else if (x1 > x2 && y1 < y2)
+                {
+                    theta = -currentRate * 0.5f * Mathf.PI;
+                }
+                else if (x1 > x2 && y1 > y2)
+                {
+                    theta = -0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                }
+                theta *= -Mathf.Rad2Deg;
                 break;
             case TrackFunctionType.LowerCir:
                 // LowerCir指向下凸起的圆弧（详见说明）
                 if (x1 < x2 && y1 < y2)
                 {
-                    theta = 1.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
                 }
                 if (x1 < x2 && y1 > y2)
                 {
-                    theta = Mathf.PI + currentRate * 0.5f * Mathf.PI;
+                    theta =  Mathf.PI - currentRate * 0.5f * Mathf.PI;
                 }
                 if (x1 > x2 && y1 < y2)
                 {
-                    theta = 1.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    theta = -0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
                 }
                 if (x1 > x2 && y1 > y2)
                 {
-                    theta = -currentRate * 0.5f * Mathf.PI;
+                    theta = -Mathf.PI + currentRate * 0.5f * Mathf.PI;
                 }
-                result = (theta - Mathf.PI) * Mathf.Rad2Deg;
+                theta *= -Mathf.Rad2Deg;
                 break;
         }
-        return result;
+        return theta;
     }
 
     public static float CalculateSubStarCurveLength(Note.Star.SubStar subStar)
