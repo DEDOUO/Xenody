@@ -19,6 +19,7 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject TapsParent;
     private GameObject SlidesParent;
     private GameObject FlicksParent;
+    private GameObject FlickArrowsParent;
     private GameObject HoldsParent;
     private GameObject StarsParent;
     private GameObject SubStarsParent;
@@ -31,7 +32,7 @@ public class ChartInstantiator : MonoBehaviour
 
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
-    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent,
+    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject starsParent,
         GameObject subStarsParent,
         Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer)
     {
@@ -40,6 +41,7 @@ public class ChartInstantiator : MonoBehaviour
         TapsParent = tapsParent;
         SlidesParent = slidesParent;
         FlicksParent = flicksParent;
+        FlickArrowsParent = flickarrowsParent;
         HoldsParent = holdsParent;
         StarsParent = starsParent;
         SubStarsParent = subStarsParent;
@@ -170,37 +172,6 @@ public class ChartInstantiator : MonoBehaviour
                 Debug.LogError("无法加载JudgeLine预制体！");
             }
         }
-    }
-
-    
-
-    private GameObject CreateJudgePlaneQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
-    {
-        // 将StartY和EndY映射为世界坐标并放大到合适范围（0 - HeightParams.HeightDefault，这里假设HeightParams.HeightDefault为6）
-        float startYWorld = startY * HeightParams.HeightDefault;
-        float endYWorld = endY * HeightParams.HeightDefault;
-
-        // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
-        float zPositionForStartT = CalculateZAxisPosition(startT);
-
-        // 计算在Z轴方向的长度（之前代码中的height变量，这里改为lengthForZAxis）
-        float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;
-
-        // 假设获取到一个目标点的世界坐标
-        Vector3 StartPoint = new Vector3(0, startYWorld, 0);
-        Vector3 EndPoint = new Vector3(0, endYWorld, 0);
-
-        // 计算StartXWorld和EndXWorld，确保在屏幕左右各留10%的距离
-        float startXWorld = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint);
-        float endXWorld = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint);
-
-        Vector3 point1 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
-        Vector3 point2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
-        Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
-        Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
-
-        GameObject instance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 1f);
-        return instance;
     }
 
     public void InstantiateTaps(Chart chart)
@@ -421,27 +392,24 @@ public class ChartInstantiator : MonoBehaviour
                         float zPositionForStartT = CalculateZAxisPosition(flick.startT);
                         flickInstance.transform.position = new Vector3(-startXWorld, yAxisPosition, zPositionForStartT);
 
+                        Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flickInstance);
+                        //Debug.Log(leftMiddleWorldPos);
+
                         // 实例化Flick箭头预制体
                         GameObject flickArrowInstance = Instantiate(flickArrowPrefab);
                         flickArrowInstance.name = $"FlickArrow{flickIndex}";
 
-                        // 设置Flick箭头实例的父物体为当前Flick实例，使其覆盖在Flick上
-                        flickArrowInstance.transform.SetParent(flickInstance.transform);
+                        // 设置Flick箭头实例的父物体为FlickArrowsParent
+                        flickArrowInstance.transform.SetParent(FlickArrowsParent.transform);
+                        // 只手动设置子物体的世界位置为父物体的世界位置
+                        flickArrowInstance.transform.position = flickInstance.transform.position;
+
                         // 继承父物体的图层
                         int parentLayer2 = flickInstance.layer;
                         flickArrowInstance.layer = parentLayer2;
 
-                        // 根据flickDirection设置箭头的旋转角度，将其方向与定义的方向一致（这里假设flickDirection表示角度相关的值，需根据实际含义调整转换逻辑）
-                        //Debug.Log(flick.flickDirection);
-                        float arrowRotationAngle = flick.flickDirection * 360; // 假设flickDirection是0-1之间的值，转换为0-360度的角度，根据实际调整
-                        //Debug.Log(arrowRotationAngle);
-                        flickArrowInstance.transform.localRotation = Quaternion.Euler(0, 0, arrowRotationAngle);
-
-                        // 设置Flick箭头实例的位置，使其在Flick的合适位置上（比如中心位置等，根据实际调整）
-                        flickArrowInstance.transform.localPosition = new Vector3(0, 0.8f, 0); // 示例，可根据实际调整
-
-                        // 根据Flick的缩放比例同步缩放箭头（仅针对Y轴缩放，即缩放箭头长度）
-                        flickArrowInstance.transform.localScale = new Vector3(1.5f, xAxisScale * 2f, 1);
+                        //调整FlickArrow的位置（针对横划情况）
+                        AdjustFlickArrowPosition(flickArrowInstance, flickInstance, flick.flickDirection);
                     }
 
                     // 检查Flick相关的范围等条件是否满足（这里简单示例输出警告，按实际需求完善检查逻辑）
@@ -744,6 +712,36 @@ public class ChartInstantiator : MonoBehaviour
                 currentRate += rateStep;
             }
         }
+    }
+
+
+    private GameObject CreateJudgePlaneQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
+    {
+        // 将StartY和EndY映射为世界坐标并放大到合适范围（0 - HeightParams.HeightDefault，这里假设HeightParams.HeightDefault为6）
+        float startYWorld = startY * HeightParams.HeightDefault;
+        float endYWorld = endY * HeightParams.HeightDefault;
+
+        // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
+        float zPositionForStartT = CalculateZAxisPosition(startT);
+
+        // 计算在Z轴方向的长度（之前代码中的height变量，这里改为lengthForZAxis）
+        float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;
+
+        // 假设获取到一个目标点的世界坐标
+        Vector3 StartPoint = new Vector3(0, startYWorld, 0);
+        Vector3 EndPoint = new Vector3(0, endYWorld, 0);
+
+        // 计算StartXWorld和EndXWorld，确保在屏幕左右各留10%的距离
+        float startXWorld = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint);
+        float endXWorld = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint);
+
+        Vector3 point1 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
+        Vector3 point2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
+        Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
+        Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
+
+        GameObject instance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 1f);
+        return instance;
     }
 
     private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,

@@ -17,6 +17,7 @@ public class AutoPlay : MonoBehaviour
     public GameObject TapsParent;
     public GameObject SlidesParent;
     public GameObject FlicksParent;
+    public GameObject FlickArrowsParent;
     public GameObject HoldsParent;
     public GameObject StarsParent;
     public GameObject subStarsParent;
@@ -38,6 +39,7 @@ public class AutoPlay : MonoBehaviour
         TapsParent = GameObject.Find("TapsParent");
         SlidesParent = GameObject.Find("SlidesParent");
         FlicksParent = GameObject.Find("FlicksParent");
+        FlickArrowsParent = GameObject.Find("FlickArrowsParent");
         HoldsParent = GameObject.Find("HoldsParent");
         StarsParent = GameObject.Find("StarsParent");
         subStarsParent = GameObject.Find("SubStarsParent");
@@ -96,7 +98,7 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent, subStarsParent,
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
             JudgePlaneSprite, HoldSprite,
             renderOrderManager, AnimatorContainer);
 
@@ -107,7 +109,7 @@ public class AutoPlay : MonoBehaviour
         instantiator.InstantiateAll(chart);
 
         // 播放音乐和更新谱面位置
-        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, HoldsParent, StarsParent, subStarsParent,
+        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
             TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, chart);
         player.enabled = true;
         player.PlayMusicAndChart(chart);

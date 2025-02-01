@@ -328,15 +328,15 @@ public class Utility : MonoBehaviour
         {
             case TrackFunctionType.Linear:
                 // 线性函数计算当前位置
-                if (x1 < x2 && y1 < y2)
+                if (x1 <= x2 && y1 <= y2)
                 {
                     theta = Mathf.Atan((y2 - y1) / (x2 - x1));
                 }
-                else if (x1 < x2 && y1 > y2)
+                else if (x1 <= x2 && y1 > y2)
                 {
                     theta = Mathf.Atan((y2 - y1) / (x2 - x1));
                 }
-                else if (x1 > x2 && y1 < y2)
+                else if (x1 > x2 && y1 <= y2)
                 {
                     theta = Mathf.Atan((y2 - y1) / (x2 - x1)) + Mathf.PI;
                 }
@@ -349,15 +349,15 @@ public class Utility : MonoBehaviour
                 break;
             case TrackFunctionType.UpperCir:
                 // UpperCir指向上凸起的圆弧（详见说明）
-                if (x1 < x2 && y1 < y2)
+                if (x1 <= x2 && y1 <= y2)
                 {
                     theta = currentRate * 0.5f * Mathf.PI;
                 }
-                else if (x1 < x2 && y1 > y2)
+                else if (x1 <= x2 && y1 > y2)
                 {
                     theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
                 }
-                else if (x1 > x2 && y1 < y2)
+                else if (x1 > x2 && y1 <= y2)
                 {
                     theta = -currentRate * 0.5f * Mathf.PI;
                 }
@@ -369,15 +369,15 @@ public class Utility : MonoBehaviour
                 break;
             case TrackFunctionType.LowerCir:
                 // LowerCir指向下凸起的圆弧（详见说明）
-                if (x1 < x2 && y1 < y2)
+                if (x1 <= x2 && y1 <= y2)
                 {
                     theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
                 }
-                if (x1 < x2 && y1 > y2)
+                if (x1 <= x2 && y1 > y2)
                 {
                     theta =  Mathf.PI - currentRate * 0.5f * Mathf.PI;
                 }
-                if (x1 > x2 && y1 < y2)
+                if (x1 > x2 && y1 <= y2)
                 {
                     theta = -0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
                 }
@@ -733,6 +733,111 @@ public class Utility : MonoBehaviour
     {
         // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
         return -startTime * SpeedParams.NoteSpeedDefault;
+    }
+
+    // 设置锚点的辅助方法
+    public static void SetAnchor(GameObject obj, Vector2 anchor)
+    {
+        RectTransform rectTransform = obj.GetComponent<RectTransform>();
+        if (rectTransform != null)
+        {
+            rectTransform.anchorMin = anchor;
+            rectTransform.anchorMax = anchor;
+        }
+    }
+
+    public static void AdjustFlickArrowPosition(GameObject flickarrow, GameObject flick, float flickDirection)
+    {
+        Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flick);
+        Vector3 rightMiddleWorldPos = GetRightMiddleWorldPosition(flick);
+        //Debug.Log(leftMiddleWorldPos);
+        //Debug.Log(rightMiddleWorldPos);
+
+        float arrowRotationAngle = flickDirection * 360; // 假设flickDirection是0-1之间的值，转换为0-360度的角度，根据实际调整
+        if (Math.Abs(arrowRotationAngle - 90) <= 1 | Math.Abs(arrowRotationAngle - 270) <= 1)
+        {
+            bool ifleft = Math.Abs(arrowRotationAngle - 90) <= 1;
+            flickarrow.transform.rotation = Quaternion.Euler(-90, 0, arrowRotationAngle);
+            // 设置Flick箭头实例的位置，使其在Flick的合适位置上
+            if (ifleft)
+            {
+                //以Flick左侧坐标为锚点，往右平移
+                Vector3 Pos = leftMiddleWorldPos;
+                Vector3 PositionAdjust = new Vector3(1.2f, 0, 0);
+                Vector3 newPosition = Pos + PositionAdjust;
+                flickarrow.transform.position = newPosition;
+            }
+            else
+            {
+                //以Flick右侧坐标为锚点，往左平移
+                Vector3 Pos = rightMiddleWorldPos;
+                Vector3 PositionAdjust = new Vector3(-1.2f, 0, 0);
+                Vector3 newPosition = Pos + PositionAdjust;
+                flickarrow.transform.position = newPosition;
+            }
+            // 根据Flick的缩放比例同步缩放箭头（仅针对X轴缩放，即缩放箭头宽度）
+            flickarrow.transform.localScale = new Vector3(1f, 0.8f, 1);
+        }
+        //针对非横划（90度或270度），箭头应显示在竖直平面内
+        else
+        {
+            flickarrow.transform.rotation = Quaternion.Euler(0, 0, arrowRotationAngle);
+            // 根据Flick的缩放比例同步缩放箭头（仅针对X轴缩放，即缩放箭头宽度）
+            flickarrow.transform.localScale = new Vector3(1f, 0.8f, 1);
+        }
+    }
+
+    // 获取矩形左侧中间的世界坐标
+    public static Vector3 GetLeftMiddleWorldPosition(GameObject obj)
+    {
+        // 获取物体的 Transform 组件
+        Transform transform = obj.transform;
+
+        // 获取物体的 Renderer 组件，用于获取边界信息
+        Renderer renderer = obj.GetComponent<Renderer>();
+        if (renderer == null)
+        {
+            Debug.LogError("物体缺少 Renderer 组件！");
+            return Vector3.zero;
+        }
+
+        // 获取物体的局部边界
+        Bounds localBounds = renderer.bounds;
+
+        // 计算左侧中间的局部坐标
+        Vector3 leftMiddlePos = new Vector3(localBounds.min.x, localBounds.center.y, localBounds.center.z);
+        //Debug.Log(leftMiddleLocalPos);
+
+        // 将局部坐标转换为世界坐标
+        //Vector3 leftMiddleWorldPos = transform.TransformPoint(leftMiddleLocalPos);
+
+        return leftMiddlePos;
+    }
+
+    // 获取矩形右侧中间的世界坐标
+    public static Vector3 GetRightMiddleWorldPosition(GameObject obj)
+    {
+        // 获取物体的 Transform 组件
+        Transform transform = obj.transform;
+
+        // 获取物体的 Renderer 组件，用于获取边界信息
+        Renderer renderer = obj.GetComponent<Renderer>();
+        if (renderer == null)
+        {
+            Debug.LogError("物体缺少 Renderer 组件！");
+            return Vector3.zero;
+        }
+
+        // 获取物体的局部边界
+        Bounds localBounds = renderer.bounds;
+
+        // 计算右侧中间的局部坐标
+        Vector3 rightMiddlePos = new Vector3(localBounds.max.x, localBounds.center.y, localBounds.center.z);
+
+        // 将局部坐标转换为世界坐标
+        //Vector3 rightMiddleWorldPos = transform.TransformPoint(rightMiddleLocalPos);
+
+        return rightMiddlePos;
     }
 
 }

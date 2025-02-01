@@ -23,6 +23,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject TapsParent;
     private GameObject SlidesParent;
     private GameObject FlicksParent;
+    private GameObject FlickArrowsParent;
     private GameObject HoldsParent;
     private GameObject StarsParent;
     private GameObject SubStarsParent;
@@ -77,7 +78,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent,
-        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject holdsParent, GameObject starsParent, GameObject substarsParent,
+        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject starsParent, GameObject substarsParent,
         AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect,
         Chart chart)
     {
@@ -87,6 +88,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         TapsParent = tapsParent;
         SlidesParent = slidesParent;
         FlicksParent = flicksParent;
+        FlickArrowsParent = flickarrowsParent;
         HoldsParent = holdsParent;
         StarsParent = starsParent;
         SubStarsParent = substarsParent;
@@ -177,7 +179,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     else if (instanceName.StartsWith("Flick"))
                     {
                         TapSoundEffect.Play();
-                        FlickSoundEffect.Play();
+                        //FlickSoundEffect.Play();
                         PlayAnimation(instanceName, "FlickEffect");
                     }
                     else if (instanceName.StartsWith("Hold"))
@@ -378,9 +380,8 @@ public class MusicAndChartPlayer : MonoBehaviour
                     // 如果已经结束判定，从列表中移除该instanceName
                     currentHoldInstanceNames.RemoveAt(i);
 
-                    GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
-                    //Debug.Log(holdHitEffectPosition);
                     
+                    //Debug.Log(holdHitEffectPosition);
                     //结束时的特效缩放由holdEndTime对应X轴宽度决定
                     subholdLeftX = hold.GetCurrentSubHoldLeftX(holdEndTime);
                     subholdRightX = hold.GetCurrentSubHoldRightX(holdEndTime);
@@ -389,12 +390,12 @@ public class MusicAndChartPlayer : MonoBehaviour
                     holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
                     x_width = noteSizeWorldLengthPerUnit * HoldAnimationScaleAdjust * (subholdRightX - subholdLeftX);
 
-                    holdHitEffect.transform.position = holdHitEffectPosition;
-                    holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
-                    //Debug.Log(holdHitEffect.transform.localScale);
 
+                    GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
                     if (holdHitEffect != null)
                     {
+                        holdHitEffect.transform.position = holdHitEffectPosition;
+                        holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
                         Animator animator = holdHitEffect.GetComponent<Animator>();
 
                         if (animator != null)
@@ -414,8 +415,11 @@ public class MusicAndChartPlayer : MonoBehaviour
                 {
                     //Debug.Log(x_width);
                     GameObject holdHitEffect = GameObject.Find($"HoldHitEffect{holdIndex + 1}");
-                    holdHitEffect.transform.position = holdHitEffectPosition;
-                    holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
+                    if (holdHitEffect != null)
+                    {
+                        holdHitEffect.transform.position = holdHitEffectPosition;
+                        holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
+                    }
                 }
             }
         }
@@ -675,6 +679,24 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
 
+
+        if (FlickArrowsParent != null)
+        {
+            for (int i = 0; i < FlickArrowsParent.transform.childCount; i++)
+            {
+                Transform childTransform = FlickArrowsParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                string instanceName = keyGameObject.name;
+                //KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                //if (!keyInfo.isJudged)
+                //{
+                Vector3 currentPosition = childTransform.position;
+                currentPosition.z += zAxisDecreasePerFrame;
+                childTransform.position = currentPosition;
+                //}
+            }
+        }
+
         // 针对Hold键进行额外的位置或属性更新
         if (HoldsParent != null)
         {
@@ -745,12 +767,21 @@ public class MusicAndChartPlayer : MonoBehaviour
             // 判断是否是Flick类型的键，如果是则先删除其所有子物体（如FlickArrow）
             if (instanceName.StartsWith("Flick"))
             {
-                // 获取Flick物体下的所有子物体并删除
-                for (int i = keyGameObject.transform.childCount - 1; i >= 0; i--)
+                string numberPart = instanceName.Substring(5);
+                if (int.TryParse(numberPart, out int flickIndex))
                 {
-                    Transform childTransform = keyGameObject.transform.GetChild(i);
-                    childTransform.gameObject.SetActive(false);
+                    GameObject gameobject = GameObject.Find($"FlickArrow{flickIndex}");
+                    if (gameobject != null)
+                    {
+                        gameobject.SetActive(false);
+                    }
                 }
+                //// 获取Flick物体下的所有子物体并删除
+                //for (int i = keyGameObject.transform.childCount - 1; i >= 0; i--)
+                //{
+                //    Transform childTransform = keyGameObject.transform.GetChild(i);
+                //    childTransform.gameObject.SetActive(false);
+                //}
             }
             //如果是Hold类型的键，则删除对应的Hold物体
             if (instanceName.StartsWith("HoldHitEffect"))
@@ -880,7 +911,32 @@ public class MusicAndChartPlayer : MonoBehaviour
                 }
                 else if (instanceName.StartsWith("Flick"))
                 {
+                    //Transform flickTransform = FlicksParent.transform.Find(instanceName);
+
                     NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+
+                    string numberPart = instanceName.Substring(5);
+                    if (int.TryParse(numberPart, out int flickIndex))
+                    {
+                        GameObject gameobject = FlickArrowsParent.transform.Find($"FlickArrow{flickIndex}").gameObject;
+                        if (gameobject != null)
+                        {
+                            gameobject.SetActive(false);
+                        }
+                    }
+
+                    //if (flickTransform != null)
+                    //{
+                    //    // 获取 Flick 对应的游戏对象
+                    //    NoteInstance = flickTransform.gameObject;
+                    //    // 遍历 Flick 下的所有子物体并设置为非激活状态
+                    //    for (int i = 0; i < flickTransform.childCount; i++)
+                    //    {
+                    //        Transform childTransform = flickTransform.GetChild(i);
+                    //        //Debug.Log(childTransform);
+                    //        childTransform.gameObject.SetActive(false);
+                    //    }
+                    //}
                 }
                 else if (instanceName.StartsWith("StarHead"))
                 {
@@ -939,6 +995,14 @@ public class MusicAndChartPlayer : MonoBehaviour
                     keyInfo.isSoundPlayedAtEnd = true;
                     NoteInstance.SetActive(false);
                 }
+
+                //将所有HoldHitEffect效果设置为非激活
+                Transform holdHitEffectTransform = HoldsParent.transform.Find($"HoldHitEffect{holdIndex}");
+                if (holdHitEffectTransform != null)
+                {
+                    GameObject gameobject = holdHitEffectTransform.gameObject;
+                    gameobject.SetActive(false);
+                }
             }
             holdIndex++;
         }
@@ -966,7 +1030,32 @@ public class MusicAndChartPlayer : MonoBehaviour
                 }
                 else if (instanceName.StartsWith("Flick"))
                 {
+
                     NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+
+                    string numberPart = instanceName.Substring(5);
+                    if (int.TryParse(numberPart, out int flickIndex))
+                    {
+                        GameObject gameobject = FlickArrowsParent.transform.Find($"FlickArrow{flickIndex}").gameObject;
+                        if (gameobject != null)
+                        {
+                            gameobject.SetActive(true);
+                        }
+                    }
+
+                    //Transform flickTransform = FlicksParent.transform.Find(instanceName);
+                    //if (flickTransform != null)
+                    //{
+                    //    // 获取 Flick 对应的游戏对象
+                    //    NoteInstance = flickTransform.gameObject;
+                    //    // 遍历 Flick 下的所有子物体并设置为非激活状态
+                    //    for (int i = 0; i < flickTransform.childCount; i++)
+                    //    {
+                    //        Transform childTransform = flickTransform.GetChild(i);
+                    //        //Debug.Log(childTransform);
+                    //        childTransform.gameObject.SetActive(true);
+                    //    }
+                    //}
                 }
                 else if (instanceName.StartsWith("StarHead"))
                 {
@@ -1040,6 +1129,31 @@ public class MusicAndChartPlayer : MonoBehaviour
                     {
                         NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
                         sprite = FlickSprite;
+
+                        //重置FlickArrow的位置
+                        string numberPart = instanceName.Substring(5);
+                        if (int.TryParse(numberPart, out int flickIndex))
+                        {
+                            GameObject gameobject = FlickArrowsParent.transform.Find($"FlickArrow{flickIndex}").gameObject;
+                            if (gameobject != null)
+                            {
+                                //gameobject.SetActive(true);
+                                //更新FlickArrow位置
+                                Vector3 currentPos = gameobject.transform.position;
+                                currentPos.z = CalculateZAxisPosition(startT - currentTime);
+                                gameobject.transform.position = currentPos;
+                                Flick flick = chart.flicks[flickIndex - 1];
+                                float flickDirection = flick.flickDirection;
+
+                                //提前更新Flick位置（AdjustFlickArrowPosition需要用到正确的位置）
+                                currentPos = NoteInstance.transform.position;
+                                currentPos.z = CalculateZAxisPosition(startT - currentTime);
+                                NoteInstance.transform.position = currentPos;
+
+                                //针对横划键，需要额外调整位置
+                                AdjustFlickArrowPosition(gameobject, NoteInstance, flickDirection);
+                            }
+                        }
                     }
                     else if (instanceName.StartsWith("StarHead"))
                     {

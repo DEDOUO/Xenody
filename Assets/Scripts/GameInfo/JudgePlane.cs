@@ -79,7 +79,7 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
         //float maxY = HeightParams.HeightDefault;
         foreach (SubJudgePlane subPlane in subJudgePlaneList)
         {
-            if (currentTime >= subPlane.startT && currentTime < subPlane.endT)
+            if (currentTime >= subPlane.startT && currentTime <= subPlane.endT)
             {
                 // 根据Y轴变化函数类型计算当前子判定面的Y轴坐标范围
                 float YAxisCoordinate = CalculateYAxisPosition(currentTime, subPlane.startT, subPlane.startY, subPlane.endT, subPlane.endY, subPlane.yAxisFunction);
