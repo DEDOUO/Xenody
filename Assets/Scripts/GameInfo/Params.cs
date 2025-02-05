@@ -19,12 +19,15 @@ namespace Params
         public static float YaxisMax = 1;
 
         //StarHead默认的X轴坐标宽度
-        public static float StarHeadXAxis = 0.4f;
+        public static float StarHeadXAxis = 0.8f;
         //Star默认的出现时间
         public static float StarAppearTime = 0.4f;
 
         //JudgeLine默认的出现时间
         public static float JudgeLineAppearTime = 0.4f;
+
+        // 所有Note默认厚度缩放比例
+        public static float ZAxisRate = 0.6f;
     }
 
     public static class SpeedParams
@@ -61,5 +64,16 @@ namespace Params
         // JudgePlane的最小和最大透明度
         public static float JudgePlaneAlphaMin = 0.5f;
         public static float JudgePlaneAlphaMax = 0.9f;
+    }
+
+    public static class SoundParams
+    {
+        // 星星划动结束后，音频音量线性地衰减为0的时间
+        public static float starSoundFadeOutTime = 0.5f;
+    }
+    public static class FrameParams
+    {
+        // 控制Note位置更新和判定的帧率，默认120帧
+        public static float updateInterval = 0.00833333f;
     }
 }

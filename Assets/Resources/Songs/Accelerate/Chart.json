@@ -747,7 +747,7 @@
         },
         {
             "startT": 21.898,
-            "startX": -0.5,
+            "startX": -0.7,
             "Size": 0.6,
             "Pid": 1
         },
@@ -759,7 +759,7 @@
         },
         {
             "startT": 22.036,
-            "startX": -0.6,
+            "startX": -1.0,
             "Size": 0.6,
             "Pid": 1
         },
@@ -1990,8 +1990,8 @@
                     "endT": 20.736,
                     "endXMin": -1.6,
                     "endXMax": -1.0,
-                    "LFunc": "Sin",
-                    "RFunc": "Sin"
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
                 },
                 {
                     "startT": 20.736,
@@ -2036,8 +2036,8 @@
                     "endT": 20.736,
                     "endXMin": 1.0,
                     "endXMax": 1.6,
-                    "LFunc": "Sin",
-                    "RFunc": "Sin"
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
                 },
                 {
                     "startT": 20.736,
@@ -2752,6 +2752,30 @@
             "Pid": 2
         },
         {
+            "startT": 9.686,
+            "startX": 0.8,
+            "Size": 0.6,
+            "Pid": 2
+        },
+        {
+            "startT": 9.736,
+            "startX": 1.2,
+            "Size": 0.4,
+            "Pid": 2
+        },
+        {
+            "startT": 9.686,
+            "startX": -0.8,
+            "Size": 0.6,
+            "Pid": 2
+        },
+        {
+            "startT": 9.736,
+            "startX": -1.2,
+            "Size": 0.4,
+            "Pid": 2
+        },
+        {
             "startT": 11.835999999999997,
             "startX": 1.3,
             "Size": 0.6,
@@ -2846,6 +2870,36 @@
             "startX": 1.0,
             "Size": 0.8,
             "Pid": 1
+        },
+        {
+            "startT": 60.836000000000006,
+            "startX": 0.0,
+            "Size": 1.5,
+            "Pid": 2
+        },
+        {
+            "startT": 60.886,
+            "startX": 0.8,
+            "Size": 0.6,
+            "Pid": 2
+        },
+        {
+            "startT": 60.93600000000001,
+            "startX": 1.2,
+            "Size": 0.4,
+            "Pid": 2
+        },
+        {
+            "startT": 60.886,
+            "startX": -0.8,
+            "Size": 0.6,
+            "Pid": 2
+        },
+        {
+            "startT": 60.93600000000001,
+            "startX": -1.2,
+            "Size": 0.4,
+            "Pid": 2
         }
     ],
     "flicks": [
@@ -2986,7 +3040,7 @@
             "startT": 49.036,
             "startX": 1.0,
             "Size": 1.0,
-            "Dir": 0.5,
+            "Dir": 0.75,
             "Pid": 3
         },
         {
@@ -3014,7 +3068,7 @@
             "startT": 52.236,
             "startX": -1.0,
             "Size": 1.0,
-            "Dir": 0.5,
+            "Dir": 0.25,
             "Pid": 3
         },
         {

@@ -11,6 +11,7 @@ public class AutoPlay : MonoBehaviour
     public AudioSource FlickSoundEffect;
     public AudioSource HoldSoundEffect;
     public AudioSource StarHeadSoundEffect;
+    public AudioSource StarSoundEffect;
 
     public GameObject JudgePlanesParent;
     public GameObject JudgeLinesParent;
@@ -60,9 +61,6 @@ public class AutoPlay : MonoBehaviour
         GameObject SoundObj = GameObject.Find("HitsoundService");
         if (SoundObj != null)
         {
-            //TapSoundEffect = SoundObj.GetComponent<AudioSource>();
-            //SlideSoundEffect = SoundObj.GetComponent<AudioSource>();
-            //FlickSoundEffect = SoundObj.GetComponent<AudioSource>();
 
             audioSources = SoundObj.GetComponents<AudioSource>();
             TapSoundEffect = audioSources[0];
@@ -72,6 +70,7 @@ public class AutoPlay : MonoBehaviour
             HoldSoundEffect = audioSources[0];
 
             StarHeadSoundEffect = audioSources[3];
+            StarSoundEffect = audioSources[4];
 
         }
 
@@ -99,8 +98,7 @@ public class AutoPlay : MonoBehaviour
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
         instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
-            JudgePlaneSprite, HoldSprite,
-            renderOrderManager, AnimatorContainer);
+            JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer);
 
         // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰
         MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
@@ -110,7 +108,7 @@ public class AutoPlay : MonoBehaviour
 
         // 播放音乐和更新谱面位置
         player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
-            TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, chart);
+            TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart);
         player.enabled = true;
         player.PlayMusicAndChart(chart);
     }

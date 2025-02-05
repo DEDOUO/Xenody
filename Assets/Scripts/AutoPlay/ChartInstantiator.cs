@@ -229,7 +229,7 @@ public class ChartInstantiator : MonoBehaviour
                         float xAxisScale = noteSizeWorldLengthPerUnit / tapXAxisLength * tap.noteSize;
 
                         // 设置Tap实例的缩放比例（只修改X轴缩放，保持Y、Z轴缩放为1，可根据实际需求改变）
-                        tapInstance.transform.localScale = new Vector3(xAxisScale, 0.8f, 1);
+                        tapInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
 
                         // 设置Tap实例的位置（X、Y、Z轴坐标）
                         float zPositionForStartT = CalculateZAxisPosition(tap.startT);
@@ -308,7 +308,7 @@ public class ChartInstantiator : MonoBehaviour
                         //Debug.Log(xAxisScale);
 
                         // 设置Slide实例的缩放比例（这里只修改X轴缩放，保持Y、Z轴缩放为1，可根据实际需求改变）
-                        slideInstance.transform.localScale = new Vector3(xAxisScale, 0.8f, 1);
+                        slideInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
 
                         // 设置Slide实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(slide.startT);
@@ -386,7 +386,7 @@ public class ChartInstantiator : MonoBehaviour
                         float xAxisScale = flickSizeWorldLengthPerUnit / flickWidth * flick.noteSize;
 
                         // 设置Flick实例的缩放比例（这里只修改X轴缩放，保持Y、Z轴缩放为1，可根据实际需求改变）
-                        flickInstance.transform.localScale = new Vector3(xAxisScale, 0.8f, 1);
+                        flickInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
 
                         // 设置Flick实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(flick.startT);
@@ -535,7 +535,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.stars != null)
         {
             // 假设Tap预制体的加载路径，你需要根据实际情况修改
-            GameObject starheadPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/StarHead.prefab", typeof(GameObject));
+            GameObject starheadPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/StarHead2.prefab", typeof(GameObject));
             if (starheadPrefab != null)
             {
                 float starheadXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
@@ -577,11 +577,10 @@ public class ChartInstantiator : MonoBehaviour
                     // 根据noteSize折算到X轴世界坐标长度，计算每单位noteSize对应的世界坐标长度
                     float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
                     // 根据StarHead本身在X轴的世界坐标长度和noteSize计算X轴的缩放值
-                    //默认StarHead对应的X轴键宽为0.8
                     float xAxisScale = noteSizeWorldLengthPerUnit / starheadXAxisLength * ChartParams.StarHeadXAxis;
 
                     // 设置StarHead实例的缩放比例
-                    starheadInstance.transform.localScale = new Vector3(xAxisScale, xAxisScale, 1);
+                    starheadInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
 
                     // 设置StarHead实例的位置（X、Y、Z轴坐标）
                     float zPositionForStartT = CalculateZAxisPosition(star.starHeadT);
@@ -666,12 +665,16 @@ public class ChartInstantiator : MonoBehaviour
             Vector2 subStarEndScreen =  ScalePositionToScreen(subStarEnd, SubStarsParentRect);
             //Debug.Log(subStarStartScreen);
             //Debug.Log(subStarEndScreen);
+            
 
             if (subStarIndex == 1)
             {
                 // 当 subStarIndex 为 1 时，初始化第一个箭头；否则忽略第一个箭头
                 //计算箭头位置
+                //if (starIndex == 16)
+                //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
                 Vector2 position = CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
+                //Debug.Log(position);
                 float rotation = CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
                 // 初始化箭头
                 GameObject arrow = Instantiate(StarArrowPrefab);
@@ -693,6 +696,8 @@ public class ChartInstantiator : MonoBehaviour
             for (int i = 1; i < numArrows; i++)
             {
                 //计算箭头位置
+                //if (starIndex == 16)
+                //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
                 Vector2 position = CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
                 float rotation = CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
                 // 初始化箭头

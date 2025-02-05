@@ -173,12 +173,12 @@ public class Utility : MonoBehaviour
             // 第一象限，t 本身就在正确区间，无需调整
             return t;
         }
-        else if (theta >= Mathf.PI / 2 && theta < Mathf.PI)
+        else if (theta >= Mathf.PI / 2 && theta <= Mathf.PI+0.01f)
         {
             // 第二象限，将 t 调整到第二象限
             return Mathf.PI + t;
         }
-        else if (theta >= -Mathf.PI && theta < -Mathf.PI / 2)
+        else if (theta >= -Mathf.PI-0.01f && theta < -Mathf.PI / 2)
         {
             // 第三象限，将 t 调整到第三象限
             return -Mathf.PI + t;
