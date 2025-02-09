@@ -712,7 +712,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                             JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, t);
                         }
                         // 当当前时间超过结束时间时，设置 JudgeLine 为 false
-                        else if (currentTime > endT && currentTime <= endT + ChartParams.JudgeLineAppearTime)
+                        else if (currentTime > endT + ChartParams.JudgeLineAppearTime)
                         {
                             judgeLineRectTransform.gameObject.SetActive(false);
                         }

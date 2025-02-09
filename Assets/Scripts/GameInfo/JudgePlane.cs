@@ -55,13 +55,13 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     {
         if (subJudgePlaneList.Count > 0 && startTime != subJudgePlaneList[subJudgePlaneList.Count - 1].endT)
         {
-            Debug.LogError("添加的子判定面时间戳不连续，无法添加。");
+            Debug.LogError("添加的子判定面时间戳不连续，无法添加。"+ startTime);
             return;
         }
         if (startY < ChartParams.YaxisMin || startY > ChartParams.YaxisMax || endY < ChartParams.YaxisMin || endY > ChartParams.YaxisMax)
         {
-            Debug.LogError("子判定面的Y轴坐标超出范围，无法添加。");
-            return;
+            //Debug.LogError("子判定面的Y轴坐标超出范围，无法添加。");
+            //return;
         }
         subJudgePlaneList.Add(new SubJudgePlane(startTime, startY, endTime, endY, yAxisFunction));
     }
