@@ -142,7 +142,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.judgePlanes != null)
         {
             // 通过路径获取JudgeLine预制体的引用，假设与JudgePlane预制体在相同路径下
-            GameObject judgeLinePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/JudgeLine.prefab", typeof(GameObject));
+            GameObject judgeLinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/JudgeLine"); 
             if (judgeLinePrefab != null)
             {
                 foreach (JudgePlane judgePlane in chart.judgePlanes)
@@ -179,7 +179,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.taps != null)
         {
             // 假设Tap预制体的加载路径，你需要根据实际情况修改
-            GameObject tapPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/Tap.prefab", typeof(GameObject));
+            GameObject tapPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Tap");
             if (tapPrefab != null)
             {
                 float tapXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
@@ -257,7 +257,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.slides != null)
         {
             // 假设Slide预制体的加载路径，你需要根据实际情况修改
-            GameObject slidePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/Slide.prefab", typeof(GameObject));
+            GameObject slidePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Slide");
             if (slidePrefab != null)
             {
                 float slideWidth = 0; // 用于存储Slide在X轴方向的宽度（用于后续缩放等操作）
@@ -336,8 +336,8 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.flicks != null)
         {
             // 假设Flick预制体的加载路径，你需要根据实际情况修改
-            GameObject flickPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/Flick.prefab", typeof(GameObject));
-            GameObject flickArrowPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/FlickArrow.prefab", typeof(GameObject));
+            GameObject flickPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick"); 
+            GameObject flickArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/FlickArrow");
             if (flickPrefab != null && flickArrowPrefab != null)
             {
                 float flickWidth = 0; // 用于存储Flick在X轴方向的宽度（用于后续缩放等操作）
@@ -535,7 +535,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.stars != null)
         {
             // 假设Tap预制体的加载路径，你需要根据实际情况修改
-            GameObject starheadPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/StarHead2.prefab", typeof(GameObject));
+            GameObject starheadPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead2"); 
             if (starheadPrefab != null)
             {
                 float starheadXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
@@ -637,7 +637,7 @@ public class ChartInstantiator : MonoBehaviour
 
     public void InitiateStarArrows(Star.SubStar subStar, int starIndex, int subStarIndex, float numArrows, float rateStep)
     {
-        GameObject StarArrowPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GamePlay/StarArrow.prefab", typeof(GameObject));
+        GameObject StarArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarArrow"); 
         if (StarArrowPrefab != null)
         {
             float currentRate = 0.0f;

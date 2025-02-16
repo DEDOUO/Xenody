@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 public class AutoPlay : MonoBehaviour
@@ -13,6 +14,7 @@ public class AutoPlay : MonoBehaviour
     public AudioSource StarHeadSoundEffect;
     public AudioSource StarSoundEffect;
 
+    public GameObject AutoPlayService; // 用于挂载 MusicAndChartLoader 组件的游戏对象
     public GameObject JudgePlanesParent;
     public GameObject JudgeLinesParent;
     public GameObject TapsParent;
@@ -35,6 +37,7 @@ public class AutoPlay : MonoBehaviour
     private void Awake()
     {
         // 查找场景内游戏物体
+        AutoPlayService = GameObject.Find("AutoPlayService");
         JudgePlanesParent = GameObject.Find("JudgePlanesParent");
         JudgeLinesParent = GameObject.Find("JudgeLinesParent");
         TapsParent = GameObject.Find("TapsParent");
@@ -48,7 +51,15 @@ public class AutoPlay : MonoBehaviour
 
         // 加载Sprite
         JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack");
+        if (JudgePlaneSprite == null)
+        {
+            Debug.LogError("Failed to load sprite: Sprites/TrackBlack");
+        }
         HoldSprite = Resources.Load<Sprite>("Sprites/HoldBlueSprite");
+        if (HoldSprite == null)
+        {
+            Debug.LogError("Failed to load sprite: Sprites/HoldBlueSprite");
+        }
 
         // 查找包含AudioSource的GameObject
         GameObject audioObj = GameObject.Find("AudioService");
@@ -85,26 +96,33 @@ public class AutoPlay : MonoBehaviour
         AnimatorContainer = GameObject.Find("AnimatorContainer");
     }
 
-    private void Start()
+    private async void Start()
     {
         // 加载音乐和谱面文件
-        MusicAndChartLoader loader = new MusicAndChartLoader(audioSource);
-        loader.LoadMusicAndChart();
+        //MusicAndChartLoader loader = new MusicAndChartLoader(audioSource);
+        MusicAndChartLoader loader = AutoPlayService.GetComponent<MusicAndChartLoader>();
+        loader.Initialize(audioSource);
+        await loader.LoadMusicAndChartAsync();
 
         // 获取加载后的谱面和音频源
         Chart chart = loader.GetChart();
-        //audioSource = loader.GetAudioSource();
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
         instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
             JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer);
+        instantiator.InstantiateAll(chart);
 
         // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰
         MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
-        player.enabled = false;
+        
 
-        instantiator.InstantiateAll(chart);
+        if (player == null)
+        {
+            Debug.LogError("未找到 MusicAndChartPlayer 组件，请确保该组件已挂载到当前对象！");
+            return;
+        }
+        player.enabled = false;
 
         // 播放音乐和更新谱面位置
         player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,

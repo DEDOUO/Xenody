@@ -1,9 +1,11 @@
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.IO;
+using System.Collections;
+using System.Threading.Tasks;
 
-
-public class MusicAndChartLoader
+public class MusicAndChartLoader:MonoBehaviour
 {
     private AudioSource audioSource;
     private Chart chart;
@@ -12,13 +14,13 @@ public class MusicAndChartLoader
     private Sprite cover;
 
 
-    public MusicAndChartLoader(AudioSource audioSource)
+    // 新增初始化方法
+    public void Initialize(AudioSource audioSource)
     {
         this.audioSource = audioSource;
     }
 
-
-    public void LoadMusicAndChart()
+    public async Task LoadMusicAndChartAsync()
     {
         // 判断如果没有获取到路径（即直接加载 AutoPlay 场景时），默认按照第一首歌曲加载
         if (string.IsNullOrEmpty(musicPath) || string.IsNullOrEmpty(chartPath))
@@ -26,16 +28,31 @@ public class MusicAndChartLoader
             SongAndChartData.SetSelectedSong("Accelerate");
         }
 
-
         musicPath = SongAndChartData.GetMusicFilePath();
+        if (!File.Exists(musicPath))
+        {
+            Debug.LogError($"音乐文件未找到：{musicPath}");
+            return;
+        }
         chartPath = SongAndChartData.GetChartFilePath();
+        if (!File.Exists(chartPath))
+        {
+            Debug.LogError($"谱面文件未找到：{chartPath}");
+            return;
+        }
+
         cover = SongAndChartData.GetCoverSprite();
 
-        audioSource.clip = Resources.Load<AudioClip>(Path.ChangeExtension(musicPath, null));
+        // 使用 UnityWebRequest 加载音频文件
+        await LoadAudioClipAsync(musicPath);
 
         if (File.Exists(chartPath))
         {
             chart = Chart.ImportFromJson(chartPath);
+            if (chart == null)
+            {
+                Debug.LogError("谱面文件解析失败！");
+            }
         }
         else
         {
@@ -46,9 +63,40 @@ public class MusicAndChartLoader
         ApplyCoverToJacketImage();
     }
 
+    private async Task LoadAudioClipAsync(string path)
+    {
+        // 构建 StreamingAssets 路径
+        string streamingPath = Path.Combine("file://", Application.streamingAssetsPath, path);
+
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(streamingPath, AudioType.MPEG))
+        {
+            var operation = www.SendWebRequest();
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
+
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"加载音频失败：{www.error}");
+            }
+            else
+            {
+                if (audioSource != null)
+                {
+                    audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
+                }
+                else
+                {
+                    Debug.LogError("audioSource 为 null，无法设置音频剪辑！");
+                }
+            }
+        }
+    }
 
     public Chart GetChart()
     {
+        //Debug.Log(chart);
         return chart;
     }
 

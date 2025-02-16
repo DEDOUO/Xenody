@@ -1265,10 +1265,32 @@ public class MusicAndChartPlayer : MonoBehaviour
     }
     private void LoadNoteSprites()
     {
-        TapSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/TapNote.png", typeof(Sprite));
-        SlideSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/SlideNote.png", typeof(Sprite));
-        FlickSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/FlickNote.png", typeof(Sprite));
-        StarHeadSprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Textures/Gameplay/Note/StarHead2.png", typeof(Sprite));
+        // 加载 Tap 音符的 Sprite
+        TapSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/TapNote");
+        // 加载 Slide 音符的 Sprite
+        SlideSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/SlideNote");
+        // 加载 Flick 音符的 Sprite
+        FlickSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/FlickNote");
+        // 加载 StarHead 音符的 Sprite
+        StarHeadSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/StarHead2");
+
+        // 检查是否成功加载
+        if (TapSprite == null)
+        {
+            Debug.LogError("Failed to load TapNote sprite.");
+        }
+        if (SlideSprite == null)
+        {
+            Debug.LogError("Failed to load SlideNote sprite.");
+        }
+        if (FlickSprite == null)
+        {
+            Debug.LogError("Failed to load FlickNote sprite.");
+        }
+        if (StarHeadSprite == null)
+        {
+            Debug.LogError("Failed to load StarHead2 sprite.");
+        }
     }
 
 }

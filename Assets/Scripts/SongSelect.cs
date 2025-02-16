@@ -33,7 +33,7 @@ public class SongSelect : MonoBehaviour
         float buttonWidth = 400f;
 
         // 获取Songs文件夹的完整路径（假设在Assets/Resources下，你可根据实际调整）
-        string songsFolderPath = Path.Combine(Application.dataPath, "Resources/Songs");
+        string songsFolderPath = Path.Combine(Application.streamingAssetsPath, "Songs");
         if (Directory.Exists(songsFolderPath))
         {
             // 获取Songs文件夹下所有的子文件夹（即歌曲文件夹）名称
