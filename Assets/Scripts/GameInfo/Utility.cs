@@ -36,6 +36,8 @@ public class Utility : MonoBehaviour
     /// <param name="functionType">坐标变化函数类型（线性、正弦、余弦）</param>
     /// <returns>计算得到的位置值</returns>
     /// 
+    
+
     public static float CalculatePosition(float currentTime, float startTime, float startVal, float endTime, float endVal, TransFunctionType functionType)
     {
         if (startTime > endTime)
@@ -839,6 +841,31 @@ public class Utility : MonoBehaviour
 
         return rightMiddlePos;
     }
+
+    public static float TransformYCoordinate(float startY)
+    {
+        Camera mainCamera = Camera.main;
+
+        // 获取世界坐标 (0, 0, 0) 和 (0, HeightParams.HeightDefault, 0) 在摄像机屏幕中的坐标
+        Vector3 screenPoint0 = mainCamera.WorldToScreenPoint(new Vector3(0, 0, 0));
+        Vector3 screenPoint1 = mainCamera.WorldToScreenPoint(new Vector3(0, HeightParams.HeightDefault, 0));
+
+        // 计算 startY 对应的屏幕坐标，即使 startY 超出 [0, 1] 范围也能正确计算
+        Vector3 tempScreenPoint = screenPoint0 + startY * (screenPoint1 - screenPoint0);
+        //float screenX = screenPoint0.x, + screenPoint1.x, startY);
+        //float screenY = Mathf.Lerp(screenPoint0.y, screenPoint1.y, startY);
+        //float screenZ = Mathf.Lerp(screenPoint0.z, screenPoint1.z, startY);
+
+        //// 创建一个临时的屏幕点
+        //Vector3 tempScreenPoint = new Vector3(screenX, screenY, screenZ);
+
+        // 将临时屏幕点转换回世界坐标
+        Vector3 worldPoint = mainCamera.ScreenToWorldPoint(tempScreenPoint);
+
+        // 返回世界坐标中的 Y 值
+        return worldPoint.y;
+    }
+
 
 }
 

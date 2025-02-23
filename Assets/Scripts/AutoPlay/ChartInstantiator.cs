@@ -142,14 +142,14 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.judgePlanes != null)
         {
             // 通过路径获取JudgeLine预制体的引用，假设与JudgePlane预制体在相同路径下
-            GameObject judgeLinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/JudgeLine"); 
+            GameObject judgeLinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/JudgeLine");
             if (judgeLinePrefab != null)
             {
                 foreach (JudgePlane judgePlane in chart.judgePlanes)
                 {
                     int judgePlaneIndex = judgePlane.id;
                     //获取第一个SubJudgePlane
-                    SubJudgePlane subJudgePlane= judgePlane.subJudgePlaneList[0];
+                    SubJudgePlane subJudgePlane = judgePlane.subJudgePlaneList[0];
                     // 实例化JudgeLine预制体，命名为JudgeLine1、JudgeLine2等
                     GameObject judgeLineInstance = Instantiate(judgeLinePrefab);
                     judgeLineInstance.name = $"JudgeLine{judgePlaneIndex}";
@@ -160,7 +160,7 @@ public class ChartInstantiator : MonoBehaviour
                     judgeLineInstance.layer = parentLayer;
 
                     //获取初始Y轴坐标并转化为屏幕坐标
-                    float YAxisUniform = judgePlane.GetPlaneYAxis(subJudgePlane.startT)/ HeightParams.HeightDefault;
+                    float YAxisUniform = judgePlane.GetPlaneYAxis(subJudgePlane.startT) / HeightParams.HeightDefault;
                     Vector2 Position = ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
                     judgeLineRectTransform.anchoredPosition3D = new Vector3(Position.x, Position.y, 0);
                     judgeLineRectTransform.localRotation = Quaternion.Euler(0, 0, 0);
@@ -336,7 +336,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.flicks != null)
         {
             // 假设Flick预制体的加载路径，你需要根据实际情况修改
-            GameObject flickPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick"); 
+            GameObject flickPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick");
             GameObject flickArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/FlickArrow");
             if (flickPrefab != null && flickArrowPrefab != null)
             {
@@ -535,7 +535,7 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.stars != null)
         {
             // 假设Tap预制体的加载路径，你需要根据实际情况修改
-            GameObject starheadPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead2"); 
+            GameObject starheadPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead2");
             if (starheadPrefab != null)
             {
                 float starheadXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
@@ -587,10 +587,10 @@ public class ChartInstantiator : MonoBehaviour
                     starheadInstance.transform.position = new Vector3(-startXWorld, yAxisPosition, zPositionForStartT);
 
                     // 检查点键是否在规定的X轴坐标范围内，如果不在范围，可进行相应处理，比如隐藏或者输出警告等（这里简单示例输出警告）
-                    if (!star.IsInAxisRange())
-                    {
-                        Debug.LogWarning($"Star with starHeadT: {star.starHeadT} is out of Axis range!");
-                    }
+                    //if (!star.IsInAxisRange())
+                    //{
+                    //    Debug.LogWarning($"Star with starHeadT: {star.starHeadT} is out of Axis range!");
+                    //}
 
                     starIndex++;
                 }
@@ -613,10 +613,10 @@ public class ChartInstantiator : MonoBehaviour
                 foreach (var subStar in star.subStarList)
                 {
                     // 检查子星星是否在规定的 X 轴坐标范围内，如果不在范围，可进行相应处理，比如隐藏或者输出警告等（这里简单示例输出警告）
-                    if (!subStar.IsInAxisRange())
-                    {
-                        Debug.LogWarning($"SubStar from {subStar.starTrackStartT} to {subStar.starTrackEndT} is out of Axis range!");
-                    }
+                    //if (!subStar.IsInAxisRange())
+                    //{
+                    //    Debug.LogWarning($"SubStar from {subStar.starTrackStartT} to {subStar.starTrackEndT} is out of Axis range!");
+                    //}
 
                     // 计算 subStar 的曲线长度
                     float curveLength = CalculateSubStarCurveLength(subStar);
@@ -637,7 +637,7 @@ public class ChartInstantiator : MonoBehaviour
 
     public void InitiateStarArrows(Star.SubStar subStar, int starIndex, int subStarIndex, float numArrows, float rateStep)
     {
-        GameObject StarArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarArrow"); 
+        GameObject StarArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarArrow");
         if (StarArrowPrefab != null)
         {
             float currentRate = 0.0f;
@@ -662,10 +662,10 @@ public class ChartInstantiator : MonoBehaviour
             //Debug.Log(subStarStart);
             //Debug.Log(subStarEnd);
             Vector2 subStarStartScreen = ScalePositionToScreen(subStarStart, SubStarsParentRect);
-            Vector2 subStarEndScreen =  ScalePositionToScreen(subStarEnd, SubStarsParentRect);
+            Vector2 subStarEndScreen = ScalePositionToScreen(subStarEnd, SubStarsParentRect);
             //Debug.Log(subStarStartScreen);
             //Debug.Log(subStarEndScreen);
-            
+
 
             if (subStarIndex == 1)
             {
@@ -720,11 +720,41 @@ public class ChartInstantiator : MonoBehaviour
     }
 
 
+    //private GameObject CreateJudgePlaneQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
+    //{
+    //    // 将StartY和EndY映射为世界坐标并放大到合适范围（0 - HeightParams.HeightDefault，这里假设HeightParams.HeightDefault为6）
+    //    float startYWorld = startY * HeightParams.HeightDefault;
+    //    float endYWorld = endY * HeightParams.HeightDefault;
+
+    //    // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
+    //    float zPositionForStartT = CalculateZAxisPosition(startT);
+
+    //    // 计算在Z轴方向的长度（之前代码中的height变量，这里改为lengthForZAxis）
+    //    float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;
+
+    //    // 假设获取到一个目标点的世界坐标
+    //    Vector3 StartPoint = new Vector3(0, startYWorld, 0);
+    //    Vector3 EndPoint = new Vector3(0, endYWorld, 0);
+
+    //    // 计算StartXWorld和EndXWorld，确保在屏幕左右各留10%的距离
+    //    float startXWorld = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint);
+    //    float endXWorld = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint);
+
+    //    Vector3 point1 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
+    //    Vector3 point2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
+    //    Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
+    //    Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
+
+    //    GameObject instance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 1f);
+    //    return instance;
+    //}
+
     private GameObject CreateJudgePlaneQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
     {
-        // 将StartY和EndY映射为世界坐标并放大到合适范围（0 - HeightParams.HeightDefault，这里假设HeightParams.HeightDefault为6）
-        float startYWorld = startY * HeightParams.HeightDefault;
-        float endYWorld = endY * HeightParams.HeightDefault;
+        //Debug.Log(objectName);
+        // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
+        float startYWorld = TransformYCoordinate(startY);
+        float endYWorld = TransformYCoordinate(endY);
 
         // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
         float zPositionForStartT = CalculateZAxisPosition(startT);
@@ -748,6 +778,7 @@ public class ChartInstantiator : MonoBehaviour
         GameObject instance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 1f);
         return instance;
     }
+
 
     private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
         float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)

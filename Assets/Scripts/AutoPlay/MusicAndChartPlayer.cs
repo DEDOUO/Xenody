@@ -696,7 +696,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                             // 获取当前时间的 Y 轴坐标，转化为屏幕坐标，更新 JudgeLine 的 Y 轴坐标
                             float YAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                             float YAxisUniform = YAxis / HeightParams.HeightDefault;
-                            ////Debug.Log(YAxis);
+                            //Debug.Log($"{judgeLineRectTransform.name}, {YAxisUniform}");
                             Vector2 Position = ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
                             judgeLineRectTransform.anchoredPosition = Position;
                             // 根据 YAxis 的值，实时改变 correspondingJudgePlane 下所有 SubJudgePlane 实例的透明度

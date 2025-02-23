@@ -256,7 +256,7 @@
                     "Func": "Linear"
                 },
                 {
-                    "startT": 95.63600000000001,
+                    "startT": 95.636,
                     "startY": 0.0,
                     "endT": 96.036,
                     "endY": 1.0,
@@ -419,8 +419,50 @@
                 {
                     "startT": 122.436,
                     "startY": 0.0,
-                    "endT": 10000.0,
+                    "endT": 137.636,
                     "endY": 0.0,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 137.636,
+                    "startY": 0.0,
+                    "endT": 138.036,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 138.036,
+                    "startY": 1.0,
+                    "endT": 138.236,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 138.236,
+                    "startY": 1.0,
+                    "endT": 138.636,
+                    "endY": 0.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 138.636,
+                    "startY": 0.0,
+                    "endT": 141.236,
+                    "endY": 0.0,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 141.236,
+                    "startY": 0.0,
+                    "endT": 141.636,
+                    "endY": 1.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 141.636,
+                    "startY": 1.0,
+                    "endT": 10000.0,
+                    "endY": 1.0,
                     "Func": "Linear"
                 }
             ]
@@ -868,7 +910,7 @@
                     "Func": "Linear"
                 },
                 {
-                    "startT": 95.63600000000001,
+                    "startT": 95.636,
                     "startY": 1.0,
                     "endT": 96.036,
                     "endY": 0.0,
@@ -952,7 +994,7 @@
                     "Func": "Linear"
                 },
                 {
-                    "startT": 110.83600000000001,
+                    "startT": 110.836,
                     "startY": 1.0,
                     "endT": 111.636,
                     "endY": 0.0,
@@ -968,9 +1010,140 @@
                 {
                     "startT": 112.036,
                     "startY": 1.0,
-                    "endT": 10000.0,
+                    "endT": 123.652,
                     "endY": 1.0,
                     "Func": "Linear"
+                },
+                {
+                    "startT": 123.652,
+                    "startY": 1.0,
+                    "endT": 125.152,
+                    "endY": 0.0,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 125.152,
+                    "startY": 0.0,
+                    "endT": 125.972,
+                    "endY": 1.5,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 125.972,
+                    "startY": 1.5,
+                    "endT": 128.447,
+                    "endY": 0.0,
+                    "Func": "Cos"
+                },
+                {
+                    "startT": 128.447,
+                    "startY": 0.0,
+                    "endT": 129.267,
+                    "endY": 1.2,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 129.267,
+                    "startY": 1.2,
+                    "endT": 131.637,
+                    "endY": 0.0,
+                    "Func": "Cos"
+                },
+                {
+                    "startT": 131.637,
+                    "startY": 0.0,
+                    "endT": 132.457,
+                    "endY": 1.2,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 132.457,
+                    "startY": 1.2,
+                    "endT": 134.836,
+                    "endY": 0.0,
+                    "Func": "Cos"
+                },
+                {
+                    "startT": 134.836,
+                    "startY": 0.0,
+                    "endT": 135.436,
+                    "endY": 1.5,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 135.436,
+                    "startY": 1.5,
+                    "endT": 136.036,
+                    "endY": 1.0,
+                    "Func": "Cos"
+                },
+                {
+                    "startT": 136.036,
+                    "startY": 1.0,
+                    "endT": 141.236,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 141.236,
+                    "startY": 1.0,
+                    "endT": 141.636,
+                    "endY": 0.0,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 141.636,
+                    "startY": 0.0,
+                    "endT": 10000.0,
+                    "endY": 0.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "id": 18,
+            "sub": [
+                {
+                    "startT": 125.152,
+                    "startY": 0.0,
+                    "endT": 125.972,
+                    "endY": 0.75,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 125.972,
+                    "startY": 0.75,
+                    "endT": 128.447,
+                    "endY": 0.0,
+                    "Func": "Cos"
+                },
+                {
+                    "startT": 128.447,
+                    "startY": 0.0,
+                    "endT": 129.267,
+                    "endY": 0.6,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 129.267,
+                    "startY": 0.6,
+                    "endT": 131.637,
+                    "endY": 0.0,
+                    "Func": "Cos"
+                },
+                {
+                    "startT": 131.637,
+                    "startY": 0.0,
+                    "endT": 132.457,
+                    "endY": 0.6,
+                    "Func": "Sin"
+                },
+                {
+                    "startT": 132.457,
+                    "startY": 0.6,
+                    "endT": 134.836,
+                    "endY": 0.0,
+                    "Func": "Cos"
                 }
             ]
         }
@@ -2430,13 +2603,7 @@
         },
         {
             "startT": 65.136,
-            "startX": 0.5,
-            "Size": 0.7,
-            "Pid": 1
-        },
-        {
-            "startT": 65.236,
-            "startX": 1.1,
+            "startX": 0.1,
             "Size": 0.7,
             "Pid": 1
         },
@@ -3216,20 +3383,14 @@
         },
         {
             "startT": 101.436,
-            "startX": 1.2,
-            "Size": 1.0,
+            "startX": 0.0,
+            "Size": 1.2,
             "Pid": 17
         },
         {
             "startT": 101.536,
-            "startX": 1.2,
-            "Size": 1.0,
-            "Pid": 17
-        },
-        {
-            "startT": 101.636,
-            "startX": 1.2,
-            "Size": 1.0,
+            "startX": 0.0,
+            "Size": 1.6,
             "Pid": 17
         },
         {
@@ -3293,13 +3454,13 @@
             "Pid": 1
         },
         {
-            "startT": 105.23599999999999,
+            "startT": 105.236,
             "startX": 1.2,
             "Size": 0.8,
             "Pid": 1
         },
         {
-            "startT": 105.33600000000001,
+            "startT": 105.336,
             "startX": -0.6,
             "Size": 0.8,
             "Pid": 1
@@ -3323,13 +3484,13 @@
             "Pid": 17
         },
         {
-            "startT": 105.73599999999999,
+            "startT": 105.736,
             "startX": -1.2,
             "Size": 0.8,
             "Pid": 17
         },
         {
-            "startT": 105.83600000000001,
+            "startT": 105.836,
             "startX": 0.0,
             "Size": 0.8,
             "Pid": 17
@@ -3432,43 +3593,43 @@
         },
         {
             "startT": 108.536,
-            "startX": -1.0857142857142859,
+            "startX": -1.086,
             "Size": 1.2,
             "Pid": 17
         },
         {
             "startT": 108.636,
-            "startX": -0.721428571428572,
+            "startX": -0.721,
             "Size": 1.3,
             "Pid": 17
         },
         {
             "startT": 108.736,
-            "startX": -0.3571428571428579,
+            "startX": -0.357,
             "Size": 1.4,
             "Pid": 17
         },
         {
             "startT": 108.836,
-            "startX": 0.007142857142856007,
+            "startX": 0.007,
             "Size": 1.5,
             "Pid": 17
         },
         {
             "startT": 108.936,
-            "startX": 0.3714285714285699,
+            "startX": 0.371,
             "Size": 1.6,
             "Pid": 17
         },
         {
             "startT": 109.036,
-            "startX": 0.7357142857142842,
+            "startX": 0.736,
             "Size": 1.7,
             "Pid": 17
         },
         {
             "startT": 109.136,
-            "startX": 1.099999999999998,
+            "startX": 1.1,
             "Size": 1.8,
             "Pid": 17
         },
@@ -3503,7 +3664,7 @@
             "Pid": 1
         },
         {
-            "startT": 110.83600000000001,
+            "startT": 110.836,
             "startX": 1.6,
             "Size": 0.8,
             "Pid": 1
@@ -3527,13 +3688,13 @@
             "Pid": 17
         },
         {
-            "startT": 111.23599999999999,
+            "startT": 111.236,
             "startX": 0.2,
             "Size": 0.8,
             "Pid": 1
         },
         {
-            "startT": 111.33600000000001,
+            "startT": 111.336,
             "startX": -1.6,
             "Size": 0.8,
             "Pid": 17
@@ -3557,7 +3718,7 @@
             "Pid": 1
         },
         {
-            "startT": 112.93599999999999,
+            "startT": 112.936,
             "startX": -0.5,
             "Size": 1.0,
             "Pid": 1
@@ -3575,7 +3736,7 @@
             "Pid": 17
         },
         {
-            "startT": 113.43599999999999,
+            "startT": 113.436,
             "startX": 1.0,
             "Size": 1.0,
             "Pid": 1
@@ -3588,20 +3749,14 @@
         },
         {
             "startT": 114.236,
-            "startX": -1.2,
-            "Size": 1.0,
+            "startX": 0.0,
+            "Size": 1.2,
             "Pid": 1
         },
         {
             "startT": 114.336,
-            "startX": -1.2,
-            "Size": 1.0,
-            "Pid": 1
-        },
-        {
-            "startT": 114.43599999999999,
-            "startX": -1.2,
-            "Size": 1.0,
+            "startX": 0.0,
+            "Size": 1.6,
             "Pid": 1
         },
         {
@@ -3756,31 +3911,37 @@
         },
         {
             "startT": 122.436,
-            "startX": -1.0,
+            "startX": 1.0,
             "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 122.536,
-            "startX": -1.0,
+            "startX": 1.0,
             "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 122.636,
-            "startX": 1.0,
+            "startX": -1.0,
             "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 122.736,
-            "startX": 1.0,
+            "startX": -1.0,
             "Size": 1.0,
             "Pid": 1
         },
         {
             "startT": 122.836,
-            "startX": 0.0,
+            "startX": -1.1,
+            "Size": 1.8,
+            "Pid": 1
+        },
+        {
+            "startT": 122.836,
+            "startX": 1.1,
             "Size": 1.8,
             "Pid": 1
         },
@@ -3822,27 +3983,375 @@
         },
         {
             "startT": 124.752,
-            "startX": -0.7,
+            "startX": -1.0,
             "Size": 0.6,
             "Pid": 1
         },
         {
             "startT": 124.852,
-            "startX": 0.3,
+            "startX": 0.0,
             "Size": 0.6,
             "Pid": 1
         },
         {
             "startT": 125.052,
-            "startX": 0.7,
+            "startX": 1.0,
             "Size": 0.6,
             "Pid": 1
         },
         {
-            "startT": 125.152,
-            "startX": -0.3,
-            "Size": 0.6,
+            "startT": 136.436,
+            "startX": -1.0,
+            "Size": 0.8,
             "Pid": 1
+        },
+        {
+            "startT": 136.436,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 136.536,
+            "startX": -1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 136.536,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 136.736,
+            "startX": -1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 136.736,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 136.936,
+            "startX": -1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 136.936,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 137.136,
+            "startX": -1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 137.136,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 137.236,
+            "startX": -1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 137.236,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 137.636,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 138.636,
+            "startX": -1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 138.936,
+            "startX": -1.0,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 139.236,
+            "startX": -0.75,
+            "Size": 1.0,
+            "Pid": 17
+        },
+        {
+            "startT": 139.436,
+            "startX": 0.75,
+            "Size": 1.0,
+            "Pid": 17
+        },
+        {
+            "startT": 139.636,
+            "startX": 1.5,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 139.936,
+            "startX": 1.2,
+            "Size": 1.0,
+            "Pid": 1
+        },
+        {
+            "startT": 140.236,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 140.336,
+            "startX": -1.2,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 140.436,
+            "startX": -0.5,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 140.536,
+            "startX": 0.5,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 140.636,
+            "startX": -1.2,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 141.236,
+            "startX": -1.5,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 141.536,
+            "startX": -0.5,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 141.836,
+            "startX": 0.5,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 142.136,
+            "startX": 1.4,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 143.836,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 143.836,
+            "startX": 0.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 144.036,
+            "startX": 0.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 144.036,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 144.236,
+            "startX": -0.8,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 144.436,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 144.636,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 144.736,
+            "startX": 0.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 145.036,
+            "startX": -1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 145.036,
+            "startX": 0.5,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 145.236,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 145.436,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 145.536,
+            "startX": 0.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 145.836,
+            "startX": -0.5,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 145.836,
+            "startX": 1.0,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 146.036,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 146.236,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 146.336,
+            "startX": 0.0,
+            "Size": 0.8,
+            "Pid": 1
+        },
+        {
+            "startT": 146.636,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 146.736,
+            "startX": -0.8,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 146.836,
+            "startX": 0.8,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 146.936,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 147.036,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 147.136,
+            "startX": -0.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 147.236,
+            "startX": 0.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 147.336,
+            "startX": -1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 147.436,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 147.636,
+            "startX": 0.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 147.936,
+            "startX": 1.1,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 148.236,
+            "startX": 1.6,
+            "Size": 0.8,
+            "Pid": 17
+        },
+        {
+            "startT": 148.336,
+            "startX": -0.5,
+            "Size": 0.8,
+            "Pid": 17
         }
     ],
     "holds": [
@@ -5465,7 +5974,7 @@
             "id": 90,
             "sub": [
                 {
-                    "startT": 87.93599999999999,
+                    "startT": 87.936,
                     "startXMin": 0.25,
                     "startXMax": 1.25,
                     "endT": 88.136,
@@ -5484,7 +5993,7 @@
                     "startT": 88.236,
                     "startXMin": -0.5,
                     "startXMax": 0.5,
-                    "endT": 88.43599999999999,
+                    "endT": 88.436,
                     "endXMin": -0.5,
                     "endXMax": 0.5,
                     "LFunc": "Linear",
@@ -5497,7 +6006,7 @@
             "id": 92,
             "sub": [
                 {
-                    "startT": 88.43599999999999,
+                    "startT": 88.436,
                     "startXMin": -2.0,
                     "startXMax": -1.0,
                     "endT": 88.636,
@@ -5516,7 +6025,7 @@
                     "startT": 88.736,
                     "startXMin": -1.25,
                     "startXMax": -0.25,
-                    "endT": 88.93599999999999,
+                    "endT": 88.936,
                     "endXMin": -1.25,
                     "endXMax": -0.25,
                     "LFunc": "Linear",
@@ -5659,7 +6168,7 @@
             "id": 99,
             "sub": [
                 {
-                    "startT": 91.43599999999999,
+                    "startT": 91.436,
                     "startXMin": -0.5,
                     "startXMax": 0.5,
                     "endT": 91.636,
@@ -5813,7 +6322,7 @@
             "id": 108,
             "sub": [
                 {
-                    "startT": 94.63600000000001,
+                    "startT": 94.636,
                     "startXMin": -0.5,
                     "startXMax": 0.5,
                     "endT": 94.836,
@@ -5845,7 +6354,7 @@
             "id": 110,
             "sub": [
                 {
-                    "startT": 95.13600000000001,
+                    "startT": 95.136,
                     "startXMin": 0.25,
                     "startXMax": 1.25,
                     "endT": 95.336,
@@ -5864,7 +6373,7 @@
                     "startT": 95.436,
                     "startXMin": -0.5,
                     "startXMax": 0.5,
-                    "endT": 95.63600000000001,
+                    "endT": 95.636,
                     "endXMin": -0.5,
                     "endXMax": 0.5,
                     "LFunc": "Linear",
@@ -5877,7 +6386,7 @@
             "id": 112,
             "sub": [
                 {
-                    "startT": 95.63600000000001,
+                    "startT": 95.636,
                     "startXMin": -2.0,
                     "startXMax": -1.2,
                     "endT": 96.036,
@@ -6432,14 +6941,14 @@
                     "startT": 112.436,
                     "startXMin": 0.5,
                     "startXMax": 2.0,
-                    "endT": 112.58600000000001,
+                    "endT": 112.586,
                     "endXMin": 0.0,
                     "endXMax": 0.8,
                     "LFunc": "Linear",
                     "RFunc": "Linear"
                 },
                 {
-                    "startT": 112.58600000000001,
+                    "startT": 112.586,
                     "startXMin": 0.0,
                     "startXMax": 0.8,
                     "endT": 112.936,
@@ -6468,17 +6977,17 @@
                     "startT": 112.436,
                     "startXMin": -2.0,
                     "startXMax": -0.5,
-                    "endT": 112.58600000000001,
+                    "endT": 112.586,
                     "endXMin": -0.8,
                     "endXMax": 0.0,
                     "LFunc": "Linear",
                     "RFunc": "Linear"
                 },
                 {
-                    "startT": 112.58600000000001,
+                    "startT": 112.586,
                     "startXMin": -0.8,
                     "startXMax": 0.0,
-                    "endT": 112.73599999999999,
+                    "endT": 112.736,
                     "endXMin": -0.8,
                     "endXMax": 0.0,
                     "LFunc": "Linear",
@@ -6494,7 +7003,7 @@
                     "startT": 113.236,
                     "startXMin": -1.5,
                     "startXMax": -0.5,
-                    "endT": 113.43599999999999,
+                    "endT": 113.436,
                     "endXMin": -1.5,
                     "endXMax": -0.5,
                     "LFunc": "Linear",
@@ -6558,7 +7067,7 @@
                     "startT": 115.136,
                     "startXMin": -1.5,
                     "startXMax": -0.5,
-                    "endT": 115.43599999999999,
+                    "endT": 115.436,
                     "endXMin": 1.0,
                     "endXMax": 2.0,
                     "LFunc": "Sin",
@@ -6571,7 +7080,7 @@
             "id": 146,
             "sub": [
                 {
-                    "startT": 115.43599999999999,
+                    "startT": 115.436,
                     "startXMin": -2.0,
                     "startXMax": -1.0,
                     "endT": 115.636,
@@ -6587,7 +7096,7 @@
             "id": 147,
             "sub": [
                 {
-                    "startT": 116.43599999999999,
+                    "startT": 116.436,
                     "startXMin": -1.5,
                     "startXMax": -0.5,
                     "endT": 116.636,
@@ -6619,7 +7128,7 @@
             "id": 149,
             "sub": [
                 {
-                    "startT": 117.23599999999999,
+                    "startT": 117.236,
                     "startXMin": -2.0,
                     "startXMax": -1.0,
                     "endT": 117.436,
@@ -6654,7 +7163,7 @@
                     "startT": 117.636,
                     "startXMin": -1.5,
                     "startXMax": -0.5,
-                    "endT": 117.83600000000001,
+                    "endT": 117.836,
                     "endXMin": -1.5,
                     "endXMax": -0.5,
                     "LFunc": "Linear",
@@ -6667,7 +7176,7 @@
             "id": 152,
             "sub": [
                 {
-                    "startT": 117.83600000000001,
+                    "startT": 117.836,
                     "startXMin": -0.5,
                     "startXMax": 0.5,
                     "endT": 118.036,
@@ -6686,14 +7195,14 @@
                     "startT": 118.036,
                     "startXMin": 1.0,
                     "startXMax": 2.0,
-                    "endT": 118.33600000000001,
+                    "endT": 118.336,
                     "endXMin": -1.3,
                     "endXMax": -0.3,
                     "LFunc": "Sin",
                     "RFunc": "Sin"
                 },
                 {
-                    "startT": 118.33600000000001,
+                    "startT": 118.336,
                     "startXMin": -1.3,
                     "startXMax": -0.3,
                     "endT": 118.536,
@@ -6709,7 +7218,7 @@
             "id": 154,
             "sub": [
                 {
-                    "startT": 118.33600000000001,
+                    "startT": 118.336,
                     "startXMin": 0.3,
                     "startXMax": 1.3,
                     "endT": 118.536,
@@ -6844,6 +7353,204 @@
                     "endXMin": 0.5,
                     "endXMax": 1.5,
                     "LFunc": "Sin",
+                    "RFunc": "Sin"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 163,
+            "sub": [
+                {
+                    "startT": 137.636,
+                    "startXMin": -2.0,
+                    "startXMax": -1.2,
+                    "endT": 138.036,
+                    "endXMin": 1.2,
+                    "endXMax": 2.0,
+                    "LFunc": "Sin",
+                    "RFunc": "Sin"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 164,
+            "sub": [
+                {
+                    "startT": 138.036,
+                    "startXMin": -1.2,
+                    "startXMax": -0.4,
+                    "endT": 138.236,
+                    "endXMin": 0.4,
+                    "endXMax": 1.2,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 165,
+            "sub": [
+                {
+                    "startT": 138.236,
+                    "startXMin": -2.0,
+                    "startXMax": -1.2,
+                    "endT": 138.636,
+                    "endXMin": 1.2,
+                    "endXMax": 2.0,
+                    "LFunc": "Sin",
+                    "RFunc": "Sin"
+                },
+                {
+                    "startT": 138.636,
+                    "startXMin": 1.2,
+                    "startXMax": 2.0,
+                    "endT": 139.436,
+                    "endXMin": 0.5,
+                    "endXMax": 1.3,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                },
+                {
+                    "startT": 139.436,
+                    "startXMin": 0.5,
+                    "startXMax": 1.3,
+                    "endT": 140.236,
+                    "endXMin": -1.6,
+                    "endXMax": -0.8,
+                    "LFunc": "Cos",
+                    "RFunc": "Cos"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 166,
+            "sub": [
+                {
+                    "startT": 140.736,
+                    "startXMin": -1.2,
+                    "startXMax": -0.4,
+                    "endT": 141.036,
+                    "endXMin": 1.2,
+                    "endXMax": 2.0,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 167,
+            "sub": [
+                {
+                    "startT": 141.036,
+                    "startXMin": -0.4,
+                    "startXMax": 0.4,
+                    "endT": 141.236,
+                    "endXMin": -1.0,
+                    "endXMax": -0.2,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                },
+                {
+                    "startT": 141.236,
+                    "startXMin": -1.0,
+                    "startXMax": -0.2,
+                    "endT": 141.636,
+                    "endXMin": 1.2,
+                    "endXMax": 2.0,
+                    "LFunc": "Sin",
+                    "RFunc": "Sin"
+                },
+                {
+                    "startT": 141.636,
+                    "startXMin": 1.2,
+                    "startXMax": 2.0,
+                    "endT": 142.436,
+                    "endXMin": -1.6,
+                    "endXMax": -0.8,
+                    "LFunc": "Cos",
+                    "RFunc": "Cos"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 168,
+            "sub": [
+                {
+                    "startT": 142.436,
+                    "startXMin": 0.4,
+                    "startXMax": 1.2,
+                    "endT": 142.636,
+                    "endXMin": -1.2,
+                    "endXMax": -0.4,
+                    "LFunc": "Linear",
+                    "RFunc": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 169,
+            "sub": [
+                {
+                    "startT": 142.636,
+                    "startXMin": 1.2,
+                    "startXMax": 2.0,
+                    "endT": 143.036,
+                    "endXMin": -2.0,
+                    "endXMax": -1.2,
+                    "LFunc": "Sin",
+                    "RFunc": "Sin"
+                },
+                {
+                    "startT": 143.036,
+                    "startXMin": -2.0,
+                    "startXMax": -1.2,
+                    "endT": 143.436,
+                    "endXMin": 0.4,
+                    "endXMax": 1.6,
+                    "LFunc": "Cos",
+                    "RFunc": "Cos"
+                },
+                {
+                    "startT": 143.436,
+                    "startXMin": 0.4,
+                    "startXMax": 1.6,
+                    "endT": 143.636,
+                    "endXMin": -0.4,
+                    "endXMax": 0.4,
+                    "LFunc": "Sin",
+                    "RFunc": "Cos"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 170,
+            "sub": [
+                {
+                    "startT": 143.036,
+                    "startXMin": 1.2,
+                    "startXMax": 2.0,
+                    "endT": 143.436,
+                    "endXMin": -1.6,
+                    "endXMax": -0.4,
+                    "LFunc": "Cos",
+                    "RFunc": "Cos"
+                },
+                {
+                    "startT": 143.436,
+                    "startXMin": -1.6,
+                    "startXMax": -0.4,
+                    "endT": 143.636,
+                    "endXMin": -0.4,
+                    "endXMax": 0.4,
+                    "LFunc": "Cos",
                     "RFunc": "Sin"
                 }
             ]
@@ -7541,7 +8248,7 @@
             "Pid": 17
         },
         {
-            "startT": 89.43599999999999,
+            "startT": 89.436,
             "startX": 0.2,
             "Size": 1.2,
             "Pid": 17
@@ -7571,7 +8278,7 @@
             "Pid": 17
         },
         {
-            "startT": 89.68599999999999,
+            "startT": 89.686,
             "startX": -0.85,
             "Size": 1.5,
             "Pid": 17
@@ -7601,7 +8308,7 @@
             "Pid": 17
         },
         {
-            "startT": 89.93599999999999,
+            "startT": 89.936,
             "startX": 0.9,
             "Size": 1.0,
             "Pid": 17
@@ -7631,7 +8338,7 @@
             "Pid": 17
         },
         {
-            "startT": 90.18599999999999,
+            "startT": 90.186,
             "startX": 0.9,
             "Size": 1.1,
             "Pid": 17
@@ -7655,7 +8362,7 @@
             "Pid": 17
         },
         {
-            "startT": 89.68599999999999,
+            "startT": 89.686,
             "startX": 0.85,
             "Size": 1.5,
             "Pid": 1
@@ -7685,7 +8392,7 @@
             "Pid": 1
         },
         {
-            "startT": 89.93599999999999,
+            "startT": 89.936,
             "startX": -0.9,
             "Size": 1.0,
             "Pid": 1
@@ -7715,7 +8422,7 @@
             "Pid": 1
         },
         {
-            "startT": 90.18599999999999,
+            "startT": 90.186,
             "startX": -0.9,
             "Size": 1.1,
             "Pid": 1
@@ -7763,7 +8470,7 @@
             "Pid": 17
         },
         {
-            "startT": 95.88600000000001,
+            "startT": 95.886,
             "startX": 0.15,
             "Size": 1.3,
             "Pid": 17
@@ -7793,7 +8500,7 @@
             "Pid": 17
         },
         {
-            "startT": 96.13600000000001,
+            "startT": 96.136,
             "startX": 0.5,
             "Size": 1.4,
             "Pid": 17
@@ -7823,7 +8530,7 @@
             "Pid": 17
         },
         {
-            "startT": 96.38600000000001,
+            "startT": 96.386,
             "startX": -1.25,
             "Size": 0.9,
             "Pid": 17
@@ -7853,7 +8560,7 @@
             "Pid": 17
         },
         {
-            "startT": 96.63600000000001,
+            "startT": 96.636,
             "startX": -0.6,
             "Size": 1.2,
             "Pid": 17
@@ -7877,7 +8584,7 @@
             "Pid": 1
         },
         {
-            "startT": 96.13600000000001,
+            "startT": 96.136,
             "startX": -0.5,
             "Size": 1.4,
             "Pid": 1
@@ -7907,7 +8614,7 @@
             "Pid": 1
         },
         {
-            "startT": 96.38600000000001,
+            "startT": 96.386,
             "startX": 1.25,
             "Size": 0.9,
             "Pid": 1
@@ -7937,7 +8644,7 @@
             "Pid": 1
         },
         {
-            "startT": 96.63600000000001,
+            "startT": 96.636,
             "startX": 0.6,
             "Size": 1.2,
             "Pid": 1
@@ -8009,7 +8716,7 @@
             "Pid": 1
         },
         {
-            "startT": 115.93599999999999,
+            "startT": 115.936,
             "startX": -1.4,
             "Size": 1.2,
             "Pid": 1
@@ -8039,50 +8746,50 @@
             "Pid": 1
         },
         {
-            "startT": 123.11583333333334,
-            "startX": -1.1625,
+            "startT": 123.116,
+            "startX": -1.163,
             "Size": 0.7625000000000001,
             "Pid": 1
         },
         {
-            "startT": 123.19566666666667,
+            "startT": 123.196,
             "startX": -0.825,
             "Size": 0.7250000000000001,
             "Pid": 1
         },
         {
-            "startT": 123.2755,
-            "startX": -0.4874999999999998,
+            "startT": 123.275,
+            "startX": -0.487,
             "Size": 0.6875,
             "Pid": 1
         },
         {
-            "startT": 123.35533333333333,
-            "startX": -0.1499999999999999,
+            "startT": 123.355,
+            "startX": -0.15,
             "Size": 0.65,
             "Pid": 1
         },
         {
-            "startT": 123.43516666666667,
-            "startX": 0.1875,
+            "startT": 123.435,
+            "startX": 0.188,
             "Size": 0.6125,
             "Pid": 1
         },
         {
             "startT": 123.515,
-            "startX": 0.5250000000000004,
+            "startX": 0.525,
             "Size": 0.5750000000000001,
             "Pid": 1
         },
         {
-            "startT": 123.56166666666667,
-            "startX": 0.8625000000000003,
+            "startT": 123.562,
+            "startX": 0.863,
             "Size": 0.5375000000000001,
             "Pid": 1
         },
         {
-            "startT": 123.60833333333333,
-            "startX": 1.2000000000000002,
+            "startT": 123.608,
+            "startX": 1.2,
             "Size": 0.5,
             "Pid": 1
         }
@@ -8404,7 +9111,7 @@
             "Pid": 17
         },
         {
-            "startT": 88.93599999999999,
+            "startT": 88.936,
             "startX": 1.0,
             "Size": 1.0,
             "Dir": 0.0,
@@ -8468,16 +9175,16 @@
         },
         {
             "startT": 101.636,
-            "startX": -0.8,
-            "Size": 1.0,
-            "Dir": 0.75,
+            "startX": 0.0,
+            "Size": 2.0,
+            "Dir": 0.0,
             "Pid": 17
         },
         {
             "startT": 101.836,
-            "startX": -0.8,
+            "startX": 0.0,
             "Size": 1.0,
-            "Dir": 0.25,
+            "Dir": 0.5,
             "Pid": 17
         },
         {
@@ -8488,17 +9195,17 @@
             "Pid": 1
         },
         {
-            "startT": 114.43599999999999,
-            "startX": 0.8,
-            "Size": 1.0,
-            "Dir": 0.25,
+            "startT": 114.436,
+            "startX": 0.0,
+            "Size": 2.0,
+            "Dir": 0.0,
             "Pid": 1
         },
         {
             "startT": 114.636,
-            "startX": 0.8,
+            "startX": 0.0,
             "Size": 1.0,
-            "Dir": 0.75,
+            "Dir": 0.5,
             "Pid": 1
         },
         {
@@ -8526,9 +9233,9 @@
                     "startT": 10.436,
                     "endT": 10.536,
                     "startX": -1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8542,9 +9249,9 @@
                     "startT": 10.736,
                     "endT": 10.836,
                     "startX": -1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.4,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8558,9 +9265,9 @@
                     "startT": 11.036,
                     "endT": 11.136,
                     "startX": -1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8574,9 +9281,9 @@
                     "startT": 11.336,
                     "endT": 11.436,
                     "startX": -1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.4,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8590,9 +9297,9 @@
                     "startT": 11.636,
                     "endT": 11.736,
                     "startX": -1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8606,9 +9313,9 @@
                     "startT": 13.636,
                     "endT": 13.736,
                     "startX": 1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8622,9 +9329,9 @@
                     "startT": 13.936,
                     "endT": 14.036,
                     "startX": 1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.4,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8638,9 +9345,9 @@
                     "startT": 14.236,
                     "endT": 14.336,
                     "startX": 1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8654,9 +9361,9 @@
                     "startT": 14.536,
                     "endT": 14.636,
                     "startX": 1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.4,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8670,9 +9377,9 @@
                     "startT": 14.836,
                     "endT": 14.936,
                     "startX": 1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8686,9 +9393,9 @@
                     "startT": 16.836,
                     "endT": 16.936,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8702,9 +9409,9 @@
                     "startT": 17.136,
                     "endT": 17.236,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8718,9 +9425,9 @@
                     "startT": 17.436,
                     "endT": 17.536,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8734,9 +9441,9 @@
                     "startT": 17.736,
                     "endT": 17.836,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8750,9 +9457,9 @@
                     "startT": 18.036,
                     "endT": 18.136,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.6,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8766,18 +9473,18 @@
                     "startT": 37.236,
                     "endT": 37.636,
                     "startX": -1.2,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 0.0,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "UpperCir"
                 },
                 {
                     "startT": 37.636,
                     "endT": 38.036,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.2,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 }
             ]
@@ -8791,9 +9498,9 @@
                     "startT": 38.836,
                     "endT": 39.236,
                     "startX": -1.2,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 0.0,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "LowerCir"
                 }
             ]
@@ -8807,18 +9514,18 @@
                     "startT": 39.636,
                     "endT": 40.036,
                     "startX": 1.2,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 0.0,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "UpperCir"
                 },
                 {
                     "startT": 40.036,
                     "endT": 40.436,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.2,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 }
             ]
@@ -8832,9 +9539,9 @@
                     "startT": 42.036,
                     "endT": 42.136,
                     "startX": 1.5,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.0,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8848,9 +9555,9 @@
                     "startT": 42.436,
                     "endT": 42.536,
                     "startX": -0.3,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.8,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8864,18 +9571,18 @@
                     "startT": 42.836,
                     "endT": 43.036,
                     "startX": 1.5,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 43.036,
                     "endT": 43.236,
                     "startX": 0.5,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 1.5,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "UpperCir"
                 }
             ]
@@ -8889,9 +9596,9 @@
                     "startT": 43.636,
                     "endT": 43.736,
                     "startX": -1.5,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.0,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8905,9 +9612,9 @@
                     "startT": 44.036,
                     "endT": 44.136,
                     "startX": 0.3,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.8,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8921,9 +9628,9 @@
                     "startT": 44.436,
                     "endT": 44.536,
                     "startX": -1.5,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.0,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8937,27 +9644,27 @@
                     "startT": 45.436,
                     "endT": 45.836,
                     "startX": 1.6,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": -1.6,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "Linear"
                 },
                 {
                     "startT": 45.836,
                     "endT": 46.236,
                     "startX": -1.6,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.0,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 },
                 {
                     "startT": 46.236,
                     "endT": 46.636,
                     "startX": 0.0,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 1.6,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "Linear"
                 }
             ]
@@ -8971,18 +9678,18 @@
                     "startT": 45.836,
                     "endT": 46.236,
                     "startX": -1.5,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.0,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "Linear"
                 },
                 {
                     "startT": 46.236,
                     "endT": 46.636,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -8996,18 +9703,18 @@
                     "startT": 49.036,
                     "endT": 49.236,
                     "startX": 1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.2,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "Linear"
                 },
                 {
                     "startT": 49.236,
                     "endT": 49.436,
                     "startX": -0.2,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "UpperCir"
                 }
             ]
@@ -9021,18 +9728,18 @@
                     "startT": 50.636,
                     "endT": 50.836,
                     "startX": 1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -0.2,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 50.836,
                     "endT": 51.036,
                     "startX": -0.2,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": -1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -9046,18 +9753,18 @@
                     "startT": 52.236,
                     "endT": 52.436,
                     "startX": -1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.2,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "Linear"
                 },
                 {
                     "startT": 52.436,
                     "endT": 52.636,
                     "startX": 0.2,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "UpperCir"
                 }
             ]
@@ -9071,18 +9778,18 @@
                     "startT": 53.836,
                     "endT": 54.036,
                     "startX": -1.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 0.2,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 54.036,
                     "endT": 54.236,
                     "startX": 0.2,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "Linear"
                 }
             ]
@@ -9096,18 +9803,18 @@
                     "startT": 55.436,
                     "endT": 55.636,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 55.636,
                     "endT": 55.836,
                     "startX": -1.5,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 0.0,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "UpperCir"
                 }
             ]
@@ -9121,18 +9828,18 @@
                     "startT": 57.036,
                     "endT": 57.236,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": 1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 57.236,
                     "endT": 57.436,
                     "startX": 1.5,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 0.0,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "UpperCir"
                 }
             ]
@@ -9146,19 +9853,296 @@
                     "startT": 58.636,
                     "endT": 58.836,
                     "startX": 0.0,
-                    "startY": 1,
+                    "startY": 1.0,
                     "endX": -1.5,
-                    "endY": 0,
+                    "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 58.836,
                     "endT": 59.036,
                     "startX": -1.5,
-                    "startY": 0,
+                    "startY": 0.0,
                     "endX": 0.0,
-                    "endY": 1,
+                    "endY": 1.0,
                     "Func": "UpperCir"
+                }
+            ]
+        },
+        {
+            "Pid": 3,
+            "id": 34,
+            "headT": 125.152,
+            "sub": [
+                {
+                    "startT": 125.152,
+                    "endT": 125.972,
+                    "startX": 0.0,
+                    "startY": 0.0,
+                    "endX": 0.0,
+                    "endY": 1.5,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 125.972,
+                    "endT": 127.11,
+                    "startX": 0.0,
+                    "startY": 1.5,
+                    "endX": -1.2,
+                    "endY": 0.75,
+                    "Func": "UpperCir"
+                },
+                {
+                    "startT": 127.11,
+                    "endT": 128.247,
+                    "startX": -1.2,
+                    "startY": 0.75,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "LowerCir"
+                },
+                {
+                    "startT": 125.972,
+                    "endT": 127.11,
+                    "startX": 0.0,
+                    "startY": 1.5,
+                    "endX": 1.2,
+                    "endY": 0.75,
+                    "Func": "UpperCir"
+                },
+                {
+                    "startT": 127.11,
+                    "endT": 128.247,
+                    "startX": 1.2,
+                    "startY": 0.75,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "LowerCir"
+                }
+            ]
+        },
+        {
+            "Pid": 3,
+            "id": 35,
+            "headT": 128.447,
+            "sub": [
+                {
+                    "startT": 128.447,
+                    "endT": 129.267,
+                    "startX": 0.0,
+                    "startY": 0.0,
+                    "endX": -1.2,
+                    "endY": 1.2,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 129.267,
+                    "endT": 131.542,
+                    "startX": -1.2,
+                    "startY": 1.2,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "UpperCir"
+                },
+                {
+                    "startT": 129.267,
+                    "endT": 131.542,
+                    "startX": -1.2,
+                    "startY": 1.2,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "LowerCir"
+                }
+            ]
+        },
+        {
+            "Pid": 3,
+            "id": 36,
+            "headT": 131.637,
+            "sub": [
+                {
+                    "startT": 131.637,
+                    "endT": 132.457,
+                    "startX": 0.0,
+                    "startY": 0.0,
+                    "endX": 1.2,
+                    "endY": 1.2,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 132.457,
+                    "endT": 134.732,
+                    "startX": 1.2,
+                    "startY": 1.2,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "UpperCir"
+                },
+                {
+                    "startT": 132.457,
+                    "endT": 134.732,
+                    "startX": 1.2,
+                    "startY": 1.2,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "LowerCir"
+                }
+            ]
+        },
+        {
+            "Pid": 3,
+            "id": 37,
+            "headT": 134.836,
+            "sub": [
+                {
+                    "startT": 134.836,
+                    "endT": 135.136,
+                    "startX": 0.0,
+                    "startY": 0.0,
+                    "endX": 1.2,
+                    "endY": 0.75,
+                    "Func": "LowerCir"
+                },
+                {
+                    "startT": 135.136,
+                    "endT": 135.436,
+                    "startX": 1.2,
+                    "startY": 0.75,
+                    "endX": 0.0,
+                    "endY": 1.5,
+                    "Func": "UpperCir"
+                },
+                {
+                    "startT": 135.436,
+                    "endT": 135.736,
+                    "startX": 0.0,
+                    "startY": 1.5,
+                    "endX": -1.2,
+                    "endY": 0.75,
+                    "Func": "UpperCir"
+                },
+                {
+                    "startT": 135.736,
+                    "endT": 136.036,
+                    "startX": -1.2,
+                    "startY": 0.75,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "LowerCir"
+                },
+                {
+                    "startT": 134.836,
+                    "endT": 135.736,
+                    "startX": 0.0,
+                    "startY": 0.0,
+                    "endX": 0.0,
+                    "endY": 1.5,
+                    "Func": "Linear"
+                },
+                {
+                    "startT": 135.736,
+                    "endT": 136.036,
+                    "startX": 0.0,
+                    "startY": 1.5,
+                    "endX": 0.0,
+                    "endY": 0.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 38,
+            "headT": 144.336,
+            "sub": [
+                {
+                    "startT": 144.736,
+                    "endT": 144.836,
+                    "startX": 0.0,
+                    "startY": 1.0,
+                    "endX": 0.6,
+                    "endY": 0.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 39,
+            "headT": 145.236,
+            "sub": [
+                {
+                    "startT": 145.536,
+                    "endT": 145.636,
+                    "startX": 0.0,
+                    "startY": 1.0,
+                    "endX": -0.6,
+                    "endY": 0.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 1,
+            "id": 40,
+            "headT": 146.036,
+            "sub": [
+                {
+                    "startT": 146.336,
+                    "endT": 146.436,
+                    "startX": 0.0,
+                    "startY": 1.0,
+                    "endX": 0.6,
+                    "endY": 0.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 41,
+            "headT": 147.536,
+            "sub": [
+                {
+                    "startT": 147.736,
+                    "endT": 147.836,
+                    "startX": -0.5,
+                    "startY": 0.0,
+                    "endX": -1.2,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 42,
+            "headT": 147.736,
+            "sub": [
+                {
+                    "startT": 148.036,
+                    "endT": 148.136,
+                    "startX": -0.5,
+                    "startY": 0.0,
+                    "endX": -0.5,
+                    "endY": 1.0,
+                    "Func": "Linear"
+                }
+            ]
+        },
+        {
+            "Pid": 17,
+            "id": 43,
+            "headT": 148.036,
+            "sub": [
+                {
+                    "startT": 148.336,
+                    "endT": 148.436,
+                    "startX": -0.5,
+                    "startY": 0.0,
+                    "endX": 0.2,
+                    "endY": 1.0,
+                    "Func": "Linear"
                 }
             ]
         }

@@ -3141,7 +3141,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 613949610}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.97324914, z: -0.22975242, w: 0}
+  m_LocalRotation: {x: 0, y: 0.9732491, z: -0.2297524, w: 0}
   m_LocalPosition: {x: 0, y: 9, z: 9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5240,6 +5240,7 @@ MonoBehaviour:
   HoldSoundEffect: {fileID: 0}
   StarHeadSoundEffect: {fileID: 0}
   StarSoundEffect: {fileID: 0}
+  AutoPlayService: {fileID: 0}
   JudgePlanesParent: {fileID: 0}
   JudgeLinesParent: {fileID: 0}
   TapsParent: {fileID: 0}
@@ -11384,7 +11385,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: b4ac0862ee6f52a4f9fb1f6c6ffbf42b, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 0
   Mute: 0

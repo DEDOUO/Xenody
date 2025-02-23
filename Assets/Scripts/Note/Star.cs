@@ -81,25 +81,25 @@ namespace Note
             if (subStarList.Count > 0)
             {
                 var lastSubStar = subStarList[subStarList.Count - 1];
-                if (starTrackStartT != lastSubStar.starTrackEndT)
-                {
-                    Debug.LogError("添加的子星星时间戳不连续，无法添加。");
-                    return;
-                }
-                // 检查起始坐标与上一个子星星结束坐标是否一致，适配新的坐标存储方式
-                if (startX != lastSubStar.endX || startY != lastSubStar.endY)
-                {
-                    Debug.LogError("添加的子星星起始坐标与上一个子星星结束坐标不一致，无法添加。");
-                    return;
-                }
+                //if (starTrackStartT != lastSubStar.starTrackEndT)
+                //{
+                //    Debug.LogError("添加的子星星时间戳不连续，无法添加。");
+                //    return;
+                //}
+                //// 检查起始坐标与上一个子星星结束坐标是否一致，适配新的坐标存储方式
+                //if (startX != lastSubStar.endX || startY != lastSubStar.endY)
+                //{
+                //    Debug.LogError("添加的子星星起始坐标与上一个子星星结束坐标不一致，无法添加。");
+                //    return;
+                //}
             }
 
             var newSubStar = new SubStar(starTrackStartT, starTrackEndT, startX, startY, endX, endY, trackFunction);
-            if (!newSubStar.IsInAxisRange())
-            {
-                Debug.LogError("添加的子星星坐标超出范围，无法添加。");
-                return;
-            }
+            //if (!newSubStar.IsInAxisRange())
+            //{
+            //    Debug.LogError("添加的子星星坐标超出范围，无法添加。");
+            //    return;
+            //}
 
             subStarList.Add(newSubStar);
         }

@@ -50,7 +50,7 @@ namespace Params
     public static class FinenessParams
     {
         // 模拟Hold/JudgePlane曲面时，用几个斜面代替曲面
-        public static int Segment = 8;
+        public static int Segment = 15;
     }
     public static class StarArrowParams
     {
