@@ -24,7 +24,7 @@ def process_dataframe(df):
     other_cols = [col for col in df.columns if col not in timestamp_and_coordinate_cols]
 
     # 对需要处理的列应用转换函数
-    df_timestamp_and_coordinate = df[timestamp_and_coordinate_cols].applymap(convert_to_3_decimals)
+    df_timestamp_and_coordinate = df[timestamp_and_coordinate_cols].apply(convert_to_3_decimals)
     df_other = df[other_cols]
 
     # 合并处理后的列
