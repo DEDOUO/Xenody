@@ -186,8 +186,10 @@ public class MusicAndChartPlayer : MonoBehaviour
                     }
                     else if (instanceName.StartsWith("Flick"))
                     {
-                        TapSoundEffect.Play();
-                        //FlickSoundEffect.Play();
+                        //TapSoundEffect.Play();
+                        //Debug.Log(FlickSoundEffect.clip);
+                        //FlickSoundEffect.enabled = true;
+                        FlickSoundEffect.Play();
                         PlayAnimation(instanceName, "FlickEffect");
                     }
                     else if (instanceName.StartsWith("Hold"))
