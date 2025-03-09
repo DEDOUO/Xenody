@@ -4,7 +4,7 @@ using UnityEngine;
 public class CreateQuadFromPoints : MonoBehaviour
 {
     // 通过函数来创建四边形游戏物体，传入四个点坐标、要赋予的精灵、游戏物体名称和父物体
-    public static GameObject CreateQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue, float Alpha)
+    public static GameObject CreateQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue, float Alpha, string Theshader)
     {
         // 创建四边形游戏物体
         GameObject quadObject = new GameObject(objectName);
@@ -52,11 +52,17 @@ public class CreateQuadFromPoints : MonoBehaviour
         triangles[10] = 2;
         triangles[11] = 0;
 
+        // 添加UV坐标设置
+        Vector2[] uv = new Vector2[4];
+        uv[0] = new Vector2(0f, 0f);
+        uv[1] = new Vector2(0f, 1f);
+        uv[2] = new Vector2(1f, 1f);
+        uv[3] = new Vector2(1f, 0f);
 
         // 设置网格的顶点和三角形索引数据
         mesh.vertices = vertices;
         mesh.triangles = triangles;
-
+        mesh.uv = uv;
 
         // 计算并设置网格的法线（用于光照等效果计算，这里简单设置为统一朝一个方向，可根据需求优化）
         mesh.RecalculateNormals();
@@ -67,10 +73,11 @@ public class CreateQuadFromPoints : MonoBehaviour
 
 
         // 通过代码基于指定的.shader 文件创建材质
-        Shader shader = Shader.Find("MaskMaterial"); // 使用绝对路径尝试查找
+        Shader shader = Shader.Find(Theshader); // 使用绝对路径尝试查找
         if (shader == null)
         {
-            Debug.LogError("无法找到指定的 MaskMaterial.shader 文件，请检查路径和资源设置！");
+            //Debug.Log(Theshader);
+            Debug.LogError("无法找到指定的shader文件，请检查路径和资源设置！");
             return null;
         }
         Material material = new Material(shader);

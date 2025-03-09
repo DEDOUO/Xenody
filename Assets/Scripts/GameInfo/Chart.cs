@@ -58,7 +58,7 @@ public class Chart
             chart.judgePlanes = new List<JudgePlane>();
             foreach (var judgePlaneData in chartData.judgePlanes)
             {
-                var newJudgePlane = new JudgePlane((int)judgePlaneData.id);
+                var newJudgePlane = new JudgePlane((int)judgePlaneData.id, (string)judgePlaneData.color);
                 foreach (var subPlane in judgePlaneData.subJudgePlaneList)
                 {
                     newJudgePlane.AddSubJudgePlane((float)subPlane.startT, (float)subPlane.startY, (float)subPlane.endT, (float)subPlane.endY, (Utility.TransFunctionType)subPlane.yAxisFunction);

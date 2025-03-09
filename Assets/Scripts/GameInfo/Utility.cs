@@ -3,10 +3,9 @@ using System;
 using UnityEngine;
 using Note;
 using Params;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+//using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using static Note.Star;
 using System.Collections.Generic;
-//using static Utility;
 
 
 public class Utility : MonoBehaviour
@@ -19,25 +18,13 @@ public class Utility : MonoBehaviour
 
     // 定义星星坐标变化函数的枚举类型
     //适用Star类
-    //public enum TrackFunctionType { Linear, Sin, Cos, Circular }
     //星星暂时只支持线性和圆形（椭圆型）
     //sin和cos涉及曲线计算的部分，不能用初等函数表示，只能通过数值计算，暂时忽略
     public enum TrackFunctionType { Linear, UpperCir, LowerCir }
 
-    /// <summary>
+
     /// 根据给定的时间、起始值、结束值以及坐标变化函数类型来计算相应的位置值。
     /// 可以用于处理如游戏中物体在某个时间段内按照不同函数规律进行位置变化的情况。
-    /// </summary>
-    /// <param name="currentTime">当前时间</param>
-    /// <param name="startTime">起始时间</param>
-    /// <param name="startVal">起始值（如起始坐标等）</param>
-    /// <param name="endTime">结束时间</param>
-    /// <param name="endVal">结束值（如结束坐标等）</param>
-    /// <param name="functionType">坐标变化函数类型（线性、正弦、余弦）</param>
-    /// <returns>计算得到的位置值</returns>
-    /// 
-    
-
     public static float CalculatePosition(float currentTime, float startTime, float startVal, float endTime, float endVal, TransFunctionType functionType)
     {
         if (startTime > endTime)
@@ -393,7 +380,7 @@ public class Utility : MonoBehaviour
         return theta;
     }
 
-    public static float CalculateSubStarCurveLength(Note.Star.SubStar subStar)
+    public static float CalculateSubStarCurveLength(SubStar subStar)
     {
         float length = 0.0f;
         switch (subStar.trackFunction)
@@ -452,7 +439,6 @@ public class Utility : MonoBehaviour
         return screenPosition.y;
     }
 
-
     public static bool IsInXAxisRange(float noteSize, float startX)
     {
         float halfNoteSize = noteSize / 2;
@@ -485,11 +471,10 @@ public class Utility : MonoBehaviour
         return new Vector2(scaledX, scaledY);
     }
 
-    public static float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition)
+    public static float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition, float targetHorizontalMargin)
     {
         // 获取屏幕宽度
         float screenWidth = Screen.width;
-        float targetHorizontalMargin = HorizontalParams.HorizontalMargin; // 目标水平边距，即离屏幕边缘10%的距离，可根据需求调整
 
         // 计算水平可视范围（考虑边距后的有效宽度）
         float horizontalVisibleRange = screenWidth * (1 - 2 * targetHorizontalMargin);
@@ -502,7 +487,6 @@ public class Utility : MonoBehaviour
 
         return XWorld;
     }
-
 
     public static void CheckArrowVisibility(GameObject SubStarsParent, float currentTime, Dictionary<(int, int), SubStarInfo> subStarInfoDict)
     {
@@ -576,111 +560,6 @@ public class Utility : MonoBehaviour
         }
     }
 
-
-
-    //public static void CheckArrowVisibility(Chart chart, GameObject SubStarsParent, float currentTime)
-    //{
-    //    if (chart.stars != null)
-    //    {
-    //        for (int i = 0; i < chart.stars.Count; i++)
-    //        {
-    //            var star = chart.stars[i];
-    //            float starHeadT = star.starHeadT;
-    //            for (int j = 0; j < star.subStarList.Count; j++)
-    //            {
-    //                var subStar = star.subStarList[j];
-    //                int subStarIndex = j;
-
-    //                string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
-    //                //Debug.Log(instanceName);
-    //                GameObject SubStarArrowParent = SubStarsParent.transform.Find(instanceName).gameObject;
-    //                //Debug.Log(SubStarArrowParent);
-    //                List<GameObject> arrows = new List<GameObject>();
-
-    //                if (SubStarArrowParent != null)
-    //                {
-    //                    for (int k = 0; k < SubStarArrowParent.transform.childCount; k++)
-    //                    {
-    //                        GameObject arrow = SubStarArrowParent.transform.GetChild(k).gameObject;
-    //                        arrows.Add(arrow);
-    //                    }
-
-    //                    if (currentTime >= starHeadT - ChartParams.StarAppearTime && currentTime < starHeadT)
-    //                    {
-    //                        SubStarArrowParent.SetActive(true);
-    //                        // 当时间处于 starHeadT - StarAppearTime 和 substar.startT 之间时，将该 substar 下对应 Arrow 均设置为可见，该 substar 下所有 arrow 的透明度由 0 线性地变为 1
-    //                        if (arrows.Count != 0)
-    //                        {
-    //                            float t = (currentTime - (starHeadT - ChartParams.StarAppearTime)) / ChartParams.StarAppearTime;
-    //                            foreach (var arrow in arrows)
-    //                            {
-    //                                arrow.SetActive(true);
-    //                                SetArrowAlpha(arrow, t);
-    //                            }
-    //                        }
-    //                    }
-    //                    else if (currentTime >= subStar.starTrackStartT && currentTime < subStar.starTrackEndT)
-    //                    {
-    //                        SubStarArrowParent.SetActive(true);
-    //                        if (arrows.Count != 0)
-    //                        {
-    //                            // 计算时间间隔和每个箭头的时间间隔
-    //                            float totalTime = subStar.starTrackEndT - subStar.starTrackStartT;
-    //                            float arrowTimeInterval = totalTime / arrows.Count;
-
-    //                            // 计算当前时间所在的箭头索引
-    //                            int arrowIndex = Mathf.FloorToInt((currentTime - subStar.starTrackStartT) / arrowTimeInterval);
-
-    //                            // 确保箭头索引不越界
-    //                            arrowIndex = Mathf.Clamp(arrowIndex, 0, arrows.Count - 1);
-
-    //                            // 遍历箭头，根据时间设置透明度
-    //                            for (int k = 0; k < arrows.Count; k++)
-    //                            {
-    //                                float alpha = 1.0f;
-    //                                if (k <= arrowIndex)
-    //                                {
-    //                                    // 对于当前箭头及之前的箭头，根据时间线性改变透明度
-    //                                    if (k == arrowIndex)
-    //                                    {
-    //                                        float timeInInterval = (currentTime - (subStar.starTrackStartT + k * arrowTimeInterval)) / arrowTimeInterval;
-    //                                        alpha = 1.0f - timeInInterval;
-    //                                    }
-    //                                    else
-    //                                    {
-    //                                        alpha = 0.0f;
-    //                                    }
-    //                                }
-    //                                SetArrowAlpha(arrows[k], alpha);
-    //                            }
-    //                        }
-    //                    }
-    //                    else if (currentTime >= subStar.starTrackEndT)
-    //                    {
-    //                        if (arrows.Count != 0)
-    //                        {
-    //                            // 当时间大于 starTrackEndT 时，将 substar 下的 arrow 实例均设为非激活
-    //                            SubStarArrowParent.SetActive(false);
-    //                        }
-    //                    }
-    //                    else if (currentTime < starHeadT - ChartParams.StarAppearTime)
-    //                    {
-    //                        if (arrows.Count != 0)
-    //                        {
-    //                            // 当时间小于 starHeadT - ChartParams.StarAppearTime 时，将 substar 下的 arrow 实例均设为非激活
-    //                            SubStarArrowParent.SetActive(false);
-    //                        }
-    //                    }
-    //                }
-    //                else
-    //                {
-    //                    Debug.Log(instanceName + "未找到！");
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
     public static GameObject CombineInstances(List<GameObject> instances)
     {
         GameObject combined = new GameObject("CombinedInstance");
@@ -729,8 +608,15 @@ public class Utility : MonoBehaviour
         MeshRenderer combinedRenderer = combined.AddComponent<MeshRenderer>();
         combinedRenderer.material = instances[0].GetComponentInChildren<MeshRenderer>().material;
 
+        // 删除合并前的实例
+        //foreach (GameObject segmentInstance in instances)
+        //{
+        //    Destroy(segmentInstance);
+        //}
+
         return combined;
     }
+
     public static float CalculateZAxisPosition(float startTime)
     {
         // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
@@ -738,15 +624,15 @@ public class Utility : MonoBehaviour
     }
 
     // 设置锚点的辅助方法
-    public static void SetAnchor(GameObject obj, Vector2 anchor)
-    {
-        RectTransform rectTransform = obj.GetComponent<RectTransform>();
-        if (rectTransform != null)
-        {
-            rectTransform.anchorMin = anchor;
-            rectTransform.anchorMax = anchor;
-        }
-    }
+    //public static void SetAnchor(GameObject obj, Vector2 anchor)
+    //{
+    //    RectTransform rectTransform = obj.GetComponent<RectTransform>();
+    //    if (rectTransform != null)
+    //    {
+    //        rectTransform.anchorMin = anchor;
+    //        rectTransform.anchorMax = anchor;
+    //    }
+    //}
 
     public static void AdjustFlickArrowPosition(GameObject flickarrow, GameObject flick, float flickDirection)
     {
@@ -852,12 +738,6 @@ public class Utility : MonoBehaviour
 
         // 计算 startY 对应的屏幕坐标，即使 startY 超出 [0, 1] 范围也能正确计算
         Vector3 tempScreenPoint = screenPoint0 + startY * (screenPoint1 - screenPoint0);
-        //float screenX = screenPoint0.x, + screenPoint1.x, startY);
-        //float screenY = Mathf.Lerp(screenPoint0.y, screenPoint1.y, startY);
-        //float screenZ = Mathf.Lerp(screenPoint0.z, screenPoint1.z, startY);
-
-        //// 创建一个临时的屏幕点
-        //Vector3 tempScreenPoint = new Vector3(screenX, screenY, screenZ);
 
         // 将临时屏幕点转换回世界坐标
         Vector3 worldPoint = mainCamera.ScreenToWorldPoint(tempScreenPoint);
@@ -866,6 +746,19 @@ public class Utility : MonoBehaviour
         return worldPoint.y;
     }
 
+    public static Color HexToColor(string hex)
+    {
+        hex = hex.Replace("#", "");
+        if (hex.Length == 6)
+        {
+            hex = "FF" + hex; // 不包含透明度时，添加默认不透明值
+        }
+        byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+        byte a = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+        return new Color32(r, g, b, a);
+    }
 
 }
 

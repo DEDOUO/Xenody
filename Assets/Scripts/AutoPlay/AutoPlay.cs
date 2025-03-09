@@ -50,15 +50,15 @@ public class AutoPlay : MonoBehaviour
         //SubStarsParentRect = subStarsParent.GetComponent<RectTransform>();
 
         // 加载Sprite
-        JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack");
+        JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack2");
         if (JudgePlaneSprite == null)
         {
-            Debug.LogError("Failed to load sprite: Sprites/TrackBlack");
+            Debug.LogError("Failed to load sprite: Sprites/TrackBlack2");
         }
-        HoldSprite = Resources.Load<Sprite>("Sprites/HoldBlueSprite");
+        HoldSprite = Resources.Load<Sprite>("Sprites/HoldBlueSprite2");
         if (HoldSprite == null)
         {
-            Debug.LogError("Failed to load sprite: Sprites/HoldBlueSprite");
+            Debug.LogError("Failed to load sprite: Sprites/HoldBlueSprite2");
         }
 
         // 查找包含AudioSource的GameObject

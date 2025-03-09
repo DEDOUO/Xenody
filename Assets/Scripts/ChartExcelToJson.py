@@ -35,6 +35,7 @@ planes_data = []
 for _, group in planes_df.groupby('id'):
     plane = {
         'id': int(group['id'].iloc[0]),
+        'color': str(group['color'].iloc[0]),  # 添加 color 信息
         'sub': process_dataframe(group[['startT', 'startY', 'endT', 'endY', 'Func']]).to_dict('records')
     }
     planes_data.append(plane)

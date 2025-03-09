@@ -46,6 +46,8 @@ namespace Params
     {
         // 判定区大小参数，距离屏幕边缘的水平边距
         public static float HorizontalMargin = 0.1f;
+        // 判定区大小参数，加上两侧亮条后，距离屏幕边缘的水平边距（两侧各留1%亮条宽度，也就是8%）
+        public static float PlusHorizontalMargin = 0.08f;
     }
     public static class FinenessParams
     {

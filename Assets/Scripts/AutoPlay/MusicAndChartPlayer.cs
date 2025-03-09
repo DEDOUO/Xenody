@@ -343,7 +343,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
             //Debug.Log(yAxisPosition);
             Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
-            float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+            float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
             //Debug.Log(worldUnitToScreenPixelX);
             float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
             float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
@@ -428,7 +428,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                 JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
                 float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(currentTime);
                 Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
-                float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint);
+                float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
                 float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
                 float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
 

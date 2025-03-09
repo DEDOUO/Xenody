@@ -16,6 +16,9 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     [JsonProperty("id")]
     // 判定面的唯一标识，按照要求改为数字编号
     public int id;
+    [JsonProperty("color")]
+    // 判定面的唯一标识，按照要求改为数字编号
+    public string color;
     [JsonProperty("sub")]
     // 用于存储子判定面参数的列表
     public List<SubJudgePlane> subJudgePlaneList = new List<SubJudgePlane>();
@@ -45,9 +48,10 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     }
 
     // 构造函数，用于初始化时设置唯一标识
-    public JudgePlane(int uniqueId)
+    public JudgePlane(int Id, string uniqueColor)
     {
-        id = uniqueId;
+        id = Id;
+        color = uniqueColor;
     }
 
     // 方法用于向子判定面参数列表中添加子判定面的参数，并检查添加是否合法
