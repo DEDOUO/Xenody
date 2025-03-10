@@ -17,6 +17,7 @@ public class AutoPlay : MonoBehaviour
     public GameObject AutoPlayService; // 用于挂载 MusicAndChartLoader 组件的游戏对象
     public GameObject JudgePlanesParent;
     public GameObject JudgeLinesParent;
+    public GameObject ColorLinesParent;
     public GameObject TapsParent;
     public GameObject SlidesParent;
     public GameObject FlicksParent;
@@ -40,6 +41,7 @@ public class AutoPlay : MonoBehaviour
         AutoPlayService = GameObject.Find("AutoPlayService");
         JudgePlanesParent = GameObject.Find("JudgePlanesParent");
         JudgeLinesParent = GameObject.Find("JudgeLinesParent");
+        ColorLinesParent = GameObject.Find("ColorLinesParent");
         TapsParent = GameObject.Find("TapsParent");
         SlidesParent = GameObject.Find("SlidesParent");
         FlicksParent = GameObject.Find("FlicksParent");
@@ -109,7 +111,7 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
             JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer);
         instantiator.InstantiateAll(chart);
 

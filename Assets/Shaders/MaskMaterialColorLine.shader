@@ -1,4 +1,4 @@
-Shader "MaskMaterialHold"
+Shader "MaskMaterialColorLine"
 {
     Properties
     {
@@ -56,13 +56,13 @@ Shader "MaskMaterialHold"
                 half4 finalColor;
                 if (z > 0)
                 {
-                    finalColor = fixed4(c.rgb * _Color.rgb, 0);
-                    // finalColor = fixed4(_Color.rgb, 0);
+                    // finalColor = fixed4(c.rgb * _Color.rgb, 0);
+                    finalColor = fixed4(_Color.rgb, 0);
                 }
                 else
                 {
-                    finalColor = half4(c.rgb * _Color.rgb, c.a * _Opacity);
-                    // finalColor = half4(_Color.rgb, c.a * _Opacity);
+                    // finalColor = half4(c.rgb * _Color.rgb, c.a * _Opacity);
+                    finalColor = half4(_Color.rgb, c.a * _Opacity);
                 }
                 return finalColor;
             }

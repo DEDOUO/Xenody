@@ -162,12 +162,12 @@ public class Utility : MonoBehaviour
             // 第一象限，t 本身就在正确区间，无需调整
             return t;
         }
-        else if (theta >= Mathf.PI / 2 && theta <= Mathf.PI+0.01f)
+        else if (theta >= Mathf.PI / 2 && theta <= Mathf.PI + 0.01f)
         {
             // 第二象限，将 t 调整到第二象限
             return Mathf.PI + t;
         }
-        else if (theta >= -Mathf.PI-0.01f && theta < -Mathf.PI / 2)
+        else if (theta >= -Mathf.PI - 0.01f && theta < -Mathf.PI / 2)
         {
             // 第三象限，将 t 调整到第三象限
             return -Mathf.PI + t;
@@ -307,7 +307,7 @@ public class Utility : MonoBehaviour
             {
                 return 0f;
             }
-            else 
+            else
             {
                 return 180f;
             }
@@ -364,7 +364,7 @@ public class Utility : MonoBehaviour
                 }
                 if (x1 <= x2 && y1 > y2)
                 {
-                    theta =  Mathf.PI - currentRate * 0.5f * Mathf.PI;
+                    theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
                 }
                 if (x1 > x2 && y1 <= y2)
                 {
@@ -609,13 +609,106 @@ public class Utility : MonoBehaviour
         combinedRenderer.material = instances[0].GetComponentInChildren<MeshRenderer>().material;
 
         // 删除合并前的实例
-        //foreach (GameObject segmentInstance in instances)
-        //{
-        //    Destroy(segmentInstance);
-        //}
+        foreach (GameObject segmentInstance in instances)
+        {
+            Destroy(segmentInstance);
+        }
 
         return combined;
     }
+
+    //public static GameObject CombineInstances(List<GameObject> instances)
+    //{
+    //    GameObject combined = new GameObject("CombinedInstance");
+
+    //    // 用于存储所有顶点、三角形索引和UV坐标
+    //    List<Vector3> vertices = new List<Vector3>();
+    //    List<int>[] subTriangles = new List<int>[instances.Count];
+    //    List<Vector2> uv = new List<Vector2>();
+    //    List<Material> materials = new List<Material>();
+
+    //    int vertexOffset = 0;
+    //    int subMeshIndex = 0;
+
+    //    foreach (GameObject instance in instances)
+    //    {
+    //        MeshFilter meshFilter = instance.GetComponent<MeshFilter>();
+    //        MeshRenderer meshRenderer = instance.GetComponent<MeshRenderer>();
+    //        if (meshFilter != null && meshRenderer != null)
+    //        {
+    //            // 打印当前物体的颜色
+    //            Color color = meshRenderer.material.color;
+    //            //Debug.Log($"物体 {instance.name} 的颜色: R={color.r}, G={color.g}, B={color.b}, A={color.a}");
+
+    //            Mesh mesh = meshFilter.mesh;
+    //            // 添加顶点
+    //            vertices.AddRange(mesh.vertices);
+    //            // 添加UV坐标（如果有的话）
+    //            if (mesh.uv.Length > 0)
+    //            {
+    //                uv.AddRange(mesh.uv);
+    //            }
+
+    //            // 收集材质
+    //            Material material = meshRenderer.material;
+    //            int materialIndex = materials.IndexOf(material);
+    //            if (materialIndex == -1)
+    //            {
+    //                materialIndex = materials.Count;
+    //                materials.Add(material);
+    //                Debug.Log($"新增材质: {material.name}，索引: {materialIndex}");
+    //            }
+    //            else
+    //            {
+    //                Debug.Log($"重用材质: {material.name}，索引: {materialIndex}");
+    //            }
+
+    //            // 处理三角形索引，添加偏移量
+    //            if (subTriangles[materialIndex] == null)
+    //            {
+    //                subTriangles[materialIndex] = new List<int>();
+    //            }
+    //            for (int i = 0; i < mesh.triangles.Length; i++)
+    //            {
+    //                subTriangles[materialIndex].Add(mesh.triangles[i] + vertexOffset);
+    //            }
+
+    //            vertexOffset += mesh.vertices.Length;
+    //            subMeshIndex++;
+    //        }
+    //    }
+
+    //    // 创建新的网格
+    //    Mesh combinedMesh = new Mesh();
+    //    combinedMesh.vertices = vertices.ToArray();
+    //    combinedMesh.subMeshCount = materials.Count;
+    //    for (int i = 0; i < materials.Count; i++)
+    //    {
+    //        if (subTriangles[i] != null)
+    //        {
+    //            combinedMesh.SetTriangles(subTriangles[i].ToArray(), i);
+    //        }
+    //    }
+    //    if (uv.Count > 0)
+    //    {
+    //        combinedMesh.uv = uv.ToArray();
+    //    }
+    //    combinedMesh.RecalculateNormals();
+
+    //    // 添加网格组件和渲染器组件
+    //    MeshFilter combinedMeshFilter = combined.AddComponent<MeshFilter>();
+    //    combinedMeshFilter.mesh = combinedMesh;
+    //    MeshRenderer combinedRenderer = combined.AddComponent<MeshRenderer>();
+    //    combinedRenderer.materials = materials.ToArray();
+
+    //    // 删除合并前的实例
+    //    foreach (GameObject segmentInstance in instances)
+    //    {
+    //        Destroy(segmentInstance);
+    //    }
+
+    //    return combined;
+    //}
 
     public static float CalculateZAxisPosition(float startTime)
     {
@@ -623,16 +716,6 @@ public class Utility : MonoBehaviour
         return -startTime * SpeedParams.NoteSpeedDefault;
     }
 
-    // 设置锚点的辅助方法
-    //public static void SetAnchor(GameObject obj, Vector2 anchor)
-    //{
-    //    RectTransform rectTransform = obj.GetComponent<RectTransform>();
-    //    if (rectTransform != null)
-    //    {
-    //        rectTransform.anchorMin = anchor;
-    //        rectTransform.anchorMax = anchor;
-    //    }
-    //}
 
     public static void AdjustFlickArrowPosition(GameObject flickarrow, GameObject flick, float flickDirection)
     {
@@ -751,13 +834,15 @@ public class Utility : MonoBehaviour
         hex = hex.Replace("#", "");
         if (hex.Length == 6)
         {
-            hex = "FF" + hex; // 不包含透明度时，添加默认不透明值
+            hex = hex + "FF"; // 不包含透明度时，在末尾添加默认不透明值
         }
         byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
         byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
         byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
         byte a = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
-        return new Color32(r, g, b, a);
+
+        // 将 Color32 转换为 Color
+        return new Color(r / 255f, g / 255f, b / 255f, a / 255f);
     }
 
 }

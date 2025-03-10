@@ -17,6 +17,7 @@ public class ChartInstantiator : MonoBehaviour
 {
     private GameObject JudgePlanesParent;
     private GameObject JudgeLinesParent;
+    private GameObject ColorLinesParent;
     private GameObject TapsParent;
     private GameObject SlidesParent;
     private GameObject FlicksParent;
@@ -33,12 +34,13 @@ public class ChartInstantiator : MonoBehaviour
 
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
-    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject starsParent,
+    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject starsParent,
         GameObject subStarsParent,
         Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer)
     {
         JudgePlanesParent = judgePlanesParent;
         JudgeLinesParent = judgeLinesParent;
+        ColorLinesParent = colorLinesParent;
         TapsParent = tapsParent;
         SlidesParent = slidesParent;
         FlicksParent = flicksParent;
@@ -64,6 +66,7 @@ public class ChartInstantiator : MonoBehaviour
         InstantiateSubStars(chart);
     }
 
+
     public void InstantiateJudgePlanes(Chart chart)
     {
         if (chart != null && chart.judgePlanes != null)
@@ -76,26 +79,49 @@ public class ChartInstantiator : MonoBehaviour
                 // 创建一个空物体作为JudgePlane实例的父物体，用于统一管理和规范命名
                 GameObject judgePlaneParent = new GameObject($"JudgePlane{judgePlaneIndex}");
                 judgePlaneParent.transform.position = new Vector3(0, 0, 0);
-                // 将judgePlaneParent设置为ChartGameObjects的子物体
+                // 将judgePlaneParent设置为JudgePlanesParent的子物体
                 judgePlaneParent.transform.SetParent(JudgePlanesParent.transform);
                 // 继承父物体的图层
-                int parentLayer = JudgePlanesParent.layer;
-                judgePlaneParent.layer = parentLayer;
+                //int parentLayer = JudgePlanesParent.layer;
+                judgePlaneParent.layer = JudgePlanesParent.layer;
+
+                // 创建 LeftColorLine 作为左侧亮条合并物体的父物体
+                GameObject leftColorLine = new GameObject($"LeftColorLine{judgePlaneIndex}");
+                leftColorLine.transform.position = new Vector3(0, 0, 0);
+                leftColorLine.transform.SetParent(ColorLinesParent.transform);
+                leftColorLine.layer = ColorLinesParent.layer;
+
+                // 创建 RightColorLine 作为右侧亮条合并物体的父物体
+                GameObject rightColorLine = new GameObject($"RightColorLine{judgePlaneIndex}");
+                rightColorLine.transform.position = new Vector3(0, 0, 0);
+                rightColorLine.transform.SetParent(ColorLinesParent.transform);
+                rightColorLine.layer = ColorLinesParent.layer;
 
                 int subJudgePlaneIndex = 1;
 
                 foreach (var subJudgePlane in judgePlane.subJudgePlaneList)
                 {
-                    List<GameObject> segmentInstances = new List<GameObject>();
+                    //List<GameObject> segmentInstances = new List<GameObject>();
+                    List<GameObject> judgePlaneInstances = new List<GameObject>();
+                    List<GameObject> leftStripInstances = new List<GameObject>();
+                    List<GameObject> rightStripInstances = new List<GameObject>();
 
                     // 根据SubJudgePlane的函数类型来决定如何处理
                     switch (subJudgePlane.yAxisFunction)
                     {
                         case TransFunctionType.Linear:
                             List<GameObject> objectsToCombine = CreateJudgePlaneAndColorLinesQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
-                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent, RenderQueue, judgePlane.color);
-                            segmentInstances.AddRange(objectsToCombine);
+                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent, leftColorLine, rightColorLine, RenderQueue, judgePlane.color);
+                            GameObject subjudgePlaneInstance = objectsToCombine[0];
+                            GameObject LeftStripInstance = objectsToCombine[1];
+                            GameObject RightStripInstance = objectsToCombine[2];
+
+                            ProcessCombinedInstance(subjudgePlaneInstance, judgePlaneParent, judgePlaneParent.layer);
+                            ProcessCombinedInstance(LeftStripInstance, leftColorLine, leftColorLine.layer);
+                            ProcessCombinedInstance(RightStripInstance, leftColorLine, leftColorLine.layer);
+
                             break;
+
                         case TransFunctionType.Sin:
                         case TransFunctionType.Cos:
                             // 精细度设为8，用于分割时间区间
@@ -108,24 +134,40 @@ public class ChartInstantiator : MonoBehaviour
                                 float endT = subJudgePlane.startT + (i + 1) * timeStep;
                                 float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
                                 float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
-                                List<GameObject> subObjectsToCombine = CreateJudgePlaneAndColorLinesQuad(startY, endY, startT, endT,
-                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", judgePlaneParent, RenderQueue, judgePlane.color);
-                                segmentInstances.AddRange(subObjectsToCombine);
+                                List<GameObject> ObjectsToCombine = CreateJudgePlaneAndColorLinesQuad(startY, endY, startT, endT,
+                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", judgePlaneParent, leftColorLine, rightColorLine, RenderQueue, judgePlane.color);
+                                //segmentInstances.AddRange(subObjectsToCombine);
+                                judgePlaneInstances.Add(ObjectsToCombine[0]);
+                                leftStripInstances.Add(ObjectsToCombine[1]);
+                                rightStripInstances.Add(ObjectsToCombine[2]);
                             }
+
+                            // 合并 SubJudgePlane
+                            GameObject combinedJudgePlane = CombineInstances(judgePlaneInstances);
+                            combinedJudgePlane.name = $"Sub{subJudgePlaneIndex}";
+                            ProcessCombinedInstance(combinedJudgePlane, judgePlaneParent, judgePlaneParent.layer);
+                            //combinedJudgePlane.transform.SetParent(judgePlaneParent.transform);
+
+                            // 合并左侧亮条
+                            GameObject combinedLeftStrip = CombineInstances(leftStripInstances);
+                            combinedLeftStrip.name = $"Sub{subJudgePlaneIndex}";
+                            ProcessCombinedInstance(combinedLeftStrip, leftColorLine, leftColorLine.layer);
+                            //combinedLeftStrip.transform.SetParent(leftColorLine.transform);
+
+                            // 合并右侧亮条
+                            GameObject combinedRightStrip = CombineInstances(rightStripInstances);
+                            combinedRightStrip.name = $"Sub {subJudgePlaneIndex}";
+                            ProcessCombinedInstance(combinedRightStrip, rightColorLine, rightColorLine.layer);
+                            //combinedRightStrip.transform.SetParent(rightColorLine.transform);
+
                             break;
                     }
-
-                    // 合并细分的Instance为一个新的GameObject
-                    GameObject combinedInstance = CombineInstances(segmentInstances);
-                    combinedInstance.name = $"Sub{subJudgePlaneIndex}";
-                    // 处理合并后的实例
-                    ProcessCombinedInstance(combinedInstance, judgePlaneParent, parentLayer);
-
                     subJudgePlaneIndex++;
                 }
             }
         }
     }
+
 
     private void ProcessCombinedInstance(GameObject combinedInstance, GameObject judgePlaneParent, int parentLayer)
     {
@@ -135,8 +177,6 @@ public class ChartInstantiator : MonoBehaviour
         combinedInstance.layer = parentLayer;
 
     }
-
-
 
     public void InstantiateJudgeLines(Chart chart)
     {
@@ -498,7 +538,7 @@ public class ChartInstantiator : MonoBehaviour
                                 float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
                                 float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
                                 float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
-                                    
+
                                 // 根据 startT 和 endT 计算 Z 轴位置
                                 float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
                                 float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
@@ -720,7 +760,8 @@ public class ChartInstantiator : MonoBehaviour
         }
     }
 
-    private List<GameObject> CreateJudgePlaneAndColorLinesQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue, string colorHex)
+    private List<GameObject> CreateJudgePlaneAndColorLinesQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName,
+        GameObject judgePlaneParent, GameObject leftColorLine, GameObject rightColorLine, int RenderQueue, string colorHex)
     {
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
         float startYWorld = TransformYCoordinate(startY);
@@ -748,17 +789,14 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
         Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
 
-        // 输出实例名和point1 - point4的值
-        //Debug.Log($"实例名: {objectName}");
-        //Debug.Log($"point1: {point1}");
-        //Debug.Log($"point2: {point2}");
-        //Debug.Log($"point3: {point3}");
-        //Debug.Log($"point4: {point4}");
-
-        // 创建JudgePlane实例
-        GameObject judgePlaneInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 1f, "MaskMaterial");
-        Color defaultColor = new Color(51f / 255f, 51f / 255f, 51f / 255f);
-        SetSpriteColor(judgePlaneInstance, defaultColor);
+        // 创建JudgePlane实例，使用Sprite的颜色，不再额外赋予灰色
+        GameObject judgePlaneInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, judgePlaneParent, RenderQueue, 1f, "MaskMaterial");
+        // 为JudgePlane实例创建独立的材质实例
+        MeshRenderer judgePlaneRenderer = judgePlaneInstance.GetComponent<MeshRenderer>();
+        if (judgePlaneRenderer != null)
+        {
+            judgePlaneRenderer.material = new Material(judgePlaneRenderer.material);
+        }
 
         // 创建左侧亮条实例
         Vector3 leftPoint1 = new Vector3(-startXWorldPlus, startYWorld, zPositionForStartT);
@@ -766,8 +804,8 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 leftPoint3 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
         Vector3 leftPoint4 = new Vector3(-endXWorldPlus, endYWorld, zPositionForStartT - lengthForZAxis);
 
-        string leftObjectName = $"LeftStrip_{objectName}";
-        GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, sprite, leftObjectName, parentObject, RenderQueue, 1f, "MaskMaterial");
+        //string leftObjectName = $"LeftStrip_{objectName}";
+        GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, sprite, objectName, leftColorLine, RenderQueue, 1f, "MaskMaterialColorLine");
         Color leftColor;
         if (!string.IsNullOrEmpty(colorHex))
         {
@@ -775,9 +813,17 @@ public class ChartInstantiator : MonoBehaviour
         }
         else
         {
-            leftColor = defaultColor;
+            //默认颜色为灰色
+            leftColor = new Color(51f / 255f, 51f / 255f, 51f / 255f);
         }
         SetSpriteColor(leftStripInstance, leftColor);
+
+        // 为左侧亮条实例创建独立的材质实例
+        MeshRenderer leftStripRenderer = leftStripInstance.GetComponent<MeshRenderer>();
+        if (leftStripRenderer != null)
+        {
+            leftStripRenderer.material = new Material(leftStripRenderer.material);
+        }
 
         // 创建右侧亮条实例
         Vector3 rightPoint1 = new Vector3(startXWorldPlus, startYWorld, zPositionForStartT);
@@ -785,8 +831,8 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 rightPoint3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
         Vector3 rightPoint4 = new Vector3(endXWorldPlus, endYWorld, zPositionForStartT - lengthForZAxis);
 
-        string rightObjectName = $"RightStrip_{objectName}";
-        GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, sprite, rightObjectName, parentObject, RenderQueue, 1f, "MaskMaterial");
+        //string rightObjectName = $"RightStrip_{objectName}";
+        GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, sprite, objectName, rightColorLine, RenderQueue, 1f, "MaskMaterialColorLine");
         Color rightColor;
         if (!string.IsNullOrEmpty(colorHex))
         {
@@ -794,109 +840,27 @@ public class ChartInstantiator : MonoBehaviour
         }
         else
         {
-            rightColor = defaultColor;
+            //默认颜色为灰色
+            rightColor = new Color(51f / 255f, 51f / 255f, 51f / 255f);
         }
         SetSpriteColor(rightStripInstance, rightColor);
 
+        // 为右侧亮条实例创建独立的材质实例
+        MeshRenderer rightStripRenderer = rightStripInstance.GetComponent<MeshRenderer>();
+        if (rightStripRenderer != null)
+        {
+            rightStripRenderer.material = new Material(rightStripRenderer.material);
+        }
+
         List<GameObject> instances = new List<GameObject>
-    {
-        judgePlaneInstance,
-        leftStripInstance,
-        rightStripInstance
-    };
+        {
+            judgePlaneInstance,
+            leftStripInstance,
+            rightStripInstance
+        };
         return instances;
     }
 
-
-    //private List<GameObject> CreateAndCombineColorLines(float startY, float endY, float startT, float endT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue)
-    //{
-    //    // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-    //    float startYWorld = TransformYCoordinate(startY);
-    //    float endYWorld = TransformYCoordinate(endY);
-
-    //    // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
-    //    float zPositionForStartT = CalculateZAxisPosition(startT);
-
-    //    // 计算在Z轴方向的长度（之前代码中的height变量，这里改为lengthForZAxis）
-    //    float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;
-
-    //    // 假设获取到一个目标点的世界坐标
-    //    Vector3 StartPoint = new Vector3(0, startYWorld, 0);
-    //    Vector3 EndPoint = new Vector3(0, endYWorld, 0);
-
-    //    // 计算StartXWorld和EndXWorld，确保在屏幕左右各留10%的距离
-    //    float startXWorld = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint, HorizontalParams.PlusHorizontalMargin);
-    //    float endXWorld = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint, HorizontalParams.PlusHorizontalMargin);
-
-    //    Vector3 point1 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
-    //    Vector3 point2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
-    //    Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
-    //    Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
-
-    //    // 输出实例名和point1 - point4的值
-    //    Debug.Log($"实例名: {objectName}");
-    //    Debug.Log($"point1: {point1}");
-    //    Debug.Log($"point2: {point2}");
-    //    Debug.Log($"point3: {point3}");
-    //    Debug.Log($"point4: {point4}");
-
-    //    GameObject instance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 1f);
-
-    //    Color? color = null;
-    //        if (!string.IsNullOrEmpty(colorHex))
-    //        {
-    //            color = HexToColor(colorHex);
-    //        }
-
-    //        string baseName = $"Sub{subJudgePlaneIndex}";
-    //        if (index > 0)
-    //        {
-    //            baseName += $"_{index}";
-    //        }
-
-    //        // 创建左侧长条
-    //        GameObject leftStrip = CreateJudgePlaneColorLineQuad(point1, point2, point3, point4, -stripWidthWorld, JudgePlaneSprite, $"LeftStrip_{baseName}", judgePlaneParent, RenderQueue + 1, 1f, color);
-
-    //        // 创建右侧长条
-    //        GameObject rightStrip = CreateJudgePlaneColorLineQuad(point1, point2, point3, point4, stripWidthWorld, JudgePlaneSprite, $"RightStrip_{baseName}", judgePlaneParent, RenderQueue + 1, 1f, color);
-
-    //        List<GameObject> objectsToCombine = new List<GameObject> { instance, leftStrip, rightStrip };
-    //        return objectsToCombine;
-    //    }
-    //    return new List<GameObject>();
-    //}
-
-    //private GameObject CreateJudgePlaneColorLineQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4, float offsetX, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue, float Alpha, Color? color)
-    //{
-    //    // 计算长条的顶点位置，根据屏幕边界调整
-    //    float screenWidth = Screen.width;
-    //    float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(point1, HorizontalParams.PlusHorizontalMargin);
-    //    float halfScreenWidthWorld = screenWidth * 0.5f / worldUnitToScreenPixelX;
-
-    //    Vector3 leftEdge = new Vector3(-halfScreenWidthWorld, 0, 0);
-    //    Vector3 rightEdge = new Vector3(halfScreenWidthWorld, 0, 0);
-
-    //    Vector3 newPoint1 = new Vector3(Mathf.Clamp(point1.x + offsetX, leftEdge.x, rightEdge.x), point1.y, point1.z);
-    //    Vector3 newPoint2 = new Vector3(Mathf.Clamp(point2.x + offsetX, leftEdge.x, rightEdge.x), point2.y, point2.z);
-    //    Vector3 newPoint3 = new Vector3(Mathf.Clamp(point3.x + offsetX, leftEdge.x, rightEdge.x), point3.y, point3.z);
-    //    Vector3 newPoint4 = new Vector3(Mathf.Clamp(point4.x + offsetX, leftEdge.x, rightEdge.x), point4.y, point4.z);
-
-    //    GameObject instance = CreateQuadFromPoints.CreateQuad(newPoint1, newPoint2, newPoint3, newPoint4, sprite, objectName, parentObject, RenderQueue, Alpha);
-
-    //    if (color.HasValue)
-    //    {
-    //        SetSpriteColor(instance, color.Value);
-    //    }
-
-    //    // 输出实例名和point1 - point4的值
-    //    Debug.Log($"实例名: {objectName}");
-    //    Debug.Log($"point1: {point1}");
-    //    Debug.Log($"point2: {point2}");
-    //    Debug.Log($"point3: {point3}");
-    //    Debug.Log($"point4: {point4}");
-
-    //    return instance;
-    //}
 
     private void SetSpriteColor(GameObject obj, Color color)
     {
@@ -924,7 +888,7 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 point4 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
 
         // 假设CreateQuadFromPoints.CreateQuad方法直接返回游戏物体实例
-        return CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 0.7f, "MaskMaterialHold");
+        return CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, 0.7f, "MaskMaterial");
     }
 
 
