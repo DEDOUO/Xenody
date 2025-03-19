@@ -215,7 +215,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7389548}
-  m_Layer: 10
+  m_Layer: 9
   m_Name: TapsParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1456,7 +1456,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 328502853}
-  m_Layer: 12
+  m_Layer: 11
   m_Name: StarsParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3733,7 +3733,7 @@ GameObject:
   - component: {fileID: 723500658}
   - component: {fileID: 723500657}
   - component: {fileID: 723500656}
-  m_Layer: 12
+  m_Layer: 11
   m_Name: SubStarsParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6681,7 +6681,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1230473740}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: HoldsParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6802,7 +6802,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1267554545}
-  m_Layer: 11
+  m_Layer: 6
   m_Name: ColorLinesParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7821,7 +7821,7 @@ GameObject:
   - component: {fileID: 1441084731}
   - component: {fileID: 1441084730}
   - component: {fileID: 1441084729}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: JudgeLinesParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10852,7 +10852,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1927062088}
-  m_Layer: 10
+  m_Layer: 9
   m_Name: FlicksParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11631,7 +11631,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1977764652}
-  m_Layer: 10
+  m_Layer: 9
   m_Name: FlickArrowsParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11877,7 +11877,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2005168471}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: SlidesParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}

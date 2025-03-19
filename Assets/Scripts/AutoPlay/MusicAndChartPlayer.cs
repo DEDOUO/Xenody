@@ -19,6 +19,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 {
     private AudioSource audioSource;
     private GameObject JudgePlanesParent;
+    private GameObject ColorLinesParent;
     private GameObject JudgeLinesParent;
     private GameObject TapsParent;
     private GameObject SlidesParent;
@@ -85,7 +86,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     }
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
-    public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent,
+    public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent,
         GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject starsParent, GameObject substarsParent,
         AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect, AudioSource starSoundEffect,
         Chart chart)
@@ -93,6 +94,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         this.audioSource = audioSource;
         JudgePlanesParent = judgePlanesParent;
         JudgeLinesParent = judgeLinesParent;
+        ColorLinesParent = colorLinesParent;
         TapsParent = tapsParent;
         SlidesParent = slidesParent;
         FlicksParent = flicksParent;
@@ -157,9 +159,32 @@ public class MusicAndChartPlayer : MonoBehaviour
                 float endT = JudgePlanesEndT[i];
                 if (endT < currentTime)
                 {
+                    // 隐藏 JudgePlane
                     var judgePlaneObject = JudgePlanesParent.transform.GetChild(i);
-                    if(judgePlaneObject != null)
-                    {judgePlaneObject.gameObject.SetActive(false);}
+                    if (judgePlaneObject != null)
+                    {
+                        judgePlaneObject.gameObject.SetActive(false);
+                    }
+
+                    // 隐藏对应的 LeftColorLine
+                    if (ColorLinesParent.transform.childCount > i * 2)
+                    {
+                        var leftColorLineObject = ColorLinesParent.transform.GetChild(i * 2);
+                        if (leftColorLineObject != null)
+                        {
+                            leftColorLineObject.gameObject.SetActive(false);
+                        }
+                    }
+
+                    // 隐藏对应的 RightColorLine
+                    if (ColorLinesParent.transform.childCount > i * 2 + 1)
+                    {
+                        var rightColorLineObject = ColorLinesParent.transform.GetChild(i * 2 + 1);
+                        if (rightColorLineObject != null)
+                        {
+                            rightColorLineObject.gameObject.SetActive(false);
+                        }
+                    }
                 }
             }
 
@@ -446,7 +471,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     // 如果已经结束判定，从列表中移除该instanceName
                     currentHoldInstanceNames.RemoveAt(i);
 
-                    
+
                     //Debug.Log(holdHitEffectPosition);
                     //结束时的特效缩放由holdEndTime对应X轴宽度决定
                     subholdLeftX = hold.GetCurrentSubHoldLeftX(holdEndTime);
@@ -572,24 +597,6 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
 
-        //if (chart.stars != null)
-        //{
-        //    for (int i = 0; i < chart.stars.Count; i++)
-        //    {
-        //        var star = chart.stars[i];
-        //        float startT = star.starHeadT;
-        //        //存储星星头判定时间
-        //        string instanceName = $"StarHead{i + 1}";
-        //        allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
-        //        keyReachedJudgment[instanceName] = new KeyInfo(startT);
-        //        //存储星星开始划动时间
-        //        float starstartT = star.subStarList[0].starTrackStartT;
-        //        instanceName = $"Stars{i + 1}";
-        //        allPairs.Add(new KeyValuePair<float, string>(starstartT, instanceName));
-        //        keyReachedJudgment[instanceName] = new KeyInfo(starstartT);
-        //    }
-        //}
-
         if (chart.stars != null)
         {
             for (int i = 0; i < chart.stars.Count; i++)
@@ -658,6 +665,18 @@ public class MusicAndChartPlayer : MonoBehaviour
                 currentJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
             }
         }
+
+        // 更新 ColorLinesParent 的子对象的位置
+        if (ColorLinesParent != null)
+        {
+            for (int i = 0; i < ColorLinesParent.transform.childCount; i++)
+            {
+                Transform childTransform = ColorLinesParent.transform.GetChild(i);
+                Vector3 currentPosition = childTransform.position;
+                currentPosition.z += zAxisDecreasePerFrame;
+                childTransform.position = currentPosition;
+            }
+        }
     }
 
     private void UpdateJudgeLinesPosition(float currentTime, float zAxisDecreasePerFrame)
@@ -707,7 +726,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                             JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, 1f);
                         }
                         // 当当前时间介于结束时间与结束时间+出现时间之间时，设置 JudgeLine 为 active，且透明度线性地由 1 变为 0
-                        else if (currentTime > endT && currentTime <= endT+ ChartParams.JudgeLineAppearTime)
+                        else if (currentTime > endT && currentTime <= endT + ChartParams.JudgeLineAppearTime)
                         {
                             judgeLineRectTransform.gameObject.SetActive(true);
                             float t = 1 - (currentTime - endT) / ChartParams.JudgeLineAppearTime;
@@ -863,7 +882,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
             //HoldHitEffect不需要调整大小
             if (!instanceName.StartsWith("HoldHitEffect"))
-            { 
+            {
                 //临时调整一下动画效果的缩放，用以跟Note大小匹配
                 Vector3 currentScale = keyGameObject.transform.localScale;
                 currentScale.x *= AnimationScaleAdjust;
@@ -989,9 +1008,32 @@ public class MusicAndChartPlayer : MonoBehaviour
             float endT = JudgePlanesEndT[i];
             if (endT >= currentTime)
             {
+                // 激活 JudgePlane
                 var judgePlaneObject = JudgePlanesParent.transform.GetChild(i);
                 if (judgePlaneObject != null)
-                { judgePlaneObject.gameObject.SetActive(true); }
+                {
+                    judgePlaneObject.gameObject.SetActive(true);
+                }
+
+                // 激活对应的 LeftColorLine
+                if (ColorLinesParent.transform.childCount > i * 2)
+                {
+                    var leftColorLineObject = ColorLinesParent.transform.GetChild(i * 2);
+                    if (leftColorLineObject != null)
+                    {
+                        leftColorLineObject.gameObject.SetActive(true);
+                    }
+                }
+
+                // 激活对应的 RightColorLine
+                if (ColorLinesParent.transform.childCount > i * 2 + 1)
+                {
+                    var rightColorLineObject = ColorLinesParent.transform.GetChild(i * 2 + 1);
+                    if (rightColorLineObject != null)
+                    {
+                        rightColorLineObject.gameObject.SetActive(true);
+                    }
+                }
             }
         }
 
@@ -1174,6 +1216,10 @@ public class MusicAndChartPlayer : MonoBehaviour
                     float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
                     // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
                     currentJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
+
+                    // 重置对应的 LeftColorLine 和 RightColorLine 的 z 轴位置
+                    ResetColorLineZPosition($"LeftColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
+                    ResetColorLineZPosition($"RightColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
                 }
                 else if (instanceName.StartsWith("Hold"))
                 {
@@ -1265,6 +1311,18 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
         audioPrevTime = currentTime;
     }
+
+    private void ResetColorLineZPosition(string objectName, GameObject parentGameObject, float newZPosition)
+    {
+        GameObject colorLineObject = parentGameObject.transform.Find(objectName).gameObject;
+        if (colorLineObject != null)
+        {
+            Vector3 currentPosition = colorLineObject.transform.position;
+            currentPosition.z = newZPosition;
+            colorLineObject.transform.position = currentPosition;
+        }
+    }
+
     private void LoadNoteSprites()
     {
         // 加载 Tap 音符的 Sprite

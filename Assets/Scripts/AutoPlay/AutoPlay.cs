@@ -117,7 +117,7 @@ public class AutoPlay : MonoBehaviour
 
         // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰
         MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
-        
+
 
         if (player == null)
         {
@@ -127,7 +127,7 @@ public class AutoPlay : MonoBehaviour
         player.enabled = false;
 
         // 播放音乐和更新谱面位置
-        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
+        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
             TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart);
         player.enabled = true;
         player.PlayMusicAndChart(chart);

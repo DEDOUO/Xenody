@@ -206,6 +206,15 @@ public class ChartInstantiator : MonoBehaviour
                     judgeLineRectTransform.anchoredPosition3D = new Vector3(Position.x, Position.y, 0);
                     judgeLineRectTransform.localRotation = Quaternion.Euler(0, 0, 0);
                     judgeLineRectTransform.localScale = new Vector3(1000000, 50, 1);
+
+                    // 将物体透明度设为1
+                    //SpriteRenderer spriteRenderer = judgeLineInstance.GetComponent<SpriteRenderer>();
+                    //if (spriteRenderer != null)
+                    //{
+                    //    Color color = spriteRenderer.color;
+                    //    color.a = 1;
+                    //    spriteRenderer.color = color;
+                    //}
                 }
             }
             else
