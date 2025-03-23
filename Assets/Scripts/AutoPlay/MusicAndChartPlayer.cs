@@ -922,6 +922,13 @@ public class MusicAndChartPlayer : MonoBehaviour
                 }
             }
 
+            // 在播放动画前将物体的Shader替换为Sprites/Default
+            Renderer renderer = keyGameObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material.shader = Shader.Find("Sprites/Default");
+            }
+
             // 根据不同的动画名称加载对应的动画控制器（这里假设路径和名称是固定的，需按实际调整）
             RuntimeAnimatorController controller = null;
             if (animationName == "TapHitEffect")
@@ -1332,7 +1339,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         // 加载 Flick 音符的 Sprite
         FlickSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/FlickNote");
         // 加载 StarHead 音符的 Sprite
-        StarHeadSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/StarHead2");
+        StarHeadSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/StarHead");
 
         // 检查是否成功加载
         if (TapSprite == null)
@@ -1349,7 +1356,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
         if (StarHeadSprite == null)
         {
-            Debug.LogError("Failed to load StarHead2 sprite.");
+            Debug.LogError("Failed to load StarHead sprite.");
         }
     }
 
