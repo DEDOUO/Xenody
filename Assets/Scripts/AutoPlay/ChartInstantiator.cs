@@ -29,6 +29,7 @@ public class ChartInstantiator : MonoBehaviour
 
     private Sprite JudgePlaneSprite;
     private Sprite HoldSprite;
+    private Sprite WhiteSprite;
 
     private GlobalRenderOrderManager renderOrderManager;
     private GameObject videoPlayerContainer;
@@ -55,6 +56,13 @@ public class ChartInstantiator : MonoBehaviour
         HoldSprite = holdSprite;
         renderOrderManager = globalRenderOrderManager;
         videoPlayerContainer = animatorContainer;
+
+        WhiteSprite = Resources.Load<Sprite>("Sprites/WhiteSprite");
+        if (WhiteSprite == null)
+        {
+            Debug.LogError("Failed to load sprite: Sprites/WhiteSprite");
+        }
+
     }
 
     private void PrepareStartTimeMapping(Chart chart)
@@ -94,7 +102,6 @@ public class ChartInstantiator : MonoBehaviour
             {
                 var hold = chart.holds[i];
                 float startT = hold.GetFirstSubHoldStartTime();
-                float endT = hold.GetLastSubHoldEndTime();
                 string instanceName = $"Hold{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
             }
@@ -106,7 +113,6 @@ public class ChartInstantiator : MonoBehaviour
             {
                 var star = chart.stars[i];
                 float startT = star.starHeadT;
-                //存储星星头判定时间
                 string instanceName = $"StarHead{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
             }
@@ -126,6 +132,16 @@ public class ChartInstantiator : MonoBehaviour
             startTimeToInstanceNames[startTime].Add(instanceName);
             //Debug.Log(startTimeToInstanceNames[startTime]);
         }
+
+        // 输出 startTimeToInstanceNames 所有元素
+        //foreach (var startTime in startTimeToInstanceNames.Keys)
+        //{
+        //    Debug.Log($"Start Time: {startTime}");
+        //    foreach (var instanceName in startTimeToInstanceNames[startTime])
+        //    {
+        //        Debug.Log($"Instance Name: {instanceName}");
+        //    }
+        //}
     }
 
     public void InstantiateAll(Chart chart)
@@ -329,6 +345,7 @@ public class ChartInstantiator : MonoBehaviour
                     // 判断是否有多押情况
                     if (startTimeToInstanceNames.ContainsKey(tap.startT) && startTimeToInstanceNames[tap.startT].Count > 1)
                     {
+                        //Debug.Log(tap.startT);
                         prefabToInstantiate = tapOutlinePrefab;
                     }
                     else
@@ -593,116 +610,6 @@ public class ChartInstantiator : MonoBehaviour
         }
     }
 
-    //public void InstantiateHolds(Chart chart)
-    //{
-    //    if (chart != null && chart.holds != null)
-    //    {
-    //        int holdIndex = 1;
-    //        int RenderQueue = 2000;
-    //        foreach (var hold in chart.holds)
-    //        {
-    //            // 创建一个空物体作为 hold 实例的父物体，用于统一管理和规范命名
-    //            GameObject holdParent = new GameObject($"Hold{holdIndex}");
-    //            holdParent.transform.position = new Vector3(0, 0, 0);
-    //            // 将 holdParent 设置为 ChartGameObjects 的子物体
-    //            holdParent.transform.SetParent(HoldsParent.transform);
-    //            // 继承父物体的图层
-    //            int parentLayer = HoldsParent.layer;
-    //            holdParent.layer = parentLayer;
-
-    //            JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
-    //            if (associatedJudgePlaneObject != null)
-    //            {
-    //                if (hold.subHoldList.Count > 0)
-    //                {
-    //                    var firstSubHold = hold.subHoldList[0];
-    //                    // 判断是否有多押情况，只根据第一个 SubHold 的 startT 来判断
-    //                    bool isMultiHold = startTimeToInstanceNames.ContainsKey(firstSubHold.startT) && startTimeToInstanceNames[firstSubHold.startT].Count > 1;
-    //                    string shaderName = isMultiHold ? "Sprites/Outline" : "MaskMaterial";
-
-    //                    int subHoldIndex = 1;
-    //                    foreach (var subHold in hold.subHoldList)
-    //                    {
-    //                        float startY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.startT);
-    //                        float endY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.endT);
-
-    //                        // 检查 SubHold 所在的 SubJudgePlane 是否为 Linear
-    //                        bool isSubJudgePlaneLinear = associatedJudgePlaneObject.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
-
-    //                        // 只有当两侧变化函数均为 Linear，且所在的 SubJudgePlane 为 Linear 时，才能一次性初始化
-    //                        if (subHold.XLeftFunction == TransFunctionType.Linear && subHold.XRightFunction == TransFunctionType.Linear && isSubJudgePlaneLinear)
-    //                        {
-    //                            float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0), HorizontalParams.HorizontalMargin) * subHold.startXMin / ChartParams.XaxisMax;
-    //                            float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0), HorizontalParams.HorizontalMargin) * subHold.startXMax / ChartParams.XaxisMax;
-    //                            float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0), HorizontalParams.HorizontalMargin) * subHold.endXMin / ChartParams.XaxisMax;
-    //                            float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
-
-    //                            // 根据 startT 和 endT 计算 Z 轴位置
-    //                            float zPositionForStartT = CalculateZAxisPosition(subHold.startT);
-    //                            float zPositionForEndT = CalculateZAxisPosition(subHold.endT);
-
-    //                            // 一次性生成整个 SubHold
-    //                            GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
-    //                                startY, endY, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent, RenderQueue, shaderName);
-    //                        }
-    //                        else
-    //                        {
-    //                            // 精细度设为 8，用于分割时间区间（可根据实际需求调整精细度）
-    //                            int segments = FinenessParams.Segment;
-    //                            float timeStep = (subHold.endT - subHold.startT) / segments;
-    //                            // 用于存储细分的 Instance，以便后续合并
-    //                            List<GameObject> segmentInstances = new List<GameObject>();
-
-    //                            for (int i = 0; i < segments; i++)
-    //                            {
-    //                                float startT = subHold.startT + i * timeStep;
-    //                                float endT = subHold.startT + (i + 1) * timeStep;
-    //                                float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
-    //                                float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
-
-    //                                float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-    //                                float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
-    //                                float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-    //                                float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
-
-    //                                float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0), HorizontalParams.HorizontalMargin) * startXMin / ChartParams.XaxisMax;
-    //                                float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
-    //                                float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
-    //                                float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
-
-    //                                // 根据 startT 和 endT 计算 Z 轴位置
-    //                                float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
-    //                                float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
-
-    //                                GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-    //                                    startY_Inner, endY_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName);
-    //                                segmentInstances.Add(instance);
-    //                            }
-
-    //                            // 合并细分的 Instance 为一个新的 GameObject
-    //                            GameObject combinedInstance = CombineInstances(segmentInstances);
-    //                            combinedInstance.name = $"SubHold{subHoldIndex}";
-    //                            // 将合并后的 Instance 设置为对应的父物体的子物体
-    //                            combinedInstance.transform.SetParent(holdParent.transform);
-    //                            // 继承父物体的图层
-    //                            int parentLayer2 = holdParent.layer;
-    //                            combinedInstance.layer = parentLayer2;
-
-    //                            // 删除合并前的实例
-    //                            foreach (GameObject segmentInstance in segmentInstances)
-    //                            {
-    //                                Destroy(segmentInstance);
-    //                            }
-    //                        }
-    //                        subHoldIndex++;
-    //                    }
-    //                }
-    //            }
-    //            holdIndex++;
-    //        }
-    //    }
-    //}
-
     public void InstantiateHolds(Chart chart)
     {
         if (chart != null && chart.holds != null)
@@ -723,6 +630,8 @@ public class ChartInstantiator : MonoBehaviour
                 JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
                 if (associatedJudgePlaneObject != null)
                 {
+                    string shaderName = "MaskMaterial"; // 默认使用 MaskMaterial 作为 shader
+
                     List<GameObject> subHoldInstances = new List<GameObject>();
                     int subHoldIndex = 1;
                     foreach (var subHold in hold.subHoldList)
@@ -732,8 +641,6 @@ public class ChartInstantiator : MonoBehaviour
 
                         // 检查 SubHold 所在的 SubJudgePlane 是否为 Linear
                         bool isSubJudgePlaneLinear = associatedJudgePlaneObject.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
-
-                        string shaderName = "MaskMaterial"; // 默认使用 MaskMaterial 作为 shader
 
                         // 只有当两侧变化函数均为 Linear，且所在的 SubJudgePlane 为 Linear 时，才能一次性初始化
                         if (subHold.XLeftFunction == TransFunctionType.Linear && subHold.XRightFunction == TransFunctionType.Linear && isSubJudgePlaneLinear)
@@ -806,18 +713,44 @@ public class ChartInstantiator : MonoBehaviour
                         var firstSubHold = hold.subHoldList[0];
                         // 判断是否有多押情况，只根据第一个 SubHold 的 startT 来判断
                         bool isMultiHold = startTimeToInstanceNames.ContainsKey(firstSubHold.startT) && startTimeToInstanceNames[firstSubHold.startT].Count > 1;
-                        //if (isMultiHold)
-                        //{
-                        //    Shader outlineShader = Shader.Find("Sprites/Outline");
-                        //    if (outlineShader != null)
-                        //    {
-                        //        MeshRenderer renderer = combinedHold.GetComponent<MeshRenderer>();
-                        //        if (renderer != null)
-                        //        {
-                        //            renderer.material.shader = outlineShader;
-                        //        }
-                        //    }
-                        //}
+                        if (isMultiHold)
+                        {
+                            // 获取 Hold 的开头和结尾 Z 轴位置
+                            float startZ = CalculateZAxisPosition(firstSubHold.startT);
+                            float endZ = CalculateZAxisPosition(hold.subHoldList.Last().endT);
+
+                            // 往后推移一点点距离，这里假设推移 0.1，可根据实际情况调整
+                            float offsetZ = -OutlineParams.HoldOutlineDefault;
+
+                            // 开头的两个点
+                            float startXMin = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(firstSubHold.startT), 0), HorizontalParams.HorizontalMargin) * firstSubHold.startXMin / ChartParams.XaxisMax;
+                            float startXMax = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(firstSubHold.startT), 0), HorizontalParams.HorizontalMargin) * firstSubHold.startXMax / ChartParams.XaxisMax;
+                            float startY = associatedJudgePlaneObject.GetPlaneYAxis(firstSubHold.startT);
+
+                            // 结尾的两个点
+                            float endXMin = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT), 0), HorizontalParams.HorizontalMargin) * hold.subHoldList.Last().endXMin / ChartParams.XaxisMax;
+                            float endXMax = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT), 0), HorizontalParams.HorizontalMargin) * hold.subHoldList.Last().endXMax / ChartParams.XaxisMax;
+                            float endY = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT);
+
+                            // 增加渲染队列值，确保白色矩形显示在 Hold 之上
+                            int whiteRectRenderQueue = RenderQueue + 1;
+
+                            // 创建开头的白色矩形
+                            GameObject startWhiteRect = CreateHoldQuad(startXMin, startXMax, startXMin, startXMax,
+                                startY, startY, startZ, startZ + offsetZ, WhiteSprite, $"StartWhiteRect{holdIndex}", holdParent, whiteRectRenderQueue, shaderName);
+
+                            // 创建结尾的白色矩形
+                            GameObject endWhiteRect = CreateHoldQuad(endXMin, endXMax, endXMin, endXMax,
+                                endY, endY, endZ - offsetZ, endZ, WhiteSprite, $"EndWhiteRect{holdIndex}", holdParent, whiteRectRenderQueue, shaderName);
+
+                            // 将白色矩形与原来的 Hold 合并
+                            //List<GameObject> allInstances = new List<GameObject> { combinedHold, startWhiteRect, endWhiteRect };
+                            //GameObject finalCombinedHold = CombineInstances(allInstances);
+                            //finalCombinedHold.name = $"Hold{holdIndex}";
+                            //finalCombinedHold.transform.SetParent(holdParent.transform);
+                            //finalCombinedHold.layer = parentLayer2;
+
+                        }
                     }
                 }
                 holdIndex++;
@@ -825,6 +758,7 @@ public class ChartInstantiator : MonoBehaviour
         }
     }
 
+    
     public void InstantiateStarHeads(Chart chart)
     {
         if (chart != null && chart.stars != null)
@@ -1144,9 +1078,7 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
     float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue, string shaderName)
     {
-        //Hold的Y轴坐标需要上移一点，以显示在JudgePlane上方
-        //startY += 0.05f;
-        //endY += 0.05f;
+
         //注意四边形顶点顺序
         Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
         Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);

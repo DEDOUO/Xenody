@@ -36,6 +36,12 @@ namespace Params
         // 1秒钟Note在世界坐标前进的距离（Z轴）
         public static float NoteSpeedDefault = 80f;
     }
+    public static class OutlineParams
+    {
+        // 描边参数
+        // Hold描边宽度
+        public static float HoldOutlineDefault = 0.25f;
+    }
 
     public static class HeightParams
     {
@@ -52,7 +58,7 @@ namespace Params
     public static class FinenessParams
     {
         // 模拟Hold/JudgePlane曲面时，用几个斜面代替曲面
-        public static int Segment = 15;
+        public static int Segment = 10;
     }
     public static class StarArrowParams
     {

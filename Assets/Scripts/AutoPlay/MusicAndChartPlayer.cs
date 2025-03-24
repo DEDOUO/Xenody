@@ -540,10 +540,9 @@ public class MusicAndChartPlayer : MonoBehaviour
                 float endT = judgePlane.subJudgePlaneList[judgePlane.subJudgePlaneList.Count - 1].endT;
                 JudgePlanesStartT.Add(startT);
                 JudgePlanesEndT.Add(endT);
-                string instanceName = $"JudgePlane{i + 1}";
-                //judgePlaneEndTimes[instanceName] = endT;
-                allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
-                keyReachedJudgment[instanceName] = new KeyInfo(startT);
+                //string instanceName = $"JudgePlane{i + 1}";
+                //allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+                //keyReachedJudgment[instanceName] = new KeyInfo(startT);
             }
         }
 
@@ -1201,34 +1200,15 @@ public class MusicAndChartPlayer : MonoBehaviour
         {
             float startT = startTimeToInstanceNames.ElementAt(Index).Key;
             List<string> instanceNames = startTimeToInstanceNames.ElementAt(Index).Value;
-            //Debug.Log(instanceNames);
+            // 判断是否是多押情况
+            bool isMultiTap = instanceNames.Count > 1;
+
             foreach (var instanceName in instanceNames)
             {
-                //Debug.Log(instanceName);
                 GameObject NoteInstance = null;
                 Sprite sprite = null;
                 // 设置该Note的位置和外观
-                if (instanceName.StartsWith("JudgePlane"))
-                {
-                    NoteInstance = JudgePlanesParent.transform.Find(instanceName).gameObject;
-                    Vector3 currentPosition = NoteInstance.transform.position;
-                    //注意JudgePlane的Z轴坐标计算逻辑不一样
-                    currentPosition.z = CalculateZAxisPosition(-currentTime);
-                    NoteInstance.transform.position = currentPosition;
-
-                    string childName = NoteInstance.name;
-                    //Debug.Log(childName+"...."+ startT);
-                    int judgePlaneId = int.Parse(childName.Substring("JudgePlane".Length));
-                    JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
-                    float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
-                    // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
-                    currentJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
-
-                    // 重置对应的 LeftColorLine 和 RightColorLine 的 z 轴位置
-                    ResetColorLineZPosition($"LeftColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
-                    ResetColorLineZPosition($"RightColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
-                }
-                else if (instanceName.StartsWith("Hold"))
+                if (instanceName.StartsWith("Hold"))
                 {
                     NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
                     Vector3 currentPosition = NoteInstance.transform.position;
@@ -1241,7 +1221,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                 {
                     if (instanceName.StartsWith("Tap"))
                     {
-                        //Debug.Log(instanceName);
                         NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
                         sprite = TapSprite;
                     }
@@ -1262,20 +1241,19 @@ public class MusicAndChartPlayer : MonoBehaviour
                             GameObject gameobject = FlickArrowsParent.transform.Find($"FlickArrow{flickIndex}").gameObject;
                             if (gameobject != null)
                             {
-                                //gameobject.SetActive(true);
-                                //更新FlickArrow位置
+                                // 更新FlickArrow位置
                                 Vector3 currentPos = gameobject.transform.position;
                                 currentPos.z = CalculateZAxisPosition(startT - currentTime);
                                 gameobject.transform.position = currentPos;
                                 Flick flick = chart.flicks[flickIndex - 1];
                                 float flickDirection = flick.flickDirection;
 
-                                //提前更新Flick位置（AdjustFlickArrowPosition需要用到正确的位置）
+                                // 提前更新Flick位置（AdjustFlickArrowPosition需要用到正确的位置）
                                 currentPos = NoteInstance.transform.position;
                                 currentPos.z = CalculateZAxisPosition(startT - currentTime);
                                 NoteInstance.transform.position = currentPos;
 
-                                //针对横划键，需要额外调整位置
+                                // 针对横划键，需要额外调整位置
                                 AdjustFlickArrowPosition(gameobject, NoteInstance, flickDirection);
                             }
                         }
@@ -1285,12 +1263,12 @@ public class MusicAndChartPlayer : MonoBehaviour
                         NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
                         sprite = StarHeadSprite;
                     }
-                    //删除Note的Animator组件（如果有）
+                    // 删除Note的Animator组件（如果有）
                     Animator animator = NoteInstance.GetComponent<Animator>();
                     if (animator != null)
                     {
                         Destroy(animator);
-                        //将Note的Sprite重置为初始Sprite
+                        // 将Note的Sprite重置为初始Sprite
                         if (sprite != null)
                         {
                             // 获取SpriteRenderer组件
@@ -1302,21 +1280,59 @@ public class MusicAndChartPlayer : MonoBehaviour
                                 spriteRenderer.sprite = sprite;
                             }
 
-                            //Note在播放动画时，x轴缩放进行了一步放缩，需要再放缩回去
+                            // Note在播放动画时，x轴缩放进行了一步放缩，需要再放缩回去
                             Vector3 currentScale = NoteInstance.transform.localScale;
                             currentScale.x /= AnimationScaleAdjust;
                             NoteInstance.transform.localScale = currentScale;
                         }
                     }
-                    //更新Note位置
+                    // 更新Note位置
                     Vector3 currentPosition = NoteInstance.transform.position;
                     currentPosition.z = CalculateZAxisPosition(startT - currentTime);
                     NoteInstance.transform.position = currentPosition;
                 }
+
+                // 如果是多押情况，将Shader替换为Sprites/Outline
+                if (isMultiTap)
+                {
+                    SpriteRenderer spriteRenderer = NoteInstance.GetComponent<SpriteRenderer>();
+                    if (spriteRenderer != null)
+                    {
+                        spriteRenderer.material.shader = Shader.Find("Sprites/Outline");
+                    }
+                }
             }
             Index++;
         }
+        // 单独处理JudgePlane的位置和外观
+        ResetJudgePlanePositionAndSprite(currentTime);
         audioPrevTime = currentTime;
+    }
+    private void ResetJudgePlanePositionAndSprite(float currentTime)
+    {
+        if (chart.judgePlanes != null)
+        {
+            for (int i = 0; i < chart.judgePlanes.Count; i++)
+            {
+                var judgePlane = chart.judgePlanes[i];
+                string instanceName = $"JudgePlane{i + 1}";
+                GameObject NoteInstance = JudgePlanesParent.transform.Find(instanceName).gameObject;
+                Vector3 currentPosition = NoteInstance.transform.position;
+                //注意JudgePlane的Z轴坐标计算逻辑不一样
+                currentPosition.z = CalculateZAxisPosition(-currentTime);
+                NoteInstance.transform.position = currentPosition;
+
+                int judgePlaneId = i + 1;
+                JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
+                float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
+                // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
+                currentJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
+
+                // 重置对应的 LeftColorLine 和 RightColorLine 的 z 轴位置
+                ResetColorLineZPosition($"LeftColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
+                ResetColorLineZPosition($"RightColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
+            }
+        }
     }
 
     private void ResetColorLineZPosition(string objectName, GameObject parentGameObject, float newZPosition)
