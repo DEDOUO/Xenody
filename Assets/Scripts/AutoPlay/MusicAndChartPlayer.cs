@@ -419,6 +419,8 @@ public class MusicAndChartPlayer : MonoBehaviour
                 holdHitEffect.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
                 holdHitEffect.transform.position = holdHitEffectPosition;
                 holdHitEffect.transform.localScale = new Vector3(x_width, 1, 1);
+                //设置Hold判定动画图层（确保位于JudgeLine之上）
+                holdHitEffect.layer = 10;
 
                 //动画组件状态设置
                 holdAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
@@ -717,7 +719,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                             float YAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
                             float YAxisUniform = YAxis / HeightParams.HeightDefault;
                             //Debug.Log($"{judgeLineRectTransform.name}, {YAxisUniform}");
-                            Vector2 Position = ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
+                            Vector2 Position = ScalePositionToScreenJudgeLine(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
                             judgeLineRectTransform.anchoredPosition = Position;
                             // 根据 YAxis 的值，实时改变 correspondingJudgePlane 下所有 SubJudgePlane 实例的透明度
                             correspondingJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
@@ -1106,12 +1108,13 @@ public class MusicAndChartPlayer : MonoBehaviour
                 float endT = holdTimes.ElementAt(holdIndex).Value[1];
                 KeyInfo keyInfo = keyReachedJudgment[instanceName];
                 //如果未开始判定
+                bool shouldBeActive;
                 if (currentTime <= startT)
                 {
                     keyInfo.isJudged = false;
                     keyInfo.isSoundPlayedAtStart = false;
                     keyInfo.isSoundPlayedAtEnd = false;
-                    NoteInstance.SetActive(true);
+                    shouldBeActive = true;
                 }
                 //如果处于判定中
                 else if (currentTime > startT && currentTime < endT)
@@ -1119,7 +1122,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     keyInfo.isJudged = true;
                     keyInfo.isSoundPlayedAtStart = true;
                     keyInfo.isSoundPlayedAtEnd = false;
-                    NoteInstance.SetActive(true);
+                    shouldBeActive = true;
                 }
                 //如果结束判定
                 else if (currentTime >= endT)
@@ -1127,7 +1130,18 @@ public class MusicAndChartPlayer : MonoBehaviour
                     keyInfo.isJudged = true;
                     keyInfo.isSoundPlayedAtStart = true;
                     keyInfo.isSoundPlayedAtEnd = true;
-                    NoteInstance.SetActive(false);
+                    shouldBeActive = false;
+                }
+                else
+                {
+                    shouldBeActive = false;
+                }
+
+                NoteInstance.SetActive(shouldBeActive);
+                // 同步子物体的激活状态
+                for (int i = 0; i < NoteInstance.transform.childCount; i++)
+                {
+                    NoteInstance.transform.GetChild(i).gameObject.SetActive(shouldBeActive);
                 }
 
                 //将所有HoldHitEffect效果设置为非激活

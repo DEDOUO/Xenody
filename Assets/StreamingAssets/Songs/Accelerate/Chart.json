@@ -5475,7 +5475,7 @@
         },
         {
             "startT": 161.836,
-            "startX": -1.6,
+            "startX": -1.2,
             "Size": 0.8,
             "Pid": 1
         },
@@ -13912,12 +13912,6 @@
             "Pid": 17
         },
         {
-            "startT": 116.336,
-            "startX": 0.0,
-            "Size": 1.2,
-            "Pid": 1
-        },
-        {
             "startT": 115.836,
             "startX": 0.0,
             "Size": 0.6,
@@ -15781,7 +15775,7 @@
                 {
                     "startT": 37.236,
                     "endT": 37.636,
-                    "startX": -1.2,
+                    "startX": -1.0,
                     "startY": 0.0,
                     "endX": 0.0,
                     "endY": 1.0,
@@ -15792,7 +15786,7 @@
                     "endT": 38.036,
                     "startX": 0.0,
                     "startY": 1.0,
-                    "endX": -1.2,
+                    "endX": -1.0,
                     "endY": 0.0,
                     "Func": "LowerCir"
                 }
@@ -15806,7 +15800,7 @@
                 {
                     "startT": 38.836,
                     "endT": 39.236,
-                    "startX": -1.2,
+                    "startX": -1.0,
                     "startY": 0.0,
                     "endX": 0.0,
                     "endY": 1.0,
@@ -15822,7 +15816,7 @@
                 {
                     "startT": 39.636,
                     "endT": 40.036,
-                    "startX": 1.2,
+                    "startX": 1.0,
                     "startY": 0.0,
                     "endX": 0.0,
                     "endY": 1.0,
@@ -15833,7 +15827,7 @@
                     "endT": 40.436,
                     "startX": 0.0,
                     "startY": 1.0,
-                    "endX": 1.2,
+                    "endX": 1.0,
                     "endY": 0.0,
                     "Func": "LowerCir"
                 }
@@ -16113,14 +16107,14 @@
                     "endT": 55.636,
                     "startX": 0.0,
                     "startY": 1.0,
-                    "endX": -1.2,
+                    "endX": -1.0,
                     "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 55.636,
                     "endT": 55.836,
-                    "startX": -1.2,
+                    "startX": -1.0,
                     "startY": 0.0,
                     "endX": 0.0,
                     "endY": 1.0,
@@ -16138,14 +16132,14 @@
                     "endT": 57.236,
                     "startX": 0.0,
                     "startY": 1.0,
-                    "endX": 1.2,
+                    "endX": 1.0,
                     "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 57.236,
                     "endT": 57.436,
-                    "startX": 1.2,
+                    "startX": 1.0,
                     "startY": 0.0,
                     "endX": 0.0,
                     "endY": 1.0,
@@ -16163,14 +16157,14 @@
                     "endT": 58.836,
                     "startX": 0.0,
                     "startY": 1.0,
-                    "endX": -1.2,
+                    "endX": -1.0,
                     "endY": 0.0,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 58.836,
                     "endT": 59.036,
-                    "startX": -1.2,
+                    "startX": -1.0,
                     "startY": 0.0,
                     "endX": 0.0,
                     "endY": 1.0,
@@ -16197,14 +16191,14 @@
                     "endT": 127.11,
                     "startX": 0.0,
                     "startY": 1.5,
-                    "endX": -1.2,
+                    "endX": -1.0,
                     "endY": 0.75,
                     "Func": "UpperCir"
                 },
                 {
                     "startT": 127.11,
                     "endT": 128.247,
-                    "startX": -1.2,
+                    "startX": -1.0,
                     "startY": 0.75,
                     "endX": 0.0,
                     "endY": 0.0,
@@ -16215,14 +16209,14 @@
                     "endT": 127.11,
                     "startX": 0.0,
                     "startY": 1.5,
-                    "endX": 1.2,
+                    "endX": 1.0,
                     "endY": 0.75,
                     "Func": "UpperCir"
                 },
                 {
                     "startT": 127.11,
                     "endT": 128.247,
-                    "startX": 1.2,
+                    "startX": 1.0,
                     "startY": 0.75,
                     "endX": 0.0,
                     "endY": 0.0,
@@ -16308,14 +16302,14 @@
                     "endT": 135.13600000000002,
                     "startX": 0.0,
                     "startY": 0.0,
-                    "endX": 1.2,
+                    "endX": 1.0,
                     "endY": 0.75,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 135.13600000000002,
                     "endT": 135.43600000000004,
-                    "startX": 1.2,
+                    "startX": 1.0,
                     "startY": 0.75,
                     "endX": 0.0,
                     "endY": 1.5,
@@ -16326,14 +16320,14 @@
                     "endT": 135.73600000000005,
                     "startX": 0.0,
                     "startY": 1.5,
-                    "endX": -1.2,
+                    "endX": -1.0,
                     "endY": 0.75,
                     "Func": "UpperCir"
                 },
                 {
                     "startT": 135.73600000000005,
                     "endT": 136.03600000000006,
-                    "startX": -1.2,
+                    "startX": -1.0,
                     "startY": 0.75,
                     "endX": 0.0,
                     "endY": 0.0,
@@ -16575,7 +16569,7 @@
                 {
                     "startT": 162.036,
                     "endT": 162.436,
-                    "startX": -1.6,
+                    "startX": -1.2,
                     "startY": 1.2,
                     "endX": 0.0,
                     "endY": 0.0,
@@ -16586,14 +16580,14 @@
                     "endT": 162.636,
                     "startX": 0.0,
                     "startY": 0.0,
-                    "endX": 0.8,
+                    "endX": 0.6,
                     "endY": 0.6,
                     "Func": "LowerCir"
                 },
                 {
                     "startT": 162.636,
                     "endT": 162.836,
-                    "startX": 0.8,
+                    "startX": 0.6,
                     "startY": 0.6,
                     "endX": 0.0,
                     "endY": 1.2,
@@ -16604,7 +16598,7 @@
                     "endT": 163.236,
                     "startX": 0.0,
                     "startY": 1.2,
-                    "endX": 1.6,
+                    "endX": 1.2,
                     "endY": 0.0,
                     "Func": "UpperCir"
                 }
@@ -16618,7 +16612,7 @@
                 {
                     "startT": 162.036,
                     "endT": 162.436,
-                    "startX": 1.6,
+                    "startX": 1.2,
                     "startY": 0.0,
                     "endX": 0.0,
                     "endY": 1.2,
@@ -16629,14 +16623,14 @@
                     "endT": 162.636,
                     "startX": 0.0,
                     "startY": 1.2,
-                    "endX": -0.8,
+                    "endX": -0.6,
                     "endY": 0.6,
                     "Func": "UpperCir"
                 },
                 {
                     "startT": 162.636,
                     "endT": 162.836,
-                    "startX": -0.8,
+                    "startX": -0.6,
                     "startY": 0.6,
                     "endX": 0.0,
                     "endY": 0.0,
@@ -16647,7 +16641,7 @@
                     "endT": 163.236,
                     "startX": 0.0,
                     "startY": 0.0,
-                    "endX": -1.6,
+                    "endX": -1.2,
                     "endY": 1.2,
                     "Func": "UpperCir"
                 }

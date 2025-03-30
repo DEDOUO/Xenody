@@ -445,7 +445,7 @@ public class Utility : MonoBehaviour
         return startX - halfNoteSize >= ChartParams.XaxisMin - 0.01f && startX + halfNoteSize <= ChartParams.XaxisMax + 0.01f;
     }
 
-    public static Vector2 ScalePositionToScreen(Vector2 position, RectTransform canvas)
+    public static Vector2 ScalePositionToScreenStar(Vector2 position, RectTransform canvas)
     {
         //注意这里获取的是画布的长宽，而不是屏幕的长宽
         float screenWidth = canvas.sizeDelta.x;
@@ -461,14 +461,45 @@ public class Utility : MonoBehaviour
         //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
         float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
         float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
-        //Debug.Log(ScreenYCeiling);
+        
         //Debug.Log(ScreenYBottom);
+        //Debug.Log(ScreenYCeiling);
 
         float scaledX = position.x / ChartParams.XaxisMax * screenXRange / 2;
+        //Debug.Log(scaledX);
         float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
 
 
         return new Vector2(scaledX, scaledY);
+    }
+
+    //JudgeLine的X轴坐标一直为0，简化计算
+    //JudgeLine的Y轴坐标需要额外修正；JudgePlane的Y轴坐标线性变化时，其实对应JudgeLine的Y轴坐标不是线性变化，需要修正（注意摄像机有一定倾角）
+    public static Vector2 ScalePositionToScreenJudgeLine(Vector2 position, RectTransform canvas)
+    {
+        //注意这里获取的是画布的长宽，而不是屏幕的长宽
+        float screenHeight = canvas.sizeDelta.y;
+
+        Vector3 worldYBottom = new Vector3(0, 0, 0);
+        Vector3 worldYCeiling = new Vector3(0, HeightParams.HeightDefault, 0);
+        //Vector3 worldY = new Vector3(0, HeightParams.HeightDefault * (position.y / ChartParams.YaxisMax), 0);
+        //Debug.Log(worldY.y);
+
+
+        //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
+        float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
+        float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
+        //float ScreenY = CalculateYAxisPixel(worldY) * screenHeight / Screen.height;
+
+        //Debug.Log(ScreenYBottom);
+        //Debug.Log(ScreenYCeiling);
+        //Debug.Log(ScreenY);
+
+
+        float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
+        //float scaledY = ScreenY - (screenHeight / 2);
+
+        return new Vector2(0, scaledY);
     }
 
     public static float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition, float targetHorizontalMargin)
