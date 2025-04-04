@@ -4,15 +4,15 @@ using UnityEngine.UI;
 using System.IO;
 using System.Collections;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
-public class MusicAndChartLoader:MonoBehaviour
+public class MusicAndChartLoader : MonoBehaviour
 {
     private AudioSource audioSource;
     private Chart chart;
     private string musicPath;
     private string chartPath;
     private Sprite cover;
-
 
     // 新增初始化方法
     public void Initialize(AudioSource audioSource)
@@ -22,23 +22,32 @@ public class MusicAndChartLoader:MonoBehaviour
 
     public async Task LoadMusicAndChartAsync()
     {
+        
+        musicPath = SongAndChartData.GetMusicFilePath();
+
         // 判断如果没有获取到路径（即直接加载 AutoPlay 场景时），默认按照第一首歌曲加载
-        if (string.IsNullOrEmpty(musicPath) || string.IsNullOrEmpty(chartPath))
+        if (string.IsNullOrEmpty(musicPath))
         {
+            Debug.Log("歌曲路径缺失，加载默认曲");
             SongAndChartData.SetSelectedSong("Accelerate");
         }
-
-        musicPath = SongAndChartData.GetMusicFilePath();
         if (!File.Exists(musicPath))
         {
             Debug.LogError($"音乐文件未找到：{musicPath}");
             return;
         }
+
         chartPath = SongAndChartData.GetChartFilePath();
+
+        // 检查Chart.json是否存在，若不存在尝试查找并转换Chart.xlsx
         if (!File.Exists(chartPath))
         {
-            Debug.LogError($"谱面文件未找到：{chartPath}");
-            return;
+            Dictionary<string, object> chartData = SongAndChartData.GetChartData();
+            if (chartData == null)
+            {
+                Debug.LogError($"未能成功生成或读取 Chart.json 文件，路径：{chartPath}");
+                return;
+            }
         }
 
         cover = SongAndChartData.GetCoverSprite();
@@ -99,7 +108,6 @@ public class MusicAndChartLoader:MonoBehaviour
         //Debug.Log(chart);
         return chart;
     }
-
 
     public AudioSource GetAudioSource()
     {

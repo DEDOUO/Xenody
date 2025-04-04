@@ -61,7 +61,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     // 新增一个列表用于存储当前正在处理的Hold对应的instanceName
     private List<string> currentHoldInstanceNames = new List<string>();
-    private bool isMusicPlaying; // 用于标识是否已经开始音乐播放阶段
+    //private bool isMusicPlaying; // 用于标识是否已经开始音乐播放阶段
     private bool isPaused = false;
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
@@ -123,7 +123,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         subStarInfoDict = Star.InitializeSubStarInfo(chart, SubStarsParent);
         LoadNoteSprites();
         audioSource.Play();
-        isMusicPlaying = true;
+        //isMusicPlaying = true;
         isPaused = false;
         //AddListenerToButton();
         StartCoroutine(UpdatePositionsCoroutine());
@@ -140,6 +140,13 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Updateall();
                 //audioPrevTime = audioSource.time;
             }
+            else if (!audioSource.isPlaying && !isPaused)
+            {
+                //Debug.Log("Music has ended. Loading SongSelect scene...");
+                SceneManager.LoadScene("SongSelect");
+                // 在这里添加 yield break 来停止协程，因为场景已经切换，协程不需要继续运行
+                yield break;
+            }
 
             yield return new WaitForSeconds(FrameParams.updateInterval);
         }
@@ -148,10 +155,10 @@ public class MusicAndChartPlayer : MonoBehaviour
     private void Updateall()
     {
         // 只有当明确进入音乐播放阶段才进行后续判断
-        if (isMusicPlaying && audioSource.isPlaying)
+        if (audioSource.isPlaying)
         {
             float currentTime = audioSource.time;
-            //Debug.Log("1. " + currentTime);
+            //Debug.Log(currentTime);
 
             // 将所有已经结束的 JudgePlane（endT 小于 currentTime）设置为 setActive(false)
             for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
@@ -243,11 +250,11 @@ public class MusicAndChartPlayer : MonoBehaviour
             CheckArrowVisibility(SubStarsParent, currentTime, subStarInfoDict);
             //Debug.Log("2. " + audioTime);
         }
-        else
-        {
-            // 歌曲播放结束后，跳回选歌场景
-            SceneManager.LoadScene("SongSelect");
-        }
+        //else
+        //{
+        //    // 歌曲播放结束后，跳回选歌场景
+        //    SceneManager.LoadScene("SongSelect");
+        //}
     }
 
     private void Update()
@@ -991,13 +998,13 @@ public class MusicAndChartPlayer : MonoBehaviour
 
             audioSource.Play();
             isPaused = false;
-            isMusicPlaying = true;
+            //isMusicPlaying = true;
         }
         else
         {
             audioSource.Pause();
             isPaused = true;
-            isMusicPlaying = false;
+            //isMusicPlaying = false;
 
             MusicSlider.SetActive(true);
             Slider slider = MusicSlider.GetComponent<Slider>();
