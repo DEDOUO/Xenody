@@ -138,7 +138,7 @@ public class Chart
                 }
                 if (associatedJudgePlane != null)
                 {
-                    float startY = associatedJudgePlane.GetPlaneYAxis(newStar.starHeadT) / HeightParams.HeightDefault;
+                    float startY = associatedJudgePlane.GetPlaneYAxis(newStar.starHeadT);
                     //Debug.Log(startY);
                     bool firstSubStar = true;
                     foreach (var subStar in starData.subStarList)

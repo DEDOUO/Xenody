@@ -292,7 +292,8 @@ public class ChartInstantiator : MonoBehaviour
                     judgeLineInstance.layer = parentLayer;
 
                     //获取初始Y轴坐标并转化为屏幕坐标
-                    float YAxisUniform = judgePlane.GetPlaneYAxis(subJudgePlane.startT) / HeightParams.HeightDefault;
+                    float YAxisUniform = judgePlane.GetPlaneYAxis(subJudgePlane.startT);
+                    //Debug.Log(YAxisUniform);
                     Vector2 Position = ScalePositionToScreenJudgeLine(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
                     judgeLineRectTransform.anchoredPosition3D = new Vector3(Position.x, Position.y, 0);
                     judgeLineRectTransform.localRotation = Quaternion.Euler(0, 0, 0);
@@ -360,9 +361,10 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         // 获取关联JudgePlane在Tap开始时间的Y轴坐标
                         float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(tap.startT);
+                        float yPos = TransformYCoordinate(yAxisPosition);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（封装成方法方便复用，以下是示例方法定义，参数需根据实际情况传入合适的世界坐标点）
-                        Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                        Vector3 referencePoint = new Vector3(0, yPos, 0);
                         float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
                         //Debug.Log(worldUnitToScreenPixelX);
 
@@ -399,7 +401,7 @@ public class ChartInstantiator : MonoBehaviour
 
                         // 设置Tap实例的位置（X、Y、Z轴坐标）
                         float zPositionForStartT = CalculateZAxisPosition(tap.startT);
-                        tapInstance.transform.position = new Vector3(-startXWorld, yAxisPosition, zPositionForStartT);
+                        tapInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
                         //Debug.Log(tapInstance.transform.position);
                     }
 
@@ -472,9 +474,10 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         // 获取关联JudgePlane在Slide开始时间的Y轴坐标
                         float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(slide.startT);
+                        float yPos = TransformYCoordinate(yAxisPosition);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
-                        Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                        Vector3 referencePoint = new Vector3(0, yPos, 0);
                         float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
 
                         // 计算Slide的X轴坐标（根据Slide相关参数和计算逻辑来确定，示例如下，需按实际调整）
@@ -511,7 +514,7 @@ public class ChartInstantiator : MonoBehaviour
 
                         // 设置Slide实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(slide.startT);
-                        slideInstance.transform.position = new Vector3(-startXWorld, yAxisPosition, zPositionForStartT);
+                        slideInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
                     }
 
                     // 检查Slide相关的范围等条件是否满足（这里简单示例输出警告，按实际需求完善检查逻辑）
@@ -583,9 +586,10 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         // 获取关联JudgePlane在Flick开始时间的Y轴坐标
                         float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(flick.startT);
+                        float yPos = TransformYCoordinate(yAxisPosition);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
-                        Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                        Vector3 referencePoint = new Vector3(0, yPos, 0);
                         float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
 
                         // 计算Flick的X轴坐标（根据Flick相关参数和计算逻辑来确定，示例如下，需按实际调整）
@@ -621,7 +625,7 @@ public class ChartInstantiator : MonoBehaviour
 
                         // 设置Flick实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(flick.startT);
-                        flickInstance.transform.position = new Vector3(-startXWorld, yAxisPosition, zPositionForStartT);
+                        flickInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
 
                         Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flickInstance);
                         //Debug.Log(leftMiddleWorldPos);
@@ -698,7 +702,7 @@ public class ChartInstantiator : MonoBehaviour
                     // 实例化StarHead预制体
                     GameObject starheadInstance = Instantiate(prefabToInstantiate);
                     starheadInstance.name = $"StarHead{starIndex}"; // 命名
-                                                                    // 将StarHead设置为ChartGameObjects的子物体
+                    // 将StarHead设置为ChartGameObjects的子物体
                     starheadInstance.transform.SetParent(StarsParent.transform);
                     // 继承父物体的图层
                     int parentLayer = StarsParent.layer;
@@ -708,9 +712,15 @@ public class ChartInstantiator : MonoBehaviour
                     Vector2 firstStarCoodinate = star.GetFirstSubStarCoordinates();
                     float xAxisPosition = firstStarCoodinate.x;
                     float yAxisPosition = firstStarCoodinate.y;
-                    yAxisPosition *= HeightParams.HeightDefault;
+                    float yPos = TransformYCoordinate(yAxisPosition);
+
+                    // 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
+                    float bottomPixel = AspectRatioManager.croppedScreenHeight * HorizontalParams.VerticalMarginBottom;
+                    float topPixel = AspectRatioManager.croppedScreenHeight * HorizontalParams.VerticalMarginCeiling;
+
+
                     // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围
-                    Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
+                    Vector3 referencePoint = new Vector3(0, yPos, 0);
                     float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
 
                     // 计算X轴坐标
@@ -744,7 +754,7 @@ public class ChartInstantiator : MonoBehaviour
 
                     // 设置StarHead实例的位置（X、Y、Z轴坐标）
                     float zPositionForStartT = CalculateZAxisPosition(star.starHeadT);
-                    starheadInstance.transform.position = new Vector3(-startXWorld, yAxisPosition, zPositionForStartT);
+                    starheadInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
 
                     // 检查点键是否在规定的X轴坐标范围内，如果不在范围，可进行相应处理，比如隐藏或者输出警告等（这里简单示例输出警告）
                     //if (!star.IsInAxisRange())
@@ -791,16 +801,20 @@ public class ChartInstantiator : MonoBehaviour
                         float startY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.startT);
                         float endY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.endT);
 
+                        // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
+                        float startYWorld = TransformYCoordinate(startY);
+                        float endYWorld = TransformYCoordinate(endY);
+
                         // 检查 SubHold 所在的 SubJudgePlane 是否为 Linear
                         bool isSubJudgePlaneLinear = associatedJudgePlaneObject.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
 
                         // 只有当两侧变化函数均为 Linear，且所在的 SubJudgePlane 为 Linear 时，才能一次性初始化
                         if (subHold.XLeftFunction == TransFunctionType.Linear && subHold.XRightFunction == TransFunctionType.Linear && isSubJudgePlaneLinear)
                         {
-                            float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0), HorizontalParams.HorizontalMargin) * subHold.startXMin / ChartParams.XaxisMax;
-                            float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY, 0), HorizontalParams.HorizontalMargin) * subHold.startXMax / ChartParams.XaxisMax;
-                            float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0), HorizontalParams.HorizontalMargin) * subHold.endXMin / ChartParams.XaxisMax;
-                            float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
+                            float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMin / ChartParams.XaxisMax;
+                            float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMax / ChartParams.XaxisMax;
+                            float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMin / ChartParams.XaxisMax;
+                            float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
 
                             // 根据 startT 和 endT 计算 Z 轴位置
                             float zPositionForStartT = CalculateZAxisPosition(subHold.startT);
@@ -808,7 +822,7 @@ public class ChartInstantiator : MonoBehaviour
 
                             // 一次性生成整个 SubHold
                             GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
-                                startY, endY, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent, RenderQueue, shaderName);
+                               startYWorld, endYWorld, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent, RenderQueue, shaderName);
                             subHoldInstances.Add(subHoldInstance);
                         }
                         else
@@ -826,22 +840,26 @@ public class ChartInstantiator : MonoBehaviour
                                 float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
                                 float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
 
+                                // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
+                                float startYWorld_Inner = TransformYCoordinate(startY_Inner);
+                                float endYWorld_Inner = TransformYCoordinate(endY_Inner);
+
                                 float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
                                 float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
                                 float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
                                 float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
 
-                                float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0), HorizontalParams.HorizontalMargin) * startXMin / ChartParams.XaxisMax;
-                                float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startY_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
-                                float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
-                                float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endY_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
+                                float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMin / ChartParams.XaxisMax;
+                                float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
+                                float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
+                                float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
 
                                 // 根据 startT 和 endT 计算 Z 轴位置
                                 float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
                                 float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
 
                                 GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                    startY_Inner, endY_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName);
+                                    startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName);
                                 segmentInstances.Add(instance);
                             }
 
@@ -875,25 +893,27 @@ public class ChartInstantiator : MonoBehaviour
                             float offsetZ = -OutlineParams.HoldOutlineDefault;
 
                             // 开头的两个点
-                            float startXMin = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(firstSubHold.startT), 0), HorizontalParams.HorizontalMargin) * firstSubHold.startXMin / ChartParams.XaxisMax;
-                            float startXMax = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(firstSubHold.startT), 0), HorizontalParams.HorizontalMargin) * firstSubHold.startXMax / ChartParams.XaxisMax;
                             float startY = associatedJudgePlaneObject.GetPlaneYAxis(firstSubHold.startT);
+                            float startYWorld = TransformYCoordinate(startY);
+                            float startXMin = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * firstSubHold.startXMin / ChartParams.XaxisMax;
+                            float startXMax = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * firstSubHold.startXMax / ChartParams.XaxisMax;
 
                             // 结尾的两个点
-                            float endXMin = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT), 0), HorizontalParams.HorizontalMargin) * hold.subHoldList.Last().endXMin / ChartParams.XaxisMax;
-                            float endXMax = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT), 0), HorizontalParams.HorizontalMargin) * hold.subHoldList.Last().endXMax / ChartParams.XaxisMax;
                             float endY = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT);
+                            float endYWorld = TransformYCoordinate(endY);
+                            float endXMin = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * hold.subHoldList.Last().endXMin / ChartParams.XaxisMax;
+                            float endXMax = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * hold.subHoldList.Last().endXMax / ChartParams.XaxisMax;
 
                             // 增加渲染队列值，确保白色矩形显示在 Hold 之上
                             int whiteRectRenderQueue = RenderQueue + 1;
 
                             // 创建开头的白色矩形
                             GameObject startWhiteRect = CreateHoldQuad(startXMin, startXMax, startXMin, startXMax,
-                                startY, startY, startZ, startZ + offsetZ, WhiteSprite, $"StartWhiteRect{holdIndex}", holdParent, whiteRectRenderQueue, shaderName);
+                                startYWorld, startYWorld, startZ, startZ + offsetZ, WhiteSprite, $"StartWhiteRect{holdIndex}", holdParent, whiteRectRenderQueue, shaderName);
 
                             // 创建结尾的白色矩形
                             GameObject endWhiteRect = CreateHoldQuad(endXMin, endXMax, endXMin, endXMax,
-                                endY, endY, endZ - offsetZ, endZ, WhiteSprite, $"EndWhiteRect{holdIndex}", holdParent, whiteRectRenderQueue, shaderName);
+                                endYWorld, endYWorld, endZ - offsetZ, endZ, WhiteSprite, $"EndWhiteRect{holdIndex}", holdParent, whiteRectRenderQueue, shaderName);
 
                             // 将白色矩形与原来的 Hold 合并
                             //List<GameObject> allInstances = new List<GameObject> { combinedHold, startWhiteRect, endWhiteRect };
@@ -1032,8 +1052,12 @@ public class ChartInstantiator : MonoBehaviour
         GameObject judgePlaneParent, GameObject leftColorLine, GameObject rightColorLine, int RenderQueue, string colorHex)
     {
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
+        //Debug.Log(startY);
+        //Debug.Log(endY);
         float startYWorld = TransformYCoordinate(startY);
         float endYWorld = TransformYCoordinate(endY);
+        //Debug.Log(startYWorld);
+        //Debug.Log(endYWorld);
 
         // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
         float zPositionForStartT = CalculateZAxisPosition(startT);
@@ -1146,7 +1170,8 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject CreateHoldQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
     float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue, string shaderName)
     {
-
+        //Debug.Log(startY);
+        //Debug.Log(endY);
         //注意四边形顶点顺序
         Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
         Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);

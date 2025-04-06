@@ -5,19 +5,14 @@ using System.Linq;
 using Params;
 using System.Collections;
 using UnityEngine.SceneManagement;
-//using UnityEngine.Experimental.Rendering.Universal;
-//using UnityEngine.Rendering.Universal;
 using Note;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using static Utility;
-//using UnityEditor.Experimental.GraphView;
-using UnityEditor;
-//using Unity.VisualScripting;
 
 public class MusicAndChartPlayer : MonoBehaviour
 {
-    private AudioSource audioSource;
+    public PauseManager pauseManager; // 添加对 PauseManager 实例的引用
+
+    public AudioSource audioSource;
     private GameObject JudgePlanesParent;
     private GameObject ColorLinesParent;
     private GameObject JudgeLinesParent;
@@ -27,8 +22,8 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject FlickArrowsParent;
     private GameObject HoldsParent;
     private GameObject StarsParent;
-    private GameObject SubStarsParent;
-    private GameObject MusicSlider;
+    public GameObject SubStarsParent;
+    public GameObject MusicSlider;
 
     private Sprite TapSprite;
     private Sprite SlideSprite;
@@ -62,7 +57,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     // 新增一个列表用于存储当前正在处理的Hold对应的instanceName
     private List<string> currentHoldInstanceNames = new List<string>();
     //private bool isMusicPlaying; // 用于标识是否已经开始音乐播放阶段
-    private bool isPaused = false;
+    //private bool isPaused = false;
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
     private float totalTime;
@@ -115,6 +110,8 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     public void PlayMusicAndChart(Chart chart)
     {
+
+        pauseManager = GetComponent<PauseManager>();
         MusicSlider = GameObject.Find("MusicSlider");
         MusicSlider.SetActive(false);
         //Debug.Log(MusicSlider);
@@ -124,7 +121,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         LoadNoteSprites();
         audioSource.Play();
         //isMusicPlaying = true;
-        isPaused = false;
+        pauseManager.isPaused = false;
         //AddListenerToButton();
         StartCoroutine(UpdatePositionsCoroutine());
     }
@@ -135,14 +132,14 @@ public class MusicAndChartPlayer : MonoBehaviour
 
         while (true)
         {
-            if (audioSource.isPlaying && !isPaused)
+            if (audioSource.isPlaying && !pauseManager.isPaused)
             {
                 Updateall();
                 //audioPrevTime = audioSource.time;
             }
-            else if (!audioSource.isPlaying && !isPaused)
+            else if (!audioSource.isPlaying && !pauseManager.isPaused)
             {
-                //Debug.Log("Music has ended. Loading SongSelect scene...");
+                Debug.Log("Music has ended. Loading SongSelect scene...");
                 SceneManager.LoadScene("SongSelect");
                 // 在这里添加 yield break 来停止协程，因为场景已经切换，协程不需要继续运行
                 yield break;
@@ -250,11 +247,6 @@ public class MusicAndChartPlayer : MonoBehaviour
             CheckArrowVisibility(SubStarsParent, currentTime, subStarInfoDict);
             //Debug.Log("2. " + audioTime);
         }
-        //else
-        //{
-        //    // 歌曲播放结束后，跳回选歌场景
-        //    SceneManager.LoadScene("SongSelect");
-        //}
     }
 
     private void Update()
@@ -262,42 +254,10 @@ public class MusicAndChartPlayer : MonoBehaviour
         // 检查鼠标点击
         if (Input.GetMouseButtonDown(0))
         {
-            CheckPauseButtonClick();
+            pauseManager.CheckPauseButtonClick();
         }
     }
 
-    private void CheckPauseButtonClick()
-    {
-        // 确保 EventSystem 存在
-        if (EventSystem.current == null)
-        {
-            Debug.LogError("EventSystem 未找到，请在场景中添加 EventSystem 组件。");
-            return;
-        }
-
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
-
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, results);
-
-        // 检查结果列表是否为空
-        if (results.Count > 0)
-        {
-            foreach (RaycastResult result in results)
-            {
-                if (result.gameObject.CompareTag("PauseButton"))
-                {
-                    TogglePause();
-                    break;
-                }
-            }
-        }
-        else
-        {
-            Debug.Log("Raycast 没有找到任何结果。");
-        }
-    }
     private void UpdateStarSoundEffect(float currentTime)
     {
         // 检查当前播放的星星音频是否结束
@@ -373,6 +333,8 @@ public class MusicAndChartPlayer : MonoBehaviour
 
             JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
             float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
+            // 对yAxisPosition进行TransformYCoordinate变换
+            yAxisPosition = TransformYCoordinate(yAxisPosition);
             //Debug.Log(yAxisPosition);
             Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
             float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
@@ -390,6 +352,8 @@ public class MusicAndChartPlayer : MonoBehaviour
             if (correspondingJudgePlane != null)
             {
                 y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                // 对y进行TransformYCoordinate变换
+                y = TransformYCoordinate(y);
             }
             //HoldHitEffect的位置（注意挂载在Hold物体下，需要根据父物体坐标折算子物体相对坐标）
             Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
@@ -399,7 +363,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 HoldSoundEffect.Play();
                 holdKeyInfo.isSoundPlayedAtStart = true; // 标记已播放开始音效
-                // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
+                                                         // 将当前Hold的instanceName添加到列表中，后续统一处理状态更新
                 currentHoldInstanceNames.Add(instanceName);
 
                 string holdHitEffectName = $"HoldHitEffect{holdIndex + 1}";
@@ -461,6 +425,8 @@ public class MusicAndChartPlayer : MonoBehaviour
 
                 JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
                 float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(currentTime);
+                // 对yAxisPosition进行TransformYCoordinate变换
+                yAxisPosition = TransformYCoordinate(yAxisPosition);
                 Vector3 referencePoint = new Vector3(0, yAxisPosition, 0);
                 float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
                 float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
@@ -470,6 +436,8 @@ public class MusicAndChartPlayer : MonoBehaviour
 
                 JudgePlane correspondingJudgePlane = chart.GetCorrespondingJudgePlaneBasedOnTime(currentTime, hold);
                 float y = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                // 对y进行TransformYCoordinate变换
+                y = TransformYCoordinate(y);
                 Vector3 holdHitEffectPosition = new Vector3(-startXWorld, y, 0f);
 
                 //判定结束
@@ -722,15 +690,19 @@ public class MusicAndChartPlayer : MonoBehaviour
                         else if (currentTime > startT && currentTime <= endT)
                         {
                             judgeLineRectTransform.gameObject.SetActive(true);
-                            // 获取当前时间的 Y 轴坐标，转化为屏幕坐标，更新 JudgeLine 的 Y 轴坐标
+                            // 获取当前时间的 Y 轴坐标
                             float YAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
-                            float YAxisUniform = YAxis / HeightParams.HeightDefault;
-                            //Debug.Log($"{judgeLineRectTransform.name}, {YAxisUniform}");
-                            Vector2 Position = ScalePositionToScreenJudgeLine(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
+
+                            // 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
+                            //float bottomPixel = AspectRatioManager.croppedScreenHeight * (1-HorizontalParams.VerticalMarginBottom);
+                            //float topPixel = AspectRatioManager.croppedScreenHeight * (1-HorizontalParams.VerticalMarginCeiling);
+
+                            // 计算 YAxis 对应的归一化坐标
+                            //float YAxisUniform = (YAxis - bottomPixel) / (topPixel - bottomPixel);
+
+                            Vector2 Position = ScalePositionToScreenJudgeLine(new Vector2(0f, YAxis), JudgeLinesParent.GetComponent<RectTransform>());
                             judgeLineRectTransform.anchoredPosition = Position;
-                            // 根据 YAxis 的值，实时改变 correspondingJudgePlane 下所有 SubJudgePlane 实例的透明度
-                            correspondingJudgePlane.ChangeSubJudgePlaneTransparency(JudgePlanesParent, YAxis);
-                            //设置 JudgeLine透明度为 1
+                            // 设置 JudgeLine 透明度为 1
                             JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, 1f);
                         }
                         // 当当前时间介于结束时间与结束时间+出现时间之间时，设置 JudgeLine 为 active，且透明度线性地由 1 变为 0
@@ -745,13 +717,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                         {
                             judgeLineRectTransform.gameObject.SetActive(false);
                         }
-
-                        //else if (currentTime >= startT)
-                        //{
-                        //    // 当当前时间大于开始时间时，设置 JudgeLine 为 active，且透明度为 1
-                        //    judgeLineRectTransform.gameObject.SetActive(true);
-                        //    JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, 1f);
-                        //}
                     }
                 }
             }
@@ -982,34 +947,6 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
 
         keyGameObject.SetActive(false);
-    }
-
-    // 新增的方法，用于处理暂停和继续播放音乐
-    public void TogglePause()
-    {
-        //Debug.Log("TogglePause");
-        if (isPaused)
-        {
-            Slider slider = MusicSlider.GetComponent<Slider>();
-            audioSource.time = slider.value * totalTime;
-            ResetAllNotes(audioSource.time);
-            CheckArrowVisibility(SubStarsParent, audioSource.time, subStarInfoDict);
-            MusicSlider.SetActive(false);
-
-            audioSource.Play();
-            isPaused = false;
-            //isMusicPlaying = true;
-        }
-        else
-        {
-            audioSource.Pause();
-            isPaused = true;
-            //isMusicPlaying = false;
-
-            MusicSlider.SetActive(true);
-            Slider slider = MusicSlider.GetComponent<Slider>();
-            slider.value = audioSource.time / totalTime;
-        }
     }
 
     public void ResetAllNotes(float currentTime)

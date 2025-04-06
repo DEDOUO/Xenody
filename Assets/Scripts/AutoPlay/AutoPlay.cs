@@ -100,9 +100,14 @@ public class AutoPlay : MonoBehaviour
 
     private async void Start()
     {
+
+        //跟据屏幕长宽比确认谱面范围
+        AspectRatioManager aspectRatioManager = GetComponent<AspectRatioManager>();
+        aspectRatioManager.SetupSpectrumBounds();
+
         // 加载音乐和谱面文件
         //MusicAndChartLoader loader = new MusicAndChartLoader(audioSource);
-        MusicAndChartLoader loader = AutoPlayService.GetComponent<MusicAndChartLoader>();
+        MusicAndChartLoader loader = GetComponent<MusicAndChartLoader>();
         loader.Initialize(audioSource);
         await loader.LoadMusicAndChartAsync();
 

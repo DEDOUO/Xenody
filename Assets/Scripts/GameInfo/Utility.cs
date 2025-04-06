@@ -8,6 +8,7 @@ using static Note.Star;
 using System.Collections.Generic;
 
 
+
 public class Utility : MonoBehaviour
 {
     // 定义X轴/Y轴坐标变化函数的枚举类型
@@ -445,67 +446,56 @@ public class Utility : MonoBehaviour
         return startX - halfNoteSize >= ChartParams.XaxisMin - 0.01f && startX + halfNoteSize <= ChartParams.XaxisMax + 0.01f;
     }
 
+
     public static Vector2 ScalePositionToScreenStar(Vector2 position, RectTransform canvas)
     {
-        //注意这里获取的是画布的长宽，而不是屏幕的长宽
-        float screenWidth = canvas.sizeDelta.x;
-        float screenHeight = canvas.sizeDelta.y;
-        //Debug.Log(screenHeight);
+        // 注意这里获取的是画布的长宽，而不是屏幕的长宽
+        float canvasWidth = canvas.sizeDelta.x;
+        float canvasHeight = canvas.sizeDelta.y;
 
-        float screenXMin = screenWidth * HorizontalParams.HorizontalMargin;
-        float screenXMax = screenWidth * (1 - HorizontalParams.HorizontalMargin);
+        float screenXMin = canvasWidth * HorizontalParams.HorizontalMargin;
+        float screenXMax = canvasWidth * (1 - HorizontalParams.HorizontalMargin);
         float screenXRange = screenXMax - screenXMin;
 
-        Vector3 worldYBottom = new Vector3(0, 0, 0);
-        Vector3 worldYCeiling = new Vector3(0, HeightParams.HeightDefault, 0);
-        //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
-        float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
-        float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
-        
+        // 以下Y轴坐标计算逻辑与 ScalePositionToScreenJudgeLine 保持一致
+        float croppedcanvasHeight = AspectRatioManager.croppedScreenHeight / Screen.height * canvasHeight;
+
+        float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom);
+        float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling);
+
+        float ScreenYBottom = bottomPixel * canvasHeight / Screen.height;
         //Debug.Log(ScreenYBottom);
-        //Debug.Log(ScreenYCeiling);
+        float ScreenYCeiling = topPixel * canvasHeight / Screen.height;
 
+        float scaledY = (croppedcanvasHeight / 2) - ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom);
         float scaledX = position.x / ChartParams.XaxisMax * screenXRange / 2;
-        //Debug.Log(scaledX);
-        float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
-
 
         return new Vector2(scaledX, scaledY);
     }
 
-    //JudgeLine的X轴坐标一直为0，简化计算
-    //JudgeLine的Y轴坐标需要额外修正；JudgePlane的Y轴坐标线性变化时，其实对应JudgeLine的Y轴坐标不是线性变化，需要修正（注意摄像机有一定倾角）
+    // JudgeLine的X轴坐标一直为0，简化计算
+    // JudgeLine的Y轴坐标需要额外修正；JudgePlane的Y轴坐标线性变化时，其实对应JudgeLine的Y轴坐标不是线性变化，需要修正（注意摄像机有一定倾角）
     public static Vector2 ScalePositionToScreenJudgeLine(Vector2 position, RectTransform canvas)
     {
-        //注意这里获取的是画布的长宽，而不是屏幕的长宽
-        float screenHeight = canvas.sizeDelta.y;
+        float canvasHeight = canvas.sizeDelta.y;
+        float croppedcanvasHeight = AspectRatioManager.croppedScreenHeight / Screen.height * canvasHeight;
 
-        Vector3 worldYBottom = new Vector3(0, 0, 0);
-        Vector3 worldYCeiling = new Vector3(0, HeightParams.HeightDefault, 0);
-        //Vector3 worldY = new Vector3(0, HeightParams.HeightDefault * (position.y / ChartParams.YaxisMax), 0);
-        //Debug.Log(worldY.y);
+        float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom);
+        float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling);
 
-
-        //这里的计算逻辑我没想明白，但是最终计算结果是正确的，后续需要再检查
-        float ScreenYBottom = CalculateYAxisPixel(worldYBottom) * screenHeight / Screen.height;
-        float ScreenYCeiling = CalculateYAxisPixel(worldYCeiling) * screenHeight / Screen.height;
-        //float ScreenY = CalculateYAxisPixel(worldY) * screenHeight / Screen.height;
-
+        float ScreenYBottom = bottomPixel * canvasHeight / Screen.height;
         //Debug.Log(ScreenYBottom);
-        //Debug.Log(ScreenYCeiling);
-        //Debug.Log(ScreenY);
+        float ScreenYCeiling = topPixel * canvasHeight / Screen.height;
 
-
-        float scaledY = ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom) - (screenHeight / 2);
-        //float scaledY = ScreenY - (screenHeight / 2);
-
+        float scaledY = (croppedcanvasHeight / 2) - ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom);
         return new Vector2(0, scaledY);
     }
 
     public static float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition, float targetHorizontalMargin)
     {
+        //AspectRatioManager aspectRatioManager = GetComponent<AspectRatioManager>();
         // 获取屏幕宽度
-        float screenWidth = Screen.width;
+        float screenWidth = AspectRatioManager.croppedScreenWidth;
 
         // 计算水平可视范围（考虑边距后的有效宽度）
         float horizontalVisibleRange = screenWidth * (1 - 2 * targetHorizontalMargin);
@@ -842,22 +832,60 @@ public class Utility : MonoBehaviour
         return rightMiddlePos;
     }
 
+    //public static float TransformYCoordinate(float startY)
+    //{
+    //    Camera mainCamera = Camera.main;
+
+    //    // 获取世界坐标 (0, 0, 0) 和 (0, HeightParams.HeightDefault, 0) 在摄像机屏幕中的坐标
+    //    Vector3 screenPoint0 = mainCamera.WorldToScreenPoint(new Vector3(0, 0, 0));
+    //    Vector3 screenPoint1 = mainCamera.WorldToScreenPoint(new Vector3(0, HeightParams.HeightDefault, 0));
+
+    //    // 计算 startY 对应的屏幕坐标，即使 startY 超出 [0, 1] 范围也能正确计算
+    //    Vector3 tempScreenPoint = screenPoint0 + startY * (screenPoint1 - screenPoint0);
+
+    //    // 将临时屏幕点转换回世界坐标
+    //    Vector3 worldPoint = mainCamera.ScreenToWorldPoint(tempScreenPoint);
+
+    //    // 返回世界坐标中的 Y 值
+    //    return worldPoint.y;
+    //}
+
     public static float TransformYCoordinate(float startY)
     {
         Camera mainCamera = Camera.main;
 
-        // 获取世界坐标 (0, 0, 0) 和 (0, HeightParams.HeightDefault, 0) 在摄像机屏幕中的坐标
-        Vector3 screenPoint0 = mainCamera.WorldToScreenPoint(new Vector3(0, 0, 0));
-        Vector3 screenPoint1 = mainCamera.WorldToScreenPoint(new Vector3(0, HeightParams.HeightDefault, 0));
+        // 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
+        float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
+        float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
 
-        // 计算 startY 对应的屏幕坐标，即使 startY 超出 [0, 1] 范围也能正确计算
-        Vector3 tempScreenPoint = screenPoint0 + startY * (screenPoint1 - screenPoint0);
+        // 计算 startY 对应的屏幕像素坐标
+        float screenPixelY = bottomPixel + startY * (topPixel - bottomPixel);
 
-        // 将临时屏幕点转换回世界坐标
-        Vector3 worldPoint = mainCamera.ScreenToWorldPoint(tempScreenPoint);
+        // 手动指定 z 轴的值为一个较大的值
+        Vector3 screenPoint = new Vector3(Screen.width / 2, Screen.height - screenPixelY, 100);
+        //Debug.Log(screenPoint);
 
-        // 返回世界坐标中的 Y 值
-        return worldPoint.y;
+        // 通过 ScreenToWorldPoint 得到射线上的一个点
+        Vector3 worldPoint = mainCamera.ScreenToWorldPoint(screenPoint);
+        //Debug.Log(worldPoint);
+
+        // 计算射线
+        Ray ray = new Ray(mainCamera.transform.position, (worldPoint - mainCamera.transform.position).normalized);
+
+        // 计算射线与 z = 0 平面的交点
+        Plane zZeroPlane = new Plane(Vector3.forward, Vector3.zero);
+        float distance;
+        if (zZeroPlane.Raycast(ray, out distance))
+        {
+            Vector3 intersectionPoint = ray.GetPoint(distance);
+            //Debug.Log(intersectionPoint);
+            return intersectionPoint.y;
+        }
+        else
+        {
+            Debug.LogError("射线未与 z = 0 平面相交");
+            return 0f;
+        }
     }
 
     public static Color HexToColor(string hex)

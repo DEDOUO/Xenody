@@ -30,6 +30,7 @@ public class MusicAndChartLoader : MonoBehaviour
         {
             Debug.Log("歌曲路径缺失，加载默认曲");
             SongAndChartData.SetSelectedSong("Accelerate");
+            musicPath = SongAndChartData.GetMusicFilePath();
         }
         if (!File.Exists(musicPath))
         {

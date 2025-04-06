@@ -77,6 +77,23 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     }
 
     // 根据当前时间更新判定面的整体Y轴坐标，使其各子判定面按设定的函数变化
+    //public float GetPlaneYAxis(float currentTime)
+    //{
+    //    //float minY = 0f;
+    //    //float maxY = HeightParams.HeightDefault;
+    //    foreach (SubJudgePlane subPlane in subJudgePlaneList)
+    //    {
+    //        if (currentTime >= subPlane.startT && currentTime <= subPlane.endT)
+    //        {
+    //            // 根据Y轴变化函数类型计算当前子判定面的Y轴坐标范围
+    //            float YAxisCoordinate = CalculateYAxisPosition(currentTime, subPlane.startT, subPlane.startY, subPlane.endT, subPlane.endY, subPlane.yAxisFunction);
+    //            YAxisCoordinate *= HeightParams.HeightDefault;
+    //            return YAxisCoordinate;
+    //        }
+    //    }
+    //    return 0f;
+    //}
+
     public float GetPlaneYAxis(float currentTime)
     {
         //float minY = 0f;
@@ -87,12 +104,12 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
             {
                 // 根据Y轴变化函数类型计算当前子判定面的Y轴坐标范围
                 float YAxisCoordinate = CalculateYAxisPosition(currentTime, subPlane.startT, subPlane.startY, subPlane.endT, subPlane.endY, subPlane.yAxisFunction);
-                YAxisCoordinate *= HeightParams.HeightDefault;
                 return YAxisCoordinate;
             }
         }
         return 0f;
     }
+
 
     // 计算指定子判定面在给定时间下根据不同函数类型的Y轴当前位置
     public static float CalculateYAxisPosition(float currentTime, float startTime, float startVal, float endTime, float endVal, TransFunctionType functionType)
@@ -151,7 +168,7 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     {
 
         // 计算透明度差值，根据给定的对应关系计算斜率
-        float alphaDelta = (AlphaParams.JudgePlaneAlphaMin - AlphaParams.JudgePlaneAlphaMax) / HeightParams.HeightDefault;
+        float alphaDelta = (AlphaParams.JudgePlaneAlphaMin - AlphaParams.JudgePlaneAlphaMax);
         //Debug.Log(alphaDelta);
         // 根据线性关系计算当前透明度值，确保透明度范围在0到1之间
         float currentAlpha = Mathf.Clamp(AlphaParams.JudgePlaneAlphaMax + alphaDelta * yAxisValue, 0, 1);

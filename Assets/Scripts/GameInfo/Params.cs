@@ -7,6 +7,13 @@
 namespace Params
 {
     // 将类名修改为更符合规范的单数形式，同时设置为静态类，方便直接访问其属性，无需实例化
+
+    public static class AspectRatioParams
+    {
+        // 谱面长宽比参数（应该不用动吧……）
+        public static float AspectRatioDefault = 16f / 9f;
+    }
+
     public static class ChartParams
     {
         // 谱面参数
@@ -36,6 +43,7 @@ namespace Params
         // 1秒钟Note在世界坐标前进的距离（Z轴）
         public static float NoteSpeedDefault = 80f;
     }
+
     public static class OutlineParams
     {
         // 描边参数
@@ -43,15 +51,22 @@ namespace Params
         public static float HoldOutlineDefault = 0.25f;
     }
 
-    public static class HeightParams
-    {
-        // 天线在世界中的实际高度（Y轴）
-        public static float HeightDefault = 4.5f;
-    }
+    //public static class HeightParams
+    //{
+    //    // 天线在世界中的实际高度（Y轴）
+    //    public static float HeightDefault = 4.5f;
+    //}
+
     public static class HorizontalParams
     {
-        // 判定区大小参数，距离屏幕边缘的水平边距
+        // 判定区大小参数，谱面左右距离判定区（固定为16:9）左/右边缘的水平边距
         public static float HorizontalMargin = 0.1f;
+
+        // 判定区大小参数，谱面下方距离判定区（固定为16:9）下边缘的垂直边距
+        public static float VerticalMarginBottom = 0.08f;
+        // 判定区大小参数，谱面上方（Y轴谱面坐标=1）距离判定区（固定为16:9）下边缘的垂直边距
+        public static float VerticalMarginCeiling = 0.45f;
+
         // 判定区大小参数，加上两侧亮条后，距离屏幕边缘的水平边距（两侧各留1%亮条宽度，也就是8%）
         public static float PlusHorizontalMargin = 0.08f;
     }
