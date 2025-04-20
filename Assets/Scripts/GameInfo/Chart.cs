@@ -87,7 +87,8 @@ public class Chart
                 newHold.holdId = (int)holdData.holdId;
                 foreach (var subHold in holdData.subHoldList)
                 {
-                    newHold.AddSubHold((float)subHold.startT, (float)subHold.startXMin, (float)subHold.startXMax, (float)subHold.endT, (float)subHold.endXMin, (float)subHold.endXMax, (Utility.TransFunctionType)subHold.XLeftFunction, (Utility.TransFunctionType)subHold.XRightFunction);
+                    newHold.AddSubHold((float)subHold.startT, (float)subHold.startXMin, (float)subHold.startXMax, (float)subHold.endT, (float)subHold.endXMin, 
+                        (float)subHold.endXMax, (Utility.TransFunctionType)subHold.XLeftFunction, (Utility.TransFunctionType)subHold.XRightFunction, (int)subHold.Jagnum);
                 }
                 chart.holds.Add(newHold);
             }

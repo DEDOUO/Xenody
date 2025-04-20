@@ -36,9 +36,11 @@ namespace Note
             public Utility.TransFunctionType XLeftFunction;
             [JsonProperty("RFunc")]
             public Utility.TransFunctionType XRightFunction;
+            [JsonProperty("Jagnum")]
+            public int Jagnum;
 
             public SubHold(float startTime, float startXMinVal, float startXMaxVal, float endTime, float endXMinVal,
-                           float endXMaxVal, Utility.TransFunctionType XLeftFunc, Utility.TransFunctionType XRightFunc)
+                           float endXMaxVal, Utility.TransFunctionType XLeftFunc, Utility.TransFunctionType XRightFunc, int jagnum)
             {
                 startT = startTime;
                 startXMin = startXMinVal;
@@ -48,6 +50,7 @@ namespace Note
                 endXMax = endXMaxVal;
                 XLeftFunction = XLeftFunc;
                 XRightFunction = XRightFunc;
+                Jagnum = jagnum;
             }
             public bool IsInXAxisRange()
             {
@@ -59,7 +62,7 @@ namespace Note
 
         // 方法用于向子Hold参数列表中添加子Hold的参数，并检查添加是否合法
         public void AddSubHold(float startTime, float startXMin, float startXMax, float endTime, float endXMin,
-                               float endXMax, Utility.TransFunctionType startXFunction, Utility.TransFunctionType endXFunction)
+                               float endXMax, Utility.TransFunctionType startXFunction, Utility.TransFunctionType endXFunction, int jagnum)
         {
             if (subHoldList.Count > 0)
             {
@@ -75,7 +78,7 @@ namespace Note
                     return;
                 }
             }
-            subHoldList.Add(new SubHold(startTime, startXMin, startXMax, endTime, endXMin, endXMax, startXFunction, endXFunction));
+            subHoldList.Add(new SubHold(startTime, startXMin, startXMax, endTime, endXMin, endXMax, startXFunction, endXFunction, jagnum));
         }
 
         // 获取子Hold列表，方便外部访问（例如序列化时需要）

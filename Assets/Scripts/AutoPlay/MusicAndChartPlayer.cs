@@ -61,7 +61,8 @@ public class MusicAndChartPlayer : MonoBehaviour
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
     private float totalTime;
-    private float AnimationScaleAdjust = 772f / 165f;  // 播放动画时x轴缩放调整
+    //private float AnimationScaleAdjust = 772f / 165f;  // 播放动画时x轴缩放调整
+    private float AnimationScaleAdjust = 0.8f;  // 播放动画时x轴缩放调整
     private float HoldAnimationScaleAdjust = 0.7f;  // 播放Hold动画时x轴缩放调整
 
     // 内部类，用于存储键的相关信息以及判定状态
@@ -723,8 +724,136 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
+    //private void UpdateNotesPosition(float zAxisDecreasePerFrame)
+    //{
+    //    // 处理 Taps 键
+    //    if (TapsParent != null)
+    //    {
+    //        for (int i = 0; i < TapsParent.transform.childCount; i++)
+    //        {
+    //            Transform childTransform = TapsParent.transform.GetChild(i);
+    //            GameObject keyGameObject = childTransform.gameObject;
+    //            string instanceName = keyGameObject.name;
+    //            KeyInfo keyInfo = keyReachedJudgment[instanceName];
+    //            if (!keyInfo.isJudged)
+    //            {
+    //                Vector3 currentPosition = childTransform.position;
+    //                currentPosition.z += zAxisDecreasePerFrame;
+    //                childTransform.position = currentPosition;
+
+    //                // 根据 z 轴坐标设置透明度
+    //                SetNoteAlpha(keyGameObject, currentPosition.z);
+    //            }
+    //        }
+    //    }
+
+    //    // 处理 Slides 键
+    //    if (SlidesParent != null)
+    //    {
+    //        for (int i = 0; i < SlidesParent.transform.childCount; i++)
+    //        {
+    //            Transform childTransform = SlidesParent.transform.GetChild(i);
+    //            GameObject keyGameObject = childTransform.gameObject;
+    //            string instanceName = keyGameObject.name;
+    //            KeyInfo keyInfo = keyReachedJudgment[instanceName];
+    //            if (!keyInfo.isJudged)
+    //            {
+    //                Vector3 currentPosition = childTransform.position;
+    //                currentPosition.z += zAxisDecreasePerFrame;
+    //                childTransform.position = currentPosition;
+
+    //                // 根据 z 轴坐标设置透明度
+    //                SetNoteAlpha(keyGameObject, currentPosition.z);
+    //            }
+    //        }
+    //    }
+
+    //    // 处理 Flicks 键
+    //    if (FlicksParent != null)
+    //    {
+    //        for (int i = 0; i < FlicksParent.transform.childCount; i++)
+    //        {
+    //            Transform childTransform = FlicksParent.transform.GetChild(i);
+    //            GameObject keyGameObject = childTransform.gameObject;
+    //            string instanceName = keyGameObject.name;
+    //            KeyInfo keyInfo = keyReachedJudgment[instanceName];
+    //            if (!keyInfo.isJudged)
+    //            {
+    //                Vector3 currentPosition = childTransform.position;
+    //                currentPosition.z += zAxisDecreasePerFrame;
+    //                childTransform.position = currentPosition;
+
+    //                //根据 z 轴坐标设置透明度
+    //                SetNoteAlpha(keyGameObject, currentPosition.z);
+    //            }
+    //        }
+    //    }
+
+    //    // 处理 FlickArrows 键
+    //    if (FlickArrowsParent != null)
+    //    {
+    //        for (int i = 0; i < FlickArrowsParent.transform.childCount; i++)
+    //        {
+    //            Transform childTransform = FlickArrowsParent.transform.GetChild(i);
+    //            GameObject keyGameObject = childTransform.gameObject;
+    //            string instanceName = keyGameObject.name;
+    //            Vector3 currentPosition = childTransform.position;
+    //            currentPosition.z += zAxisDecreasePerFrame;
+    //            childTransform.position = currentPosition;
+
+    //            //根据 z 轴坐标设置透明度
+    //            SetNoteAlpha(keyGameObject, currentPosition.z);
+    //        }
+    //    }
+
+    //    // 处理 Hold 键
+    //    if (HoldsParent != null)
+    //    {
+    //        for (int i = 0; i < HoldsParent.transform.childCount; i++)
+    //        {
+    //            Transform childTransform = HoldsParent.transform.GetChild(i);
+    //            GameObject holdGameObject = childTransform.gameObject;
+    //            string instanceName = holdGameObject.name;
+    //            // 如果是 HoldHitEffect 物体，则跳过
+    //            if (!instanceName.StartsWith("HoldHitEffect"))
+    //            {
+    //                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+
+    //                // Hold 无论是否判定，位置都要更新
+    //                Vector3 currentPosition = childTransform.position;
+    //                currentPosition.z += zAxisDecreasePerFrame;
+    //                childTransform.position = currentPosition;
+
+    //                //根据 z 轴坐标设置透明度
+    //                SetNoteAlpha(holdGameObject, currentPosition.z);
+    //            }
+    //        }
+    //    }
+
+    //    // 处理 StarHead 键
+    //    if (StarsParent != null)
+    //    {
+    //        for (int i = 0; i < StarsParent.transform.childCount; i++)
+    //        {
+    //            Transform childTransform = StarsParent.transform.GetChild(i);
+    //            GameObject starHeadGameObject = childTransform.gameObject;
+    //            string instanceName = starHeadGameObject.name;
+    //            KeyInfo keyInfo = keyReachedJudgment[instanceName];
+    //            if (instanceName.StartsWith("StarHead") && !keyInfo.isJudged)
+    //            {
+    //                Vector3 currentPosition = childTransform.position;
+    //                currentPosition.z += zAxisDecreasePerFrame;
+    //                childTransform.position = currentPosition;
+
+    //                //根据 z 轴坐标设置透明度
+    //                SetNoteAlpha(starHeadGameObject, currentPosition.z);
+    //            }
+    //        }
+    //    }
+    //}
     private void UpdateNotesPosition(float zAxisDecreasePerFrame)
     {
+        // 处理 Taps 键
         if (TapsParent != null)
         {
             for (int i = 0; i < TapsParent.transform.childCount; i++)
@@ -732,17 +861,25 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Transform childTransform = TapsParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
                 string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect"))
+                {
+                    continue;
+                }
                 KeyInfo keyInfo = keyReachedJudgment[instanceName];
                 if (!keyInfo.isJudged)
                 {
                     Vector3 currentPosition = childTransform.position;
                     currentPosition.z += zAxisDecreasePerFrame;
                     childTransform.position = currentPosition;
+
+                    // 根据 z 轴坐标设置透明度
+                    SetNoteAlpha(keyGameObject, currentPosition.z);
                 }
-                //if (i == 0) { Debug.Log(childTransform.position.z); }
             }
         }
 
+        // 处理 Slides 键
         if (SlidesParent != null)
         {
             for (int i = 0; i < SlidesParent.transform.childCount; i++)
@@ -750,16 +887,25 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Transform childTransform = SlidesParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
                 string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect"))
+                {
+                    continue;
+                }
                 KeyInfo keyInfo = keyReachedJudgment[instanceName];
                 if (!keyInfo.isJudged)
                 {
                     Vector3 currentPosition = childTransform.position;
                     currentPosition.z += zAxisDecreasePerFrame;
                     childTransform.position = currentPosition;
+
+                    // 根据 z 轴坐标设置透明度
+                    SetNoteAlpha(keyGameObject, currentPosition.z);
                 }
             }
         }
 
+        // 处理 Flicks 键
         if (FlicksParent != null)
         {
             for (int i = 0; i < FlicksParent.transform.childCount; i++)
@@ -767,17 +913,25 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Transform childTransform = FlicksParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
                 string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect"))
+                {
+                    continue;
+                }
                 KeyInfo keyInfo = keyReachedJudgment[instanceName];
                 if (!keyInfo.isJudged)
                 {
                     Vector3 currentPosition = childTransform.position;
                     currentPosition.z += zAxisDecreasePerFrame;
                     childTransform.position = currentPosition;
+
+                    //根据 z 轴坐标设置透明度
+                    SetNoteAlpha(keyGameObject, currentPosition.z);
                 }
             }
         }
 
-
+        // 处理 FlickArrows 键
         if (FlickArrowsParent != null)
         {
             for (int i = 0; i < FlickArrowsParent.transform.childCount; i++)
@@ -785,17 +939,21 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Transform childTransform = FlickArrowsParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
                 string instanceName = keyGameObject.name;
-                //KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                //if (!keyInfo.isJudged)
-                //{
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect"))
+                {
+                    continue;
+                }
                 Vector3 currentPosition = childTransform.position;
                 currentPosition.z += zAxisDecreasePerFrame;
                 childTransform.position = currentPosition;
-                //}
+
+                //根据 z 轴坐标设置透明度
+                SetNoteAlpha(keyGameObject, currentPosition.z);
             }
         }
 
-        // 针对Hold键进行额外的位置或属性更新
+        // 处理 Hold 键
         if (HoldsParent != null)
         {
             for (int i = 0; i < HoldsParent.transform.childCount; i++)
@@ -803,20 +961,24 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Transform childTransform = HoldsParent.transform.GetChild(i);
                 GameObject holdGameObject = childTransform.gameObject;
                 string instanceName = holdGameObject.name;
-                //如果是HoldHitEffect物体，则跳过
-                if (!instanceName.StartsWith("HoldHitEffect"))
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect"))
                 {
-                    KeyInfo keyInfo = keyReachedJudgment[instanceName];
-
-                    //注意Hold无论是否判定，位置都要更新
-                    Vector3 currentPosition = childTransform.position;
-                    currentPosition.z += zAxisDecreasePerFrame;
-                    childTransform.position = currentPosition;
-
+                    continue;
                 }
+                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+
+                // Hold 无论是否判定，位置都要更新
+                Vector3 currentPosition = childTransform.position;
+                currentPosition.z += zAxisDecreasePerFrame;
+                childTransform.position = currentPosition;
+
+                //根据 z 轴坐标设置透明度
+                SetNoteAlpha(holdGameObject, currentPosition.z);
             }
         }
-        // 针对StarHead键进行位置更新
+
+        // 处理 StarHead 键
         if (StarsParent != null)
         {
             for (int i = 0; i < StarsParent.transform.childCount; i++)
@@ -824,15 +986,53 @@ public class MusicAndChartPlayer : MonoBehaviour
                 Transform childTransform = StarsParent.transform.GetChild(i);
                 GameObject starHeadGameObject = childTransform.gameObject;
                 string instanceName = starHeadGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect"))
+                {
+                    continue;
+                }
                 KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                //如果是HoldHitEffect物体，则跳过
                 if (instanceName.StartsWith("StarHead") && !keyInfo.isJudged)
                 {
                     Vector3 currentPosition = childTransform.position;
                     currentPosition.z += zAxisDecreasePerFrame;
                     childTransform.position = currentPosition;
+
+                    //根据 z 轴坐标设置透明度
+                    SetNoteAlpha(starHeadGameObject, currentPosition.z);
                 }
             }
+        }
+    }
+
+    // 根据 z 轴坐标设置 Note 的透明度
+    private void SetNoteAlpha(GameObject noteObject, float zPosition)
+    {
+        SpriteRenderer spriteRenderer = noteObject.GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            Color currentColor = spriteRenderer.color;
+            float alphaValue;
+            if (zPosition < ChartParams.NoteZAxisAppearPos)
+            {
+                // 完全透明
+                alphaValue = 0f;
+            }
+            else if (zPosition < ChartParams.NoteZAxisOpaquePos)
+            {
+                // 从透明线性地变为不透明
+                float t = (zPosition - ChartParams.NoteZAxisAppearPos) / (ChartParams.NoteZAxisOpaquePos - ChartParams.NoteZAxisAppearPos);
+                alphaValue = t;
+                // 打印物体名称和对应的透明度
+                //Debug.Log($"物体名称: {noteObject.name}, 透明度: {alphaValue}");
+            }
+            else
+            {
+                // 完全不透明
+                alphaValue = 1f;
+            }
+            currentColor.a = alphaValue;
+            spriteRenderer.color = currentColor;
         }
     }
 
@@ -842,31 +1042,64 @@ public class MusicAndChartPlayer : MonoBehaviour
         GameObject keyGameObject = GameObject.Find(instanceName);
         if (keyGameObject != null)
         {
-            //先修改物体z轴位置为0（保证判定特效在判定线上）
-            Vector3 pos = keyGameObject.transform.position;
-            pos.z = 0;
-            keyGameObject.transform.position = pos;
+            // 复制原物体的坐标和缩放，将z轴坐标改为0
+            Vector3 position = keyGameObject.transform.position;
+            position.z = 0;
+            Vector3 scale = keyGameObject.transform.localScale;
 
-            Animator animator = keyGameObject.GetComponent<Animator>();
+            // 获取原物体的父物体和图层
+            Transform parent = keyGameObject.transform.parent;
+            int layer = keyGameObject.layer;
+
+            // 提取原物体名称中的数字部分
+            string numberPart = "";
+            int startIndex = 0;
+            for (int i = 0; i < instanceName.Length; i++)
+            {
+                if (char.IsDigit(instanceName[i]))
+                {
+                    startIndex = i;
+                    numberPart = instanceName.Substring(startIndex);
+                    break;
+                }
+            }
+            string baseName = instanceName.Substring(0, startIndex);
+
+            // 创建一个新的挂载SpriteRenderer的游戏物体
+            string newName = baseName + "HitEffect" + numberPart;
+            GameObject newGameObject = new GameObject(newName);
+            SpriteRenderer spriteRenderer = newGameObject.AddComponent<SpriteRenderer>();
+
+            // 设置新物体的父物体、位置、缩放和图层
+            newGameObject.transform.SetParent(parent);
+            newGameObject.transform.position = position;
+            newGameObject.transform.localScale = scale;
+            newGameObject.layer = layer;
+
+            // 设为非激活状态
+            keyGameObject.SetActive(false);
+
+            Animator animator = newGameObject.GetComponent<Animator>();
             if (animator == null)
             {
-                animator = keyGameObject.AddComponent<Animator>();
+                animator = newGameObject.AddComponent<Animator>();
             }
 
-            //HoldHitEffect不需要调整大小
+            // HoldHitEffect不需要调整大小
             if (!instanceName.StartsWith("HoldHitEffect"))
             {
-                //临时调整一下动画效果的缩放，用以跟Note大小匹配
-                Vector3 currentScale = keyGameObject.transform.localScale;
+                // 临时调整一下动画效果的缩放，用以跟Note大小匹配
+                Vector3 currentScale = newGameObject.transform.localScale;
                 currentScale.x *= AnimationScaleAdjust;
-                keyGameObject.transform.localScale = currentScale;
+                currentScale.y = 1; // 将y轴缩放固定为1
+                newGameObject.transform.localScale = currentScale;
             }
 
             // 判断是否是Flick类型的键，如果是则先删除其所有子物体（如FlickArrow）
             if (instanceName.StartsWith("Flick"))
             {
-                string numberPart = instanceName.Substring(5);
-                if (int.TryParse(numberPart, out int flickIndex))
+                string flickNumberPart = instanceName.Substring(5);
+                if (int.TryParse(flickNumberPart, out int flickIndex))
                 {
                     GameObject gameobject = GameObject.Find($"FlickArrow{flickIndex}");
                     if (gameobject != null)
@@ -874,18 +1107,12 @@ public class MusicAndChartPlayer : MonoBehaviour
                         gameobject.SetActive(false);
                     }
                 }
-                //// 获取Flick物体下的所有子物体并删除
-                //for (int i = keyGameObject.transform.childCount - 1; i >= 0; i--)
-                //{
-                //    Transform childTransform = keyGameObject.transform.GetChild(i);
-                //    childTransform.gameObject.SetActive(false);
-                //}
             }
-            //如果是Hold类型的键，则删除对应的Hold物体
+            // 如果是Hold类型的键，则删除对应的Hold物体
             if (instanceName.StartsWith("HoldHitEffect"))
             {
-                string numberPart = instanceName.Substring(13);
-                if (int.TryParse(numberPart, out int holdIndex))
+                string holdNumberPart = instanceName.Substring(13);
+                if (int.TryParse(holdNumberPart, out int holdIndex))
                 {
                     GameObject gameobject = GameObject.Find($"Hold{holdIndex}");
                     if (gameobject != null)
@@ -896,34 +1123,13 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
 
             // 在播放动画前将物体的Shader替换为Sprites/Default
-            Renderer renderer = keyGameObject.GetComponent<Renderer>();
-            if (renderer != null)
+            if (spriteRenderer != null)
             {
-                renderer.material.shader = Shader.Find("Sprites/Default");
+                spriteRenderer.material.shader = Shader.Find("Sprites/Default");
             }
 
             // 根据不同的动画名称加载对应的动画控制器（这里假设路径和名称是固定的，需按实际调整）
-            RuntimeAnimatorController controller = null;
-            if (animationName == "TapHitEffect")
-            {
-                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-            }
-            else if (animationName == "SlideEffect")
-            {
-                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-            }
-            else if (animationName == "FlickEffect")
-            {
-                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-            }
-            else if (animationName == "HoldEffect") // Hold开始动画控制器加载
-            {
-                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-            }
-            else if (animationName == "StarHeadEffect") // Hold开始动画控制器加载
-            {
-                controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
-            }
+            RuntimeAnimatorController controller = Resources.Load<RuntimeAnimatorController>("Animations/TapHitEffectController");
 
             if (controller == null)
             {
@@ -934,7 +1140,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             // 正常播放动画
             animator.Play("TapHitEffect");
             // 检查动画是否播放完毕
-            StartCoroutine(CheckAnimationEnd(animator, keyGameObject));
+            StartCoroutine(CheckAnimationEnd(animator, newGameObject));
         }
     }
 
@@ -1208,7 +1414,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
                                 // 提前更新Flick位置（AdjustFlickArrowPosition需要用到正确的位置）
                                 currentPos = NoteInstance.transform.position;
-                                currentPos.z = CalculateZAxisPosition(startT - currentTime);
+                                currentPos.z = CalculateZAxisPosition(startT - currentTime) + ChartParams.NoteZAxisOffset;
                                 NoteInstance.transform.position = currentPos;
 
                                 // 针对横划键，需要额外调整位置
@@ -1246,7 +1452,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     }
                     // 更新Note位置
                     Vector3 currentPosition = NoteInstance.transform.position;
-                    currentPosition.z = CalculateZAxisPosition(startT - currentTime);
+                    currentPosition.z = CalculateZAxisPosition(startT - currentTime) + ChartParams.NoteZAxisOffset;
                     NoteInstance.transform.position = currentPosition;
                 }
 

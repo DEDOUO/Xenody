@@ -22,7 +22,6 @@ public class MusicAndChartLoader : MonoBehaviour
 
     public async Task LoadMusicAndChartAsync()
     {
-        
         musicPath = SongAndChartData.GetMusicFilePath();
 
         // 判断如果没有获取到路径（即直接加载 AutoPlay 场景时），默认按照第一首歌曲加载
@@ -40,13 +39,18 @@ public class MusicAndChartLoader : MonoBehaviour
 
         chartPath = SongAndChartData.GetChartFilePath();
 
-        // 检查Chart.json是否存在，若不存在尝试查找并转换Chart.xlsx
-        if (!File.Exists(chartPath))
+        // 检查Chart.xlsx是否存在，若存在尝试将其转换为Chart.json（如果已有Chart.json，就覆盖原来的）
+        string excelPath = SongAndChartData.GetExcelFilePath();
+        if (File.Exists(excelPath))
         {
-            Dictionary<string, object> chartData = SongAndChartData.GetChartData();
-            if (chartData == null)
+            SongAndChartData.ConvertExcelToJson();
+        }
+        else
+        {
+            // 若Chart.xlsx不存在，检查Chart.json是否存在
+            if (!File.Exists(chartPath))
             {
-                Debug.LogError($"未能成功生成或读取 Chart.json 文件，路径：{chartPath}");
+                Debug.LogError("谱面文件不存在！");
                 return;
             }
         }

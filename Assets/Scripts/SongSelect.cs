@@ -22,6 +22,7 @@ public class SongSelect : MonoBehaviour
     // 填充歌曲列表，创建按钮并添加点击事件监听
     private void PopulateSongList()
     {
+        Debug.Log($"获取歌曲列表...");
         // 设置按钮的初始垂直位置偏移量，用于控制按钮在滚动视图中的排列位置
         float horizontalOffset = 40f;
         float verticalOffset = 40f;
@@ -40,6 +41,7 @@ public class SongSelect : MonoBehaviour
             string[] songFolderNames = Directory.GetDirectories(songsFolderPath);
             foreach (string songFolder in songFolderNames)
             {
+                //Debug.Log(songFolder);
                 // 提取歌曲文件夹名作为歌曲名，这里假设歌曲文件夹名就是歌曲名，可根据实际情况调整提取逻辑
                 string songName = Path.GetFileName(songFolder);
                 songList.Add(songName);
@@ -70,9 +72,11 @@ public class SongSelect : MonoBehaviour
                 if (textComponent == null)
                 {
                     textComponent = textObj.AddComponent<TextMeshProUGUI>();
-                    textComponent.alignment = TextAlignmentOptions.Midline; // 设置文本对齐方式，与之前Text组件略有不同
                 }
                 textComponent.text = songName;
+
+                // 设置文字居中对齐
+                textComponent.alignment = TextAlignmentOptions.Center;
 
                 // 设置按钮的样式相关属性（颜色、过渡效果等，和之前类似）
                 button.targetGraphic = textComponent;
@@ -105,15 +109,27 @@ public class SongSelect : MonoBehaviour
                 buttonObj.transform.localScale = Vector3.one;
 
                 // 获取按钮的RectTransform组件，用于设置布局相关属性
-                RectTransform rectTransform = buttonObj.GetComponent<RectTransform>();
+                RectTransform buttonRectTransform = buttonObj.GetComponent<RectTransform>();
                 // 设置按钮的锚点，均对齐左上角
-                rectTransform.anchorMin = new Vector2(0f, 1f);
-                rectTransform.anchorMax = new Vector2(0f, 1f);
-                rectTransform.pivot = new Vector2(0f, 1f);
+                buttonRectTransform.anchorMin = new Vector2(0f, 1f);
+                buttonRectTransform.anchorMax = new Vector2(0f, 1f);
+                buttonRectTransform.pivot = new Vector2(0f, 1f);
                 // 设置按钮在垂直方向上的位置，基于之前的偏移量和间距来排列
-                rectTransform.anchoredPosition = new Vector2(horizontalOffset, -verticalOffset);
+                // 这里添加了对z轴坐标的设置，将其设为0
+                buttonRectTransform.anchoredPosition3D = new Vector3(horizontalOffset, -verticalOffset, 0f);
                 // 设置按钮的初始大小
-                rectTransform.sizeDelta = new Vector2(buttonWidth, buttonHeight);
+                buttonRectTransform.sizeDelta = new Vector2(buttonWidth, buttonHeight);
+
+                // 获取文本对象的RectTransform组件
+                RectTransform textRectTransform = textObj.GetComponent<RectTransform>();
+                // 设置文本对象的锚点、枢轴与按钮一致
+                textRectTransform.anchorMin = new Vector2(0f, 0f);
+                textRectTransform.anchorMax = new Vector2(1f, 1f);
+                textRectTransform.pivot = new Vector2(0.5f, 0.5f);
+                // 设置文本对象的位置和大小与按钮一致
+                textRectTransform.offsetMin = Vector2.zero;
+                textRectTransform.offsetMax = Vector2.zero;
+
                 // 更新垂直偏移量，为下一个按钮的位置做准备
                 verticalOffset += buttonHeight + spacing;
             }
@@ -122,6 +138,5 @@ public class SongSelect : MonoBehaviour
         {
             Debug.LogError("Songs文件夹不存在，请检查路径是否正确！");
         }
-
     }
 }

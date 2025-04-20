@@ -35,6 +35,16 @@ namespace Params
 
         // 所有Note默认厚度缩放比例
         public static float ZAxisRate = 0.6f;
+        public static float NoteThickness = 0.3f;
+
+        // 所有Note默认开始出现Z轴坐标
+        public static float NoteZAxisAppearPos = -100f;
+
+        // 所有Note默认完全变为不透明Z轴坐标
+        public static float NoteZAxisOpaquePos = -50f;
+
+        // 所有3DNote默认Z轴偏移坐标（为NoteZ轴宽度的一半）
+        public static float NoteZAxisOffset = -0.55f;
     }
 
     public static class SpeedParams

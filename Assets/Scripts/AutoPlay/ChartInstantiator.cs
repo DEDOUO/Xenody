@@ -312,23 +312,23 @@ public class ChartInstantiator : MonoBehaviour
     {
         if (chart != null && chart.taps != null)
         {
-            // 假设Tap预制体的加载路径，你需要根据实际情况修改
-            GameObject tapPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Tap");
-            GameObject tapOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/TapOutline");
+            // 假设Tap3D预制体的加载路径，你需要根据实际情况修改
+            GameObject tapPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Tap3D");
+            GameObject tapOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Tap3DOutline");
 
             if (tapPrefab != null && tapOutlinePrefab != null)
             {
                 float tapXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
-                SpriteRenderer spriteRenderer = tapPrefab.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null)
+                MeshFilter meshFilter = tapPrefab.GetComponent<MeshFilter>();
+                if (meshFilter != null)
                 {
-                    //获取Tap在X轴的长度（用于缩放）
-                    tapXAxisLength = spriteRenderer.sprite.bounds.size.x;
+                    // 获取Tap在X轴的长度（用于缩放），使用sharedMesh替代mesh
+                    tapXAxisLength = meshFilter.sharedMesh.bounds.size.x;
                     //Debug.Log(tapXAxisLength);
                 }
                 else
                 {
-                    Debug.LogError($"Tap预制体实例 {tapPrefab.name} 缺少SpriteRenderer组件，无法获取X轴长度进行缩放设置！");
+                    Debug.LogError($"Tap3D预制体实例 {tapPrefab.name} 缺少MeshFilter组件，无法获取X轴长度进行缩放设置！");
                 }
 
                 int tapIndex = 1;
@@ -378,30 +378,11 @@ public class ChartInstantiator : MonoBehaviour
                         float xAxisScale = noteSizeWorldLengthPerUnit / tapXAxisLength * tap.noteSize;
 
                         // 设置Tap实例的缩放比例（只修改X轴缩放，保持Y、Z轴缩放为1，可根据实际需求改变）
-                        tapInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
+                        tapInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
-                        // 仅在多押时调整_Thickness的值
-                        if (prefabToInstantiate == tapOutlinePrefab)
-                        {
-                            // 获取Tap实例的Material
-                            Material tapMaterial = tapInstance.GetComponent<Renderer>().material;
-                            if (tapMaterial != null)
-                            {
-                                // 获取shader中的_Thickness属性ID
-                                int thicknessPropertyID = Shader.PropertyToID("_Thickness");
-                                // 根据xAxisScale调整_Thickness的值
-                                float adjustedThickness = tapMaterial.GetFloat(thicknessPropertyID) / xAxisScale;
-                                tapMaterial.SetFloat(thicknessPropertyID, adjustedThickness);
-                            }
-                            else
-                            {
-                                Debug.LogError($"Tap实例 {tapInstance.name} 缺少Renderer组件，无法获取Material调整_Thickness！");
-                            }
-                        }
-
-                        // 设置Tap实例的位置（X、Y、Z轴坐标）
+                        // 设置Tap实例的位置（X、Y、Z轴坐标），同时考虑Z轴偏移量
                         float zPositionForStartT = CalculateZAxisPosition(tap.startT);
-                        tapInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
+                        tapInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
                         //Debug.Log(tapInstance.transform.position);
                     }
 
@@ -416,7 +397,7 @@ public class ChartInstantiator : MonoBehaviour
             }
             else
             {
-                Debug.LogError("无法加载Tap或TapOutline预制体！");
+                Debug.LogError("无法加载Tap3D或Tap3DOutline预制体！");
             }
         }
     }
@@ -426,22 +407,21 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.slides != null)
         {
             // 加载常规Slide预制体和多押时的Slide预制体
-            GameObject slidePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Slide");
-            GameObject slideOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/SlideOutline");
+            GameObject slidePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Slide3D");
+            GameObject slideOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Slide3DOutline");
 
             if (slidePrefab != null && slideOutlinePrefab != null)
             {
-                float slideWidth = 0; // 用于存储Slide在X轴方向的宽度（用于后续缩放等操作）
-                SpriteRenderer spriteRenderer = slidePrefab.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null)
+                float slideXAxisLength = 0; // 用于存储Slide在X轴方向的长度（用于后续缩放等操作）
+                MeshFilter meshFilter = slidePrefab.GetComponent<MeshFilter>();
+                if (meshFilter != null)
                 {
-                    // 获取Slide在X轴的宽度（用于缩放等处理）
-                    slideWidth = spriteRenderer.sprite.bounds.size.x;
-                    //Debug.Log(slideWidth);
+                    // 获取Slide在X轴的长度（用于缩放等处理）
+                    slideXAxisLength = meshFilter.sharedMesh.bounds.size.x;
                 }
                 else
                 {
-                    Debug.LogError($"Slide预制体实例 {slidePrefab.name} 缺少SpriteRenderer组件，无法获取X轴宽度进行相关设置！");
+                    Debug.LogError($"Slide3D预制体实例 {slidePrefab.name} 缺少MeshFilter组件，无法获取X轴长度进行相关设置！");
                 }
 
                 int slideIndex = 1;
@@ -486,35 +466,15 @@ public class ChartInstantiator : MonoBehaviour
                         // 根据slideSize等参数折算到X轴世界坐标长度，计算每单位slideSize对应的世界坐标长度（示例逻辑，按实际修改）
                         float slideSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
 
-                        // 根据Slide本身在X轴的世界坐标宽度和slideSize等参数计算X轴的缩放值（示例，按需调整）
-                        float xAxisScale = slideSizeWorldLengthPerUnit / slideWidth * slide.noteSize;
-                        //Debug.Log(xAxisScale);
+                        // 根据Slide本身在X轴的世界坐标长度和slideSize等参数计算X轴的缩放值（示例，按需调整）
+                        float xAxisScale = slideSizeWorldLengthPerUnit / slideXAxisLength * slide.noteSize;
 
                         // 设置Slide实例的缩放比例（这里只修改X轴缩放，保持Y、Z轴缩放为1，可根据实际需求改变）
-                        slideInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
-
-                        // 仅在多押时调整_Thickness的值
-                        if (prefabToInstantiate == slideOutlinePrefab)
-                        {
-                            // 获取Slide实例的Material
-                            Material slideMaterial = slideInstance.GetComponent<Renderer>().material;
-                            if (slideMaterial != null)
-                            {
-                                // 获取shader中的_Thickness属性ID
-                                int thicknessPropertyID = Shader.PropertyToID("_Thickness");
-                                // 根据xAxisScale调整_Thickness的值
-                                float adjustedThickness = slideMaterial.GetFloat(thicknessPropertyID) / xAxisScale;
-                                slideMaterial.SetFloat(thicknessPropertyID, adjustedThickness);
-                            }
-                            else
-                            {
-                                Debug.LogError($"Slide实例 {slideInstance.name} 缺少Renderer组件，无法获取Material调整_Thickness！");
-                            }
-                        }
+                        slideInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Slide实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(slide.startT);
-                        slideInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
+                        slideInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
                     }
 
                     // 检查Slide相关的范围等条件是否满足（这里简单示例输出警告，按实际需求完善检查逻辑）
@@ -528,7 +488,7 @@ public class ChartInstantiator : MonoBehaviour
             }
             else
             {
-                Debug.LogError("无法加载Slide或SlideOutline预制体！");
+                Debug.LogError("无法加载Slide3D或Slide3DOutline预制体！");
             }
         }
     }
@@ -538,22 +498,22 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.flicks != null)
         {
             // 加载常规Flick预制体、多押时的Flick预制体和FlickArrow预制体
-            GameObject flickPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick");
-            GameObject flickOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/FlickOutline");
+            GameObject flickPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick3D");
+            GameObject flickOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick3DOutline");
             GameObject flickArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/FlickArrow");
 
             if (flickPrefab != null && flickOutlinePrefab != null && flickArrowPrefab != null)
             {
-                float flickWidth = 0; // 用于存储Flick在X轴方向的宽度（用于后续缩放等操作）
-                SpriteRenderer spriteRenderer = flickPrefab.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null)
+                float flickXAxisLength = 0; // 用于存储Flick在X轴方向的长度（用于后续缩放等操作）
+                MeshFilter meshFilter = flickPrefab.GetComponent<MeshFilter>();
+                if (meshFilter != null)
                 {
-                    // 获取Flick在X轴的宽度（用于缩放等处理）
-                    flickWidth = spriteRenderer.sprite.bounds.size.x;
+                    // 获取Flick在X轴的长度（用于缩放等处理）
+                    flickXAxisLength = meshFilter.sharedMesh.bounds.size.x;
                 }
                 else
                 {
-                    Debug.LogError($"Flick预制体实例 {flickPrefab.name} 缺少SpriteRenderer组件，无法获取X轴宽度进行相关设置！");
+                    Debug.LogError($"Flick3D预制体实例 {flickPrefab.name} 缺少MeshFilter组件，无法获取X轴长度进行相关设置！");
                 }
 
                 int flickIndex = 1;
@@ -598,37 +558,17 @@ public class ChartInstantiator : MonoBehaviour
                         // 根据flickSize等参数折算到X轴世界坐标长度，计算每单位flickSize对应的世界坐标长度（示例逻辑，按实际修改）
                         float flickSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
 
-                        // 根据Flick本身在X轴的世界坐标宽度和flickSize等参数计算X轴的缩放值（示例，按需调整）
-                        float xAxisScale = flickSizeWorldLengthPerUnit / flickWidth * flick.noteSize;
+                        // 根据Flick本身在X轴的世界坐标长度和flickSize等参数计算X轴的缩放值（示例，按需调整）
+                        float xAxisScale = flickSizeWorldLengthPerUnit / flickXAxisLength * flick.noteSize;
 
                         // 设置Flick实例的缩放比例（这里只修改X轴缩放，保持Y、Z轴缩放为1，可根据实际需求改变）
-                        flickInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
-
-                        // 仅在多押时调整_Thickness的值
-                        if (prefabToInstantiate == flickOutlinePrefab)
-                        {
-                            // 获取Flick实例的Material
-                            Material flickMaterial = flickInstance.GetComponent<Renderer>().material;
-                            if (flickMaterial != null)
-                            {
-                                // 获取shader中的_Thickness属性ID
-                                int thicknessPropertyID = Shader.PropertyToID("_Thickness");
-                                // 根据xAxisScale调整_Thickness的值
-                                float adjustedThickness = flickMaterial.GetFloat(thicknessPropertyID) / xAxisScale;
-                                flickMaterial.SetFloat(thicknessPropertyID, adjustedThickness);
-                            }
-                            else
-                            {
-                                Debug.LogError($"Flick实例 {flickInstance.name} 缺少Renderer组件，无法获取Material调整_Thickness！");
-                            }
-                        }
+                        flickInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Flick实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(flick.startT);
-                        flickInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
+                        flickInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                         Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flickInstance);
-                        //Debug.Log(leftMiddleWorldPos);
 
                         // 实例化Flick箭头预制体
                         GameObject flickArrowInstance = Instantiate(flickArrowPrefab);
@@ -658,7 +598,7 @@ public class ChartInstantiator : MonoBehaviour
             }
             else
             {
-                Debug.LogError("无法加载Flick、FlickOutline或FlickArrow预制体！");
+                Debug.LogError("无法加载Flick3D、Flick3DOutline或FlickArrow预制体！");
             }
         }
     }
@@ -668,21 +608,21 @@ public class ChartInstantiator : MonoBehaviour
         if (chart != null && chart.stars != null)
         {
             // 加载常规StarHead预制体和多押时的StarHead预制体
-            GameObject starheadPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead");
-            GameObject starheadOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHeadOutline");
+            GameObject starheadPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead3D");
+            GameObject starheadOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead3DOutline");
 
             if (starheadPrefab != null && starheadOutlinePrefab != null)
             {
                 float starheadXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
-                SpriteRenderer spriteRenderer = starheadPrefab.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null)
+                MeshFilter meshFilter = starheadPrefab.GetComponent<MeshFilter>();
+                if (meshFilter != null)
                 {
                     // 获取StarHead在X轴的长度（用于缩放）
-                    starheadXAxisLength = spriteRenderer.sprite.bounds.size.x;
+                    starheadXAxisLength = meshFilter.sharedMesh.bounds.size.x;
                 }
                 else
                 {
-                    Debug.LogError($"starhead预制体实例 {starheadPrefab.name} 缺少SpriteRenderer组件，无法获取X轴长度进行缩放设置！");
+                    Debug.LogError($"StarHead3D预制体实例 {starheadPrefab.name} 缺少MeshFilter组件，无法获取X轴长度进行缩放设置！");
                 }
 
                 int starIndex = 1;
@@ -702,7 +642,7 @@ public class ChartInstantiator : MonoBehaviour
                     // 实例化StarHead预制体
                     GameObject starheadInstance = Instantiate(prefabToInstantiate);
                     starheadInstance.name = $"StarHead{starIndex}"; // 命名
-                    // 将StarHead设置为ChartGameObjects的子物体
+                                                                    // 将StarHead设置为ChartGameObjects的子物体
                     starheadInstance.transform.SetParent(StarsParent.transform);
                     // 继承父物体的图层
                     int parentLayer = StarsParent.layer;
@@ -718,7 +658,6 @@ public class ChartInstantiator : MonoBehaviour
                     float bottomPixel = AspectRatioManager.croppedScreenHeight * HorizontalParams.VerticalMarginBottom;
                     float topPixel = AspectRatioManager.croppedScreenHeight * HorizontalParams.VerticalMarginCeiling;
 
-
                     // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围
                     Vector3 referencePoint = new Vector3(0, yPos, 0);
                     float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
@@ -731,30 +670,11 @@ public class ChartInstantiator : MonoBehaviour
                     float xAxisScale = noteSizeWorldLengthPerUnit / starheadXAxisLength * ChartParams.StarHeadXAxis;
 
                     // 设置StarHead实例的缩放比例
-                    starheadInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.ZAxisRate, 1);
-
-                    // 仅在多押时调整_Thickness的值
-                    if (prefabToInstantiate == starheadOutlinePrefab)
-                    {
-                        // 获取StarHead实例的Material
-                        Material starheadMaterial = starheadInstance.GetComponent<Renderer>().material;
-                        if (starheadMaterial != null)
-                        {
-                            // 获取shader中的_Thickness属性ID
-                            int thicknessPropertyID = Shader.PropertyToID("_Thickness");
-                            // 根据xAxisScale调整_Thickness的值
-                            float adjustedThickness = starheadMaterial.GetFloat(thicknessPropertyID) / xAxisScale;
-                            starheadMaterial.SetFloat(thicknessPropertyID, adjustedThickness);
-                        }
-                        else
-                        {
-                            Debug.LogError($"StarHead实例 {starheadInstance.name} 缺少Renderer组件，无法获取Material调整_Thickness！");
-                        }
-                    }
+                    starheadInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                     // 设置StarHead实例的位置（X、Y、Z轴坐标）
                     float zPositionForStartT = CalculateZAxisPosition(star.starHeadT);
-                    starheadInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT);
+                    starheadInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                     // 检查点键是否在规定的X轴坐标范围内，如果不在范围，可进行相应处理，比如隐藏或者输出警告等（这里简单示例输出警告）
                     //if (!star.IsInAxisRange())
@@ -767,7 +687,7 @@ public class ChartInstantiator : MonoBehaviour
             }
             else
             {
-                Debug.LogError("无法加载StarHead或StarHeadOutline预制体！");
+                Debug.LogError("无法加载StarHead3D或StarHead3DOutline预制体！");
             }
         }
     }
@@ -808,35 +728,82 @@ public class ChartInstantiator : MonoBehaviour
                         // 检查 SubHold 所在的 SubJudgePlane 是否为 Linear
                         bool isSubJudgePlaneLinear = associatedJudgePlaneObject.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
 
-                        // 只有当两侧变化函数均为 Linear，且所在的 SubJudgePlane 为 Linear 时，才能一次性初始化
-                        if (subHold.XLeftFunction == TransFunctionType.Linear && subHold.XRightFunction == TransFunctionType.Linear && isSubJudgePlaneLinear)
+                        if (subHold.Jagnum == 0)
                         {
-                            float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMin / ChartParams.XaxisMax;
-                            float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMax / ChartParams.XaxisMax;
-                            float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMin / ChartParams.XaxisMax;
-                            float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
+                            // Jagnum = 0 时，采用之前的代码
+                            if (subHold.XLeftFunction == TransFunctionType.Linear && subHold.XRightFunction == TransFunctionType.Linear && isSubJudgePlaneLinear)
+                            {
+                                float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMin / ChartParams.XaxisMax;
+                                float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMax / ChartParams.XaxisMax;
+                                float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMin / ChartParams.XaxisMax;
+                                float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
 
-                            // 根据 startT 和 endT 计算 Z 轴位置
-                            float zPositionForStartT = CalculateZAxisPosition(subHold.startT);
-                            float zPositionForEndT = CalculateZAxisPosition(subHold.endT);
+                                // 根据 startT 和 endT 计算 Z 轴位置
+                                float zPositionForStartT = CalculateZAxisPosition(subHold.startT);
+                                float zPositionForEndT = CalculateZAxisPosition(subHold.endT);
 
-                            // 一次性生成整个 SubHold
-                            GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
-                               startYWorld, endYWorld, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent, RenderQueue, shaderName);
-                            subHoldInstances.Add(subHoldInstance);
+                                // 一次性生成整个 SubHold
+                                GameObject subHoldInstance = CreateHoldQuad(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
+                                   startYWorld, endYWorld, zPositionForStartT, zPositionForEndT, HoldSprite, $"SubHold{subHoldIndex}", holdParent, RenderQueue, shaderName);
+                                subHoldInstances.Add(subHoldInstance);
+                            }
+                            else
+                            {
+                                // 精细度设为 8，用于分割时间区间（可根据实际需求调整精细度）
+                                int segments = FinenessParams.Segment;
+                                float timeStep = (subHold.endT - subHold.startT) / segments;
+                                // 用于存储细分的 Instance，以便后续合并
+                                List<GameObject> segmentInstances = new List<GameObject>();
+
+                                for (int i = 0; i < segments; i++)
+                                {
+                                    float startT = subHold.startT + i * timeStep;
+                                    float endT = subHold.startT + (i + 1) * timeStep;
+                                    float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
+                                    float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
+
+                                    // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
+                                    float startYWorld_Inner = TransformYCoordinate(startY_Inner);
+                                    float endYWorld_Inner = TransformYCoordinate(endY_Inner);
+
+                                    float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                                    float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+                                    float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                                    float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+
+                                    float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMin / ChartParams.XaxisMax;
+                                    float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
+                                    float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
+                                    float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
+
+                                    // 根据 startT 和 endT 计算 Z 轴位置
+                                    float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
+                                    float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
+
+                                    GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
+                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName);
+                                    segmentInstances.Add(instance);
+                                }
+
+                                // 合并细分的 Instance 为一个新的 GameObject
+                                GameObject combinedSubHold = CombineInstances(segmentInstances);
+                                combinedSubHold.name = $"SubHold{subHoldIndex}";
+                                subHoldInstances.Add(combinedSubHold);
+                            }
                         }
                         else
                         {
-                            // 精细度设为 8，用于分割时间区间（可根据实际需求调整精细度）
-                            int segments = FinenessParams.Segment;
-                            float timeStep = (subHold.endT - subHold.startT) / segments;
-                            // 用于存储细分的 Instance，以便后续合并
+                            // Jagnum > 0 时，创建锯齿状的 SubHold
+                            int totalSegments = subHold.Jagnum * 2;
+                            float timeStep = (subHold.endT - subHold.startT) / totalSegments;
+
                             List<GameObject> segmentInstances = new List<GameObject>();
 
-                            for (int i = 0; i < segments; i++)
+                            for (int i = 0; i < totalSegments; i++)
                             {
                                 float startT = subHold.startT + i * timeStep;
                                 float endT = subHold.startT + (i + 1) * timeStep;
+
                                 float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
                                 float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
 
@@ -849,18 +816,49 @@ public class ChartInstantiator : MonoBehaviour
                                 float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
                                 float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
 
+                                float middleXMin, middleXMax;
+                                if (i % 2 == 0)
+                                {
+                                    // 偶数段，由 100% 宽到 50% 宽
+                                    float width = (endXMax - endXMin) / 2;
+                                    float center = (endXMin + endXMax) / 2;
+                                    middleXMin = center - width / 2;
+                                    middleXMax = center + width / 2;
+                                }
+                                else
+                                {
+                                    // 奇数段，由 50% 宽到 100% 宽
+                                    float width = (startXMax - startXMin) / 2;
+                                    float center = (startXMin + startXMax) / 2;
+                                    middleXMin = center - width / 2;
+                                    middleXMax = center + width / 2;
+                                }
+
                                 float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMin / ChartParams.XaxisMax;
                                 float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
                                 float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
                                 float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
+                                float middleXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * middleXMin / ChartParams.XaxisMax;
+                                float middleXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * middleXMax / ChartParams.XaxisMax;
 
                                 // 根据 startT 和 endT 计算 Z 轴位置
                                 float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
                                 float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
 
-                                GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                    startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName);
-                                segmentInstances.Add(instance);
+                                if (i % 2 == 0)
+                                {
+                                    // 偶数段
+                                    GameObject instance = CreateHoldQuad(startXMinWorld_Inner, startXMaxWorld_Inner, middleXMinWorld_Inner, middleXMaxWorld_Inner,
+                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName);
+                                    segmentInstances.Add(instance);
+                                }
+                                else
+                                {
+                                    // 奇数段
+                                    GameObject instance = CreateHoldQuad(middleXMinWorld_Inner, middleXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
+                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName);
+                                    segmentInstances.Add(instance);
+                                }
                             }
 
                             // 合并细分的 Instance 为一个新的 GameObject
