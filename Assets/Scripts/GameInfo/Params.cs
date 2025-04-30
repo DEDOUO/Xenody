@@ -45,6 +45,8 @@ namespace Params
 
         // 所有3DNote默认Z轴偏移坐标（为NoteZ轴宽度的一半）
         public static float NoteZAxisOffset = -0.55f;
+
+        public static float OutlineWidth = 0.15f;
     }
 
     public static class SpeedParams
@@ -58,7 +60,8 @@ namespace Params
     {
         // 描边参数
         // Hold描边宽度
-        public static float HoldOutlineDefault = 0.25f;
+        //public static float HoldOutlineDefault = 0.4f;
+        public static float HoldColorLineWidth = 0.2f;
     }
 
     //public static class HeightParams

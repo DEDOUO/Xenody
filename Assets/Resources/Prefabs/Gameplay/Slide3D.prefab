@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5144610348713256294}
   - component: {fileID: 8487892525430893013}
   - component: {fileID: 1987793107246184525}
+  - component: {fileID: 49947374446525124}
   m_Layer: 0
   m_Name: Slide3D
   m_TagString: Untagged
@@ -83,3 +84,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &49947374446525124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 987925469198056089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f85750f39500c2409ff9de54f9af8d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 0.2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []

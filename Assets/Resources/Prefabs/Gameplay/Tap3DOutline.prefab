@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7871888337980446088}
   - component: {fileID: 7226761469657921841}
   - component: {fileID: 1932715577634788692}
-  - component: {fileID: 8437025410295924696}
+  - component: {fileID: 3335077046489088682}
   m_Layer: 0
   m_Name: Tap3DOutline
   m_TagString: Untagged
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f4a26ad5679431e428dac4c63534db14, type: 2}
+  - {fileID: 2100000, guid: ab8c407ab19b73140baf08626db4c423, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -84,7 +84,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &8437025410295924696
+--- !u!114 &3335077046489088682
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,7 +93,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2749530569702751497}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4218d78ef2d54d0898b7514e121a781f, type: 3}
+  m_Script: {fileID: 11500000, guid: 7f85750f39500c2409ff9de54f9af8d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _color: {r: 1, g: 1, b: 1, a: 1}
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 0.2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []

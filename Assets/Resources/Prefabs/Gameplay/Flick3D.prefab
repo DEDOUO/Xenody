@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3659906398394375589}
   - component: {fileID: 3628275261410212028}
   - component: {fileID: 1285283435975236883}
+  - component: {fileID: 481860592920649482}
   m_Layer: 0
   m_Name: Flick3D
   m_TagString: Untagged
@@ -83,3 +84,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &481860592920649482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5593919760948992318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f85750f39500c2409ff9de54f9af8d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 0.2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []

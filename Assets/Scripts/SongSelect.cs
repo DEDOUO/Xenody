@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-//using System.IO;
 using TMPro;
 using System.IO;
 
@@ -91,12 +90,20 @@ public class SongSelect : MonoBehaviour
                 colorBlock.fadeDuration = 0.1f;
                 button.colors = colorBlock;
 
-                // 设置按钮文字的样式（字体、字号、颜色等）
-                //textComponent.font = Resources.GetBuiltinResource<Font>("Jupiter.ttf");
-                //textComponent.font = Resources.Load<Font>("Fonts/FontFiles/Jupiter");
-                textComponent.font = Resources.Load<TMP_FontAsset>("Fonts/Jupiter SDF"); // 注意这里加载的是TextMeshPro的字体资源
+                // 根据歌曲名包含的文字类型设置字体
+                TMP_FontAsset fontAsset = GetFontBasedOnCharacters(songName);
+                textComponent.font = fontAsset;
 
-                textComponent.fontSize = 50;
+                // 根据字体设置字体大小
+                if (IsNotoSansFont(fontAsset))
+                {
+                    textComponent.fontSize = 40;
+                }
+                else
+                {
+                    textComponent.fontSize = 50;
+                }
+
                 textComponent.color = Color.white;
 
                 button.onClick.AddListener(() =>
@@ -138,5 +145,72 @@ public class SongSelect : MonoBehaviour
         {
             Debug.LogError("Songs文件夹不存在，请检查路径是否正确！");
         }
+    }
+
+    // 根据字符串包含的文字类型返回对应的字体
+    private TMP_FontAsset GetFontBasedOnCharacters(string input)
+    {
+        if (ContainsKorean(input))
+        {
+            return Resources.Load<TMP_FontAsset>("Fonts/NotoSansKR-Regular SDF");
+        }
+        else if (ContainsJapanese(input))
+        {
+            return Resources.Load<TMP_FontAsset>("Fonts/NotoSansJP-Regular SDF");
+        }
+        else if (ContainsChinese(input))
+        {
+            return Resources.Load<TMP_FontAsset>("Fonts/NotoSansSC-Regular SDF");
+        }
+        return Resources.Load<TMP_FontAsset>("Fonts/Jupiter SDF");
+    }
+
+    // 判断字符串是否包含韩文
+    private bool ContainsKorean(string input)
+    {
+        foreach (char c in input)
+        {
+            if ((c >= 0xAC00 && c <= 0xD7AF) || (c >= 0x1100 && c <= 0x11FF) || (c >= 0x3130 && c <= 0x318F))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 判断字符串是否包含日文
+    private bool ContainsJapanese(string input)
+    {
+        foreach (char c in input)
+        {
+            if ((c >= 0x3040 && c <= 0x309F) || (c >= 0x30A0 && c <= 0x30FF) || (c >= 0x4E00 && c <= 0x9FFF))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 判断字符串是否包含中文
+    private bool ContainsChinese(string input)
+    {
+        foreach (char c in input)
+        {
+            if ((c >= 0x4E00) && (c <= 0x9FFF))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 判断是否为NotoSans系列字体
+    private bool IsNotoSansFont(TMP_FontAsset fontAsset)
+    {
+        return fontAsset != null && (
+            fontAsset.name.Contains("NotoSansKR-Regular") ||
+            fontAsset.name.Contains("NotoSansJP-Regular") ||
+            fontAsset.name.Contains("NotoSansSC-Regular")
+        );
     }
 }

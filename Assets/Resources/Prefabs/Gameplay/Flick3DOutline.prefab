@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7346391288065403546}
   - component: {fileID: 7505578953988515988}
   - component: {fileID: 2546504233692500881}
-  - component: {fileID: 3888600346817528047}
+  - component: {fileID: 7211758159199355270}
   m_Layer: 0
   m_Name: Flick3DOutline
   m_TagString: Untagged
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b9a52053d53f9d54fa73cfd7d34baa29, type: 2}
+  - {fileID: 2100000, guid: ac076085b10fb114d93ee51320148b07, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -84,7 +84,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &3888600346817528047
+--- !u!114 &7211758159199355270
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,7 +93,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 812935318255364203}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4218d78ef2d54d0898b7514e121a781f, type: 3}
+  m_Script: {fileID: 11500000, guid: 7f85750f39500c2409ff9de54f9af8d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _color: {r: 1, g: 1, b: 1, a: 1}
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 0.2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []

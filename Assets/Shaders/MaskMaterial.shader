@@ -5,7 +5,8 @@ Shader "MaskMaterial"
         _MainTex ("Base (RGB)", 2D) = "white" {}
         _Color ("Color", Color) = (1, 1, 1, 1)
         _Opacity ("Opacity", Range(0, 1)) = 1
-        _RenderQueue ("Render Queue", Int) = 3000 // 添加渲染队列作为可调节的参数，默认值为 3000（Transparent 队列）
+        // 添加渲染队列作为可调节的参数
+        _RenderQueue ("Render Queue", Int) = 3000 
     }
     SubShader
     {
@@ -69,4 +70,4 @@ Shader "MaskMaterial"
             ENDCG
         }
     }
-}
+}    

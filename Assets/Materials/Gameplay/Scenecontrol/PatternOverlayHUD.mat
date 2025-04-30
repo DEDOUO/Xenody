@@ -9,14 +9,22 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: PatternOverlayHUD
   m_Shader: {fileID: 4800000, guid: f3b508825341ae14eae56bfc3119dac5, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _OUTLINEENABLED_ON
+  - _OUTLINEMODE_SOLID
+  - _OUTLINEPOSITION_INSIDE_UNDER_SPRITE
+  - _OUTLINESHAPE_CONTOUR
+  - _TILEMODE_STRETCH
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -37,6 +45,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FrameTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -63,8 +75,11 @@ Material:
     m_Ints: []
     m_Floats:
     - PixelSnap: 0
+    - _AlphaThreshold: 0
+    - _Angle: 45
     - _BumpScale: 1
     - _ColorMask: 15
+    - _ConnectedAlpha: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -74,6 +89,11 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
+    - _OutlineEnabled: 1
+    - _OutlineMode: 0
+    - _OutlinePosition: 0
+    - _OutlineShape: 0
+    - _OutlineWidth: 2
     - _Parallax: 0.02
     - _Scale: 2
     - _SmoothnessTextureChannel: 0
@@ -84,13 +104,22 @@ Material:
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
+    - _Thickness: 10
+    - _TileMode: 0
     - _UVSec: 0
     - _UseUIAlphaClip: 0
+    - _Weight: 0.5
+    - _ZTest: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GradientOutline1: {r: 1, g: 1, b: 1, a: 1}
+    - _GradientOutline2: {r: 1, g: 1, b: 1, a: 1}
     - _HSVOffset: {r: 0, g: 0.05, b: -0.05, a: 0}
+    - _ImageOutline: {r: 1, g: 1, b: 1, a: 1}
     - _Modify: {r: 0, g: 0, b: 1, a: 1}
+    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
     - _PatternOffset: {r: 30, g: 10, b: 0, a: 0}
+    - _SolidOutline: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

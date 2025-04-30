@@ -30,12 +30,12 @@ public class Utility : MonoBehaviour
     {
         if (startTime > endTime)
         {
-            throw new ArgumentException("起始时间不能大于结束时间", "startTime");
+            throw new ArgumentException($"起始时间不能大于结束时间:{startTime}");
         }
 
         if (!Enum.IsDefined(typeof(TransFunctionType), functionType))
         {
-            throw new ArgumentException("传入的坐标变化函数类型无效", "functionType");
+            throw new ArgumentException($"传入的坐标变化函数类型无效:{functionType}");
         }
 
         float result = 0f;
@@ -745,7 +745,9 @@ public class Utility : MonoBehaviour
         //Debug.Log(leftMiddleWorldPos);
         //Debug.Log(rightMiddleWorldPos);
 
-        float arrowRotationAngle = flickDirection * 360; // 假设flickDirection是0-1之间的值，转换为0-360度的角度，根据实际调整
+        // 假设flickDirection是0-1之间的值，转换为0-360度的角度，根据实际调整
+        float arrowRotationAngle = flickDirection * 360;
+        //针对非横划（90度或270度），箭头应显示在水平平面内
         if (Math.Abs(arrowRotationAngle - 90) <= 1 | Math.Abs(arrowRotationAngle - 270) <= 1)
         {
             bool ifleft = Math.Abs(arrowRotationAngle - 90) <= 1;
@@ -755,7 +757,7 @@ public class Utility : MonoBehaviour
             {
                 //以Flick左侧坐标为锚点，往右平移
                 Vector3 Pos = leftMiddleWorldPos;
-                Vector3 PositionAdjust = new Vector3(1.2f, 0, 0);
+                Vector3 PositionAdjust = new Vector3(1f, 0, 0);
                 Vector3 newPosition = Pos + PositionAdjust;
                 flickarrow.transform.position = newPosition;
             }
@@ -763,7 +765,7 @@ public class Utility : MonoBehaviour
             {
                 //以Flick右侧坐标为锚点，往左平移
                 Vector3 Pos = rightMiddleWorldPos;
-                Vector3 PositionAdjust = new Vector3(-1.2f, 0, 0);
+                Vector3 PositionAdjust = new Vector3(-1f, 0, 0);
                 Vector3 newPosition = Pos + PositionAdjust;
                 flickarrow.transform.position = newPosition;
             }
@@ -902,6 +904,15 @@ public class Utility : MonoBehaviour
 
         // 将 Color32 转换为 Color
         return new Color(r / 255f, g / 255f, b / 255f, a / 255f);
+    }
+
+    public static void ProcessCombinedInstance(GameObject combinedInstance, GameObject judgePlaneParent, int parentLayer)
+    {
+        // 将合并后的Instance设置为对应的父物体的子物体
+        combinedInstance.transform.SetParent(judgePlaneParent.transform);
+        // 继承父物体的图层
+        combinedInstance.layer = parentLayer;
+
     }
 
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3159124646471984757}
   - component: {fileID: 8653130650834963035}
   - component: {fileID: 2228739543363508264}
-  - component: {fileID: -6383357297003782424}
+  - component: {fileID: -9165993872048437855}
   m_Layer: 0
   m_Name: Slide3DOutline
   m_TagString: Untagged
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 889a13620bdb5a844839089b662ef8b4, type: 2}
+  - {fileID: 2100000, guid: feb88031954c7564591383a79406babc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -84,7 +84,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-6383357297003782424
+--- !u!114 &-9165993872048437855
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,7 +93,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4646954735199192543}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4218d78ef2d54d0898b7514e121a781f, type: 3}
+  m_Script: {fileID: 11500000, guid: 7f85750f39500c2409ff9de54f9af8d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _color: {r: 1, g: 1, b: 1, a: 1}
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 0.2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
