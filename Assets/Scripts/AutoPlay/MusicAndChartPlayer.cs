@@ -1049,7 +1049,9 @@ public class MusicAndChartPlayer : MonoBehaviour
 
             // 获取原物体的父物体和图层
             Transform parent = keyGameObject.transform.parent;
-            int layer = keyGameObject.layer;
+            //int layer = keyGameObject.layer;
+            //这里统一用JudgeLine图层（10）
+            int layer = 10;
 
             // 提取原物体名称中的数字部分
             string numberPart = "";
