@@ -25,6 +25,9 @@ namespace Note
         // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
         public int associatedPlaneId;
 
+        //Y轴坐标
+        public float startY;
+
 
         // 检测玩家是否在正确的时间点击并向正确方向滑动了划键对应的判定区（仅针对移动端触摸检测）
         public bool IsFlickedCorrectly()

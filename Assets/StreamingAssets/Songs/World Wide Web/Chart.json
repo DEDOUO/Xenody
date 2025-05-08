@@ -1,8 +1,22 @@
 {
-  "planes": [
+  "speed": [
+    {
+      "startT": 0.0,
+      "endT": 999.0,
+      "sp": 1.0
+    }
+  ],
+  "color": [
+    {
+      "startT": 0.0,
+      "endT": 154.828,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    }
+  ],
+  "plane": [
     {
       "id": 1,
-      "color": "#63b8ff",
       "sub": [
         {
           "startT": 0.0,
@@ -407,7 +421,6 @@
     },
     {
       "id": 2,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 32.015,
@@ -427,7 +440,6 @@
     },
     {
       "id": 3,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 32.483,
@@ -447,7 +459,6 @@
     },
     {
       "id": 4,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 32.951,
@@ -502,7 +513,6 @@
     },
     {
       "id": 5,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 62.015,
@@ -529,7 +539,6 @@
     },
     {
       "id": 6,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 62.484,
@@ -549,7 +558,6 @@
     },
     {
       "id": 7,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 78.89,
@@ -681,7 +689,6 @@
     },
     {
       "id": 8,
-      "color": "#E0EEE0",
       "sub": [
         {
           "startT": 107.015,
@@ -701,7 +708,6 @@
     },
     {
       "id": 9,
-      "color": "#E0EEE0",
       "sub": [
         {
           "startT": 107.953,
@@ -728,7 +734,6 @@
     },
     {
       "id": 10,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 135.14,
@@ -740,7 +745,7 @@
       ]
     }
   ],
-  "taps": [
+  "tap": [
     {
       "startT": 5.179,
       "startX": 0.0,
@@ -4744,7 +4749,7 @@
       "Pid": 1
     }
   ],
-  "holds": [
+  "hold": [
     {
       "Pid": 1,
       "id": 1,
@@ -7997,7 +8002,7 @@
       ]
     }
   ],
-  "slides": [
+  "slide": [
     {
       "startT": 0.14,
       "startX": 0.0,
@@ -8365,7 +8370,7 @@
       "Pid": 1
     }
   ],
-  "flicks": [
+  "flick": [
     {
       "startT": 5.296,
       "startX": 1.5,
@@ -8955,5 +8960,5 @@
       "Pid": 1
     }
   ],
-  "stars": []
+  "star": []
 }

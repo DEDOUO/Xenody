@@ -23,6 +23,7 @@ public class AutoPlay : MonoBehaviour
     public GameObject FlicksParent;
     public GameObject FlickArrowsParent;
     public GameObject HoldsParent;
+    public GameObject HoldOutlinesParent;
     public GameObject StarsParent;
     public GameObject subStarsParent;
     //public RectTransform SubStarsParentRect;
@@ -47,6 +48,7 @@ public class AutoPlay : MonoBehaviour
         FlicksParent = GameObject.Find("FlicksParent");
         FlickArrowsParent = GameObject.Find("FlickArrowsParent");
         HoldsParent = GameObject.Find("HoldsParent");
+        HoldOutlinesParent = GameObject.Find("HoldOutlinesParent");
         StarsParent = GameObject.Find("StarsParent");
         subStarsParent = GameObject.Find("SubStarsParent");
         //SubStarsParentRect = subStarsParent.GetComponent<RectTransform>();
@@ -116,7 +118,7 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent,
             JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer);
         instantiator.InstantiateAll(chart);
 
@@ -132,7 +134,7 @@ public class AutoPlay : MonoBehaviour
         player.enabled = false;
 
         // 播放音乐和更新谱面位置
-        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, StarsParent, subStarsParent,
+        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent,
             TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart);
         player.enabled = true;
         player.PlayMusicAndChart(chart);

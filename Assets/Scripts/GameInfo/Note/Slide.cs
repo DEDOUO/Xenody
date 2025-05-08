@@ -21,6 +21,9 @@ namespace Note
         // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
         public int associatedPlaneId;
 
+        //Y轴坐标
+        public float startY;
+
         // 方法用于检查滑动键是否在规定的X轴坐标范围内（结合新的参数类来判断）
         public bool IsInXAxisRange()
         {

@@ -9,7 +9,9 @@ using System;
 using Note;
 using static JudgePlane;
 using System.Linq;
-using Unity.VisualScripting;
+//using DocumentFormat.OpenXml.Presentation;
+//using Unity.VisualScripting;
+//using DocumentFormat.OpenXml.Presentation;
 //using System.Drawing;
 //using UnityEngine.Rendering;
 
@@ -25,6 +27,7 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject FlicksParent;
     private GameObject FlickArrowsParent;
     private GameObject HoldsParent;
+    private GameObject HoldOutlinesParent;
     private GameObject StarsParent;
     private GameObject SubStarsParent;
 
@@ -36,11 +39,12 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject videoPlayerContainer;
 
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
+    private GradientColorListUnity GradientColorList;
 
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
-    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject starsParent,
-        GameObject subStarsParent,
+    public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, 
+        GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject subStarsParent,
         Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer)
     {
         JudgePlanesParent = judgePlanesParent;
@@ -51,6 +55,7 @@ public class ChartInstantiator : MonoBehaviour
         FlicksParent = flicksParent;
         FlickArrowsParent = flickarrowsParent;
         HoldsParent = holdsParent;
+        HoldOutlinesParent = holdOutlinesParent;
         StarsParent = starsParent;
         SubStarsParent = subStarsParent;
         JudgePlaneSprite = judgePlaneSprite;
@@ -134,15 +139,9 @@ public class ChartInstantiator : MonoBehaviour
             //Debug.Log(startTimeToInstanceNames[startTime]);
         }
 
-        //输出 startTimeToInstanceNames 所有元素
-        //foreach (var startTime in startTimeToInstanceNames.Keys)
-        //{
-        //    Debug.Log($"Start Time: {startTime}");
-        //    foreach (var instanceName in startTimeToInstanceNames[startTime])
-        //    {
-        //        Debug.Log($"Instance Name: {instanceName}");
-        //    }
-        //}
+        // 调用 ConvertToUnityList 方法完成颜色转换
+        GradientColorList = ConvertToUnityList(chart.gradientColorList);
+
     }
 
     public void InstantiateAll(Chart chart)
@@ -168,49 +167,33 @@ public class ChartInstantiator : MonoBehaviour
                 //Debug.Log(judgePlane.color);
                 int RenderQueue = 3000;
                 int judgePlaneIndex = judgePlane.id;
-                // 创建一个空物体作为JudgePlane实例的父物体，用于统一管理和规范命名
-                GameObject judgePlaneParent = new GameObject($"JudgePlane{judgePlaneIndex}");
-                judgePlaneParent.transform.position = new Vector3(0, 0, 0);
-                // 将judgePlaneParent设置为JudgePlanesParent的子物体
-                judgePlaneParent.transform.SetParent(JudgePlanesParent.transform);
-                // 继承父物体的图层
-                //int parentLayer = JudgePlanesParent.layer;
-                judgePlaneParent.layer = JudgePlanesParent.layer;
-
-                // 创建 LeftColorLine 作为左侧亮条合并物体的父物体
-                GameObject leftColorLine = new GameObject($"LeftColorLine{judgePlaneIndex}");
-                leftColorLine.transform.position = new Vector3(0, 0, 0);
-                leftColorLine.transform.SetParent(ColorLinesParent.transform);
-                leftColorLine.layer = ColorLinesParent.layer;
-
-                // 创建 RightColorLine 作为右侧亮条合并物体的父物体
-                GameObject rightColorLine = new GameObject($"RightColorLine{judgePlaneIndex}");
-                rightColorLine.transform.position = new Vector3(0, 0, 0);
-                rightColorLine.transform.SetParent(ColorLinesParent.transform);
-                rightColorLine.layer = ColorLinesParent.layer;
 
                 int subJudgePlaneIndex = 1;
 
+                Color planecolor = Color.black;
+
+                List<GameObject> judgePlaneInstances = new List<GameObject>();
+                List<GameObject> leftStripInstances = new List<GameObject>();
+                List<GameObject> rightStripInstances = new List<GameObject>();
+
                 foreach (var subJudgePlane in judgePlane.subJudgePlaneList)
                 {
-                    //List<GameObject> segmentInstances = new List<GameObject>();
-                    List<GameObject> judgePlaneInstances = new List<GameObject>();
-                    List<GameObject> leftStripInstances = new List<GameObject>();
-                    List<GameObject> rightStripInstances = new List<GameObject>();
+
+                    if (subJudgePlaneIndex == 1) 
+                    {
+                        planecolor = GradientColorList.GetColorAtTimeAndY(subJudgePlane.startT, subJudgePlane.startY);
+                    };
 
                     // 根据SubJudgePlane的函数类型来决定如何处理
                     switch (subJudgePlane.yAxisFunction)
                     {
                         case TransFunctionType.Linear:
                             List<GameObject> objectsToCombine = CreateJudgePlaneAndColorLinesQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
-                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", judgePlaneParent, leftColorLine, rightColorLine, RenderQueue, judgePlane.color);
-                            GameObject subjudgePlaneInstance = objectsToCombine[0];
-                            GameObject LeftStripInstance = objectsToCombine[1];
-                            GameObject RightStripInstance = objectsToCombine[2];
+                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor);
 
-                            ProcessCombinedInstance(subjudgePlaneInstance, judgePlaneParent, judgePlaneParent.layer);
-                            ProcessCombinedInstance(LeftStripInstance, leftColorLine, leftColorLine.layer);
-                            ProcessCombinedInstance(RightStripInstance, leftColorLine, leftColorLine.layer);
+                            judgePlaneInstances.Add(objectsToCombine[0]);
+                            leftStripInstances.Add(objectsToCombine[1]);
+                            rightStripInstances.Add(objectsToCombine[2]);
 
                             break;
 
@@ -227,35 +210,34 @@ public class ChartInstantiator : MonoBehaviour
                                 float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
                                 float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
                                 List<GameObject> ObjectsToCombine = CreateJudgePlaneAndColorLinesQuad(startY, endY, startT, endT,
-                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", judgePlaneParent, leftColorLine, rightColorLine, RenderQueue, judgePlane.color);
-                                //segmentInstances.AddRange(subObjectsToCombine);
+                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor);
+
                                 judgePlaneInstances.Add(ObjectsToCombine[0]);
                                 leftStripInstances.Add(ObjectsToCombine[1]);
                                 rightStripInstances.Add(ObjectsToCombine[2]);
                             }
 
-                            // 合并 SubJudgePlane
-                            GameObject combinedJudgePlane = CombineInstances(judgePlaneInstances);
-                            combinedJudgePlane.name = $"Sub{subJudgePlaneIndex}";
-                            ProcessCombinedInstance(combinedJudgePlane, judgePlaneParent, judgePlaneParent.layer);
-                            //combinedJudgePlane.transform.SetParent(judgePlaneParent.transform);
-
-                            // 合并左侧亮条
-                            GameObject combinedLeftStrip = CombineInstances(leftStripInstances);
-                            combinedLeftStrip.name = $"Sub{subJudgePlaneIndex}";
-                            ProcessCombinedInstance(combinedLeftStrip, leftColorLine, leftColorLine.layer);
-                            //combinedLeftStrip.transform.SetParent(leftColorLine.transform);
-
-                            // 合并右侧亮条
-                            GameObject combinedRightStrip = CombineInstances(rightStripInstances);
-                            combinedRightStrip.name = $"Sub {subJudgePlaneIndex}";
-                            ProcessCombinedInstance(combinedRightStrip, rightColorLine, rightColorLine.layer);
-                            //combinedRightStrip.transform.SetParent(rightColorLine.transform);
-
                             break;
                     }
+
                     subJudgePlaneIndex++;
                 }
+
+                // 合并 SubJudgePlane
+                GameObject combinedJudgePlane = CombineInstances(judgePlaneInstances, JudgePlanesParent.transform);
+                combinedJudgePlane.name = $"JudgePlane{judgePlaneIndex}";
+                ProcessCombinedInstance(combinedJudgePlane, JudgePlanesParent, JudgePlanesParent.layer);
+
+                // 合并左侧亮条
+                GameObject combinedLeftStrip = CombineInstances(leftStripInstances, ColorLinesParent.transform);
+                combinedLeftStrip.name = $"LeftColorLine{judgePlaneIndex}";
+                ProcessCombinedInstance(combinedLeftStrip, ColorLinesParent, ColorLinesParent.layer);
+
+                // 合并右侧亮条
+                GameObject combinedRightStrip = CombineInstances(rightStripInstances, ColorLinesParent.transform);
+                combinedRightStrip.name = $"RightColorLine{judgePlaneIndex}";
+                ProcessCombinedInstance(combinedRightStrip, ColorLinesParent, ColorLinesParent.layer);
+
             }
         }
     }
@@ -305,9 +287,9 @@ public class ChartInstantiator : MonoBehaviour
         {
             // 假设Tap3D预制体的加载路径，你需要根据实际情况修改
             GameObject tapPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Tap3D");
-            GameObject tapOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Tap3DOutline");
+            //GameObject tapOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Tap3DOutline");
 
-            if (tapPrefab != null && tapOutlinePrefab != null)
+            if (tapPrefab != null)
             {
                 float tapXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
                 MeshFilter meshFilter = tapPrefab.GetComponent<MeshFilter>();
@@ -325,22 +307,11 @@ public class ChartInstantiator : MonoBehaviour
                 int tapIndex = 1;
                 foreach (var tap in chart.taps)
                 {
-                    GameObject prefabToInstantiate;
-                    // 判断是否有多押情况
-                    if (startTimeToInstanceNames.ContainsKey(tap.startT) && startTimeToInstanceNames[tap.startT].Count > 1)
-                    {
-                        //Debug.Log(tap.startT);
-                        prefabToInstantiate = tapOutlinePrefab;
-                    }
-                    else
-                    {
-                        prefabToInstantiate = tapPrefab;
-                    }
 
                     // 实例化Tap预制体
-                    GameObject tapInstance = Instantiate(prefabToInstantiate);
+                    GameObject tapInstance = Instantiate(tapPrefab);
                     tapInstance.name = $"Tap{tapIndex}"; // 命名
-                                                         // 将Tap设置为ChartGameObjects的子物体
+                    // 将Tap设置为ChartGameObjects的子物体
                     tapInstance.transform.SetParent(TapsParent.transform);
                     // 继承父物体的图层
                     int parentLayer = TapsParent.layer;
@@ -352,6 +323,9 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         // 获取关联JudgePlane在Tap开始时间的Y轴坐标
                         float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(tap.startT);
+                        tap.startY = yAxisPosition;
+                        // 注意Outline初始化为最初的颜色
+                        Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
                         float yPos = TransformYCoordinate(yAxisPosition);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（封装成方法方便复用，以下是示例方法定义，参数需根据实际情况传入合适的世界坐标点）
@@ -380,9 +354,7 @@ public class ChartInstantiator : MonoBehaviour
                         MyOutline outlineComponent = tapInstance.GetComponent<MyOutline>();
                         if (outlineComponent != null)
                         {
-                            // 将颜色从Hex转换为Unity的Color
-                            Color judgePlaneColor = HexToColor(associatedJudgePlaneObject.color.ToString());
-                            outlineComponent.OutlineColor = judgePlaneColor;
+                            outlineComponent.OutlineColor = planecolor;
                             outlineComponent.OutlineWidth = ChartParams.OutlineWidth;
                         }
                         else
@@ -413,9 +385,9 @@ public class ChartInstantiator : MonoBehaviour
         {
             // 加载常规Slide预制体和多押时的Slide预制体
             GameObject slidePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Slide3D");
-            GameObject slideOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Slide3DOutline");
+            //GameObject slideOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Slide3DOutline");
 
-            if (slidePrefab != null && slideOutlinePrefab != null)
+            if (slidePrefab != null)
             {
                 float slideXAxisLength = 0; // 用于存储Slide在X轴方向的长度（用于后续缩放等操作）
                 MeshFilter meshFilter = slidePrefab.GetComponent<MeshFilter>();
@@ -432,19 +404,9 @@ public class ChartInstantiator : MonoBehaviour
                 int slideIndex = 1;
                 foreach (var slide in chart.slides)
                 {
-                    GameObject prefabToInstantiate;
-                    // 判断是否有多押情况
-                    if (startTimeToInstanceNames.ContainsKey(slide.startT) && startTimeToInstanceNames[slide.startT].Count > 1)
-                    {
-                        prefabToInstantiate = slideOutlinePrefab;
-                    }
-                    else
-                    {
-                        prefabToInstantiate = slidePrefab;
-                    }
 
                     // 实例化Slide预制体
-                    GameObject slideInstance = Instantiate(prefabToInstantiate);
+                    GameObject slideInstance = Instantiate(slidePrefab);
                     slideInstance.name = $"Slide{slideIndex}"; // 命名
 
                     // 将Slide设置为合适的父物体的子物体，这里假设和Taps类似，有个SlidesParent，你可根据实际调整
@@ -459,6 +421,9 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         // 获取关联JudgePlane在Slide开始时间的Y轴坐标
                         float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(slide.startT);
+                        slide.startY = yAxisPosition;
+                        // 注意Outline初始化为最初的颜色
+                        Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
                         float yPos = TransformYCoordinate(yAxisPosition);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
@@ -485,9 +450,7 @@ public class ChartInstantiator : MonoBehaviour
                         MyOutline outlineComponent = slideInstance.GetComponent<MyOutline>();
                         if (outlineComponent != null)
                         {
-                            // 将颜色从Hex转换为Unity的Color
-                            Color judgePlaneColor = HexToColor(associatedJudgePlaneObject.color);
-                            outlineComponent.OutlineColor = judgePlaneColor;
+                            outlineComponent.OutlineColor = planecolor;
                             outlineComponent.OutlineWidth = ChartParams.OutlineWidth;
                         }
                         else
@@ -518,10 +481,10 @@ public class ChartInstantiator : MonoBehaviour
         {
             // 加载常规Flick预制体、多押时的Flick预制体和FlickArrow预制体
             GameObject flickPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick3D");
-            GameObject flickOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick3DOutline");
+            //GameObject flickOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/Flick3DOutline");
             GameObject flickArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/FlickArrow");
 
-            if (flickPrefab != null && flickOutlinePrefab != null && flickArrowPrefab != null)
+            if (flickPrefab != null && flickArrowPrefab != null)
             {
                 float flickXAxisLength = 0; // 用于存储Flick在X轴方向的长度（用于后续缩放等操作）
                 MeshFilter meshFilter = flickPrefab.GetComponent<MeshFilter>();
@@ -538,19 +501,8 @@ public class ChartInstantiator : MonoBehaviour
                 int flickIndex = 1;
                 foreach (var flick in chart.flicks)
                 {
-                    GameObject prefabToInstantiate;
-                    // 判断是否有多押情况
-                    if (startTimeToInstanceNames.ContainsKey(flick.startT) && startTimeToInstanceNames[flick.startT].Count > 1)
-                    {
-                        prefabToInstantiate = flickOutlinePrefab;
-                    }
-                    else
-                    {
-                        prefabToInstantiate = flickPrefab;
-                    }
-
                     // 实例化Flick预制体
-                    GameObject flickInstance = Instantiate(prefabToInstantiate);
+                    GameObject flickInstance = Instantiate(flickPrefab);
                     flickInstance.name = $"Flick{flickIndex}"; // 命名
 
                     // 将Flick设置为合适的父物体的子物体，这里假设和Taps、Slides类似，有个FlicksParent，你可根据实际调整
@@ -565,6 +517,9 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         // 获取关联JudgePlane在Flick开始时间的Y轴坐标
                         float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(flick.startT);
+                        flick.startY = yAxisPosition;
+                        // 注意Outline初始化为最初的颜色
+                        Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
                         float yPos = TransformYCoordinate(yAxisPosition);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
@@ -609,9 +564,7 @@ public class ChartInstantiator : MonoBehaviour
                         MyOutline outlineComponent = flickInstance.GetComponent<MyOutline>();
                         if (outlineComponent != null)
                         {
-                            // 将颜色从Hex转换为Unity的Color
-                            Color judgePlaneColor = HexToColor(associatedJudgePlaneObject.color);
-                            outlineComponent.OutlineColor = judgePlaneColor;
+                            outlineComponent.OutlineColor = planecolor;
                             outlineComponent.OutlineWidth = ChartParams.OutlineWidth;
                         }
                         else
@@ -642,9 +595,9 @@ public class ChartInstantiator : MonoBehaviour
         {
             // 加载常规StarHead预制体和多押时的StarHead预制体
             GameObject starheadPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead3D");
-            GameObject starheadOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead3DOutline");
+            //GameObject starheadOutlinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarHead3DOutline");
 
-            if (starheadPrefab != null && starheadOutlinePrefab != null)
+            if (starheadPrefab != null)
             {
                 float starheadXAxisLength = 0; // 先在外层定义变量，初始化为0，后续根据实际情况赋值
                 MeshFilter meshFilter = starheadPrefab.GetComponent<MeshFilter>();
@@ -661,19 +614,9 @@ public class ChartInstantiator : MonoBehaviour
                 int starIndex = 1;
                 foreach (var star in chart.stars)
                 {
-                    GameObject prefabToInstantiate;
-                    // 判断是否有多押情况
-                    if (startTimeToInstanceNames.ContainsKey(star.starHeadT) && startTimeToInstanceNames[star.starHeadT].Count > 1)
-                    {
-                        prefabToInstantiate = starheadOutlinePrefab;
-                    }
-                    else
-                    {
-                        prefabToInstantiate = starheadPrefab;
-                    }
 
                     // 实例化StarHead预制体
-                    GameObject starheadInstance = Instantiate(prefabToInstantiate);
+                    GameObject starheadInstance = Instantiate(starheadPrefab);
                     starheadInstance.name = $"StarHead{starIndex}"; // 命名
                     // 将StarHead设置为ChartGameObjects的子物体
                     starheadInstance.transform.SetParent(StarsParent.transform);
@@ -686,6 +629,9 @@ public class ChartInstantiator : MonoBehaviour
                     Vector2 firstStarCoodinate = star.GetFirstSubStarCoordinates();
                     float xAxisPosition = firstStarCoodinate.x;
                     float yAxisPosition = firstStarCoodinate.y;
+                    star.startY = yAxisPosition;
+                    // 注意Outline初始化为最初的颜色
+                    Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
                     float yPos = TransformYCoordinate(yAxisPosition);
 
                     // 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
@@ -714,9 +660,7 @@ public class ChartInstantiator : MonoBehaviour
                     MyOutline outlineComponent = starheadInstance.GetComponent<MyOutline>();
                     if (outlineComponent != null)
                     {
-                        // 将颜色从Hex转换为Unity的Color
-                        Color judgePlaneColor = HexToColor(associatedJudgePlaneObject.color);
-                        outlineComponent.OutlineColor = judgePlaneColor;
+                        outlineComponent.OutlineColor = planecolor;
                         outlineComponent.OutlineWidth = ChartParams.OutlineWidth;
                     }
                     else
@@ -749,16 +693,10 @@ public class ChartInstantiator : MonoBehaviour
             foreach (var hold in chart.holds)
             {
                 // 创建一个空物体作为 hold 实例的父物体，用于统一管理和规范命名
-                GameObject holdParent = new GameObject($"Hold{holdIndex}");
-                holdParent.transform.position = new Vector3(0, 0, 0);
-                // 将 holdParent 设置为 ChartGameObjects 的子物体
-                holdParent.transform.SetParent(HoldsParent.transform);
-                // 继承父物体的图层
-                int parentLayer = HoldsParent.layer;
-                holdParent.layer = parentLayer;
 
                 JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
-                Color judgePlaneColor = HexToColor(associatedJudgePlaneObject.color.ToString());
+                Color planecolor = Color.black;
+
                 if (associatedJudgePlaneObject != null)
                 {
                     string shaderName = "MaskMaterial"; // 默认使用 MaskMaterial 作为 shader
@@ -768,12 +706,18 @@ public class ChartInstantiator : MonoBehaviour
                     int subHoldIndex = 1;
                     foreach (var subHold in hold.subHoldList)
                     {
+
                         float startY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.startT);
                         float endY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.endT);
 
                         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
                         float startYWorld = TransformYCoordinate(startY);
                         float endYWorld = TransformYCoordinate(endY);
+
+                        if (subHoldIndex == 1)
+                        {
+                            planecolor = GradientColorList.GetColorAtTimeAndY(subHold.startT, startY);
+                        };
 
                         // 检查 SubHold 所在的 SubJudgePlane 是否为 Linear
                         bool isSubJudgePlaneLinear = associatedJudgePlaneObject.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
@@ -794,7 +738,7 @@ public class ChartInstantiator : MonoBehaviour
 
                                 // 一次性生成整个 SubHold 及两侧色条
                                 List<GameObject> subHoldAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
-                                    startYWorld, endYWorld, zPositionForStartT, zPositionForEndT, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}", holdParent, RenderQueue, shaderName, judgePlaneColor);
+                                    startYWorld, endYWorld, zPositionForStartT, zPositionForEndT, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
                                 //subHoldInstances.AddRange(subHoldAndColorLines);
                                 subHoldInstances.Add(subHoldAndColorLines[0]);
                                 OutlineInstances.Add(subHoldAndColorLines[1]);
@@ -835,17 +779,12 @@ public class ChartInstantiator : MonoBehaviour
 
                                     // 生成细分的 SubHold 及两侧色条
                                     List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName, judgePlaneColor);
+                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
                                     //segmentInstances.AddRange(segmentAndColorLines);
                                     subHoldInstances.Add(segmentAndColorLines[0]);
                                     OutlineInstances.Add(segmentAndColorLines[1]);
                                     OutlineInstances.Add(segmentAndColorLines[2]);
                                 }
-
-                                // 合并细分的 Instance 为一个新的 GameObject
-                                //GameObject combinedSubHold = CombineInstances(segmentInstances);
-                                //combinedSubHold.name = $"SubHold{subHoldIndex}";
-                                //subHoldInstances.Add(combinedSubHold);
                             }
                         }
                         else
@@ -906,7 +845,7 @@ public class ChartInstantiator : MonoBehaviour
                                 {
                                     // 偶数段
                                     List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld_Inner, startXMaxWorld_Inner, middleXMinWorld_Inner, middleXMaxWorld_Inner,
-                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName, judgePlaneColor);
+                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
                                     //segmentInstances.AddRange(segmentAndColorLines);
                                     subHoldInstances.Add(segmentAndColorLines[0]);
                                     OutlineInstances.Add(segmentAndColorLines[1]);
@@ -916,29 +855,22 @@ public class ChartInstantiator : MonoBehaviour
                                 {
                                     // 奇数段
                                     List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(middleXMinWorld_Inner, middleXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", holdParent, RenderQueue, shaderName, judgePlaneColor);
+                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
                                     //segmentInstances.AddRange(segmentAndColorLines);
                                     subHoldInstances.Add(segmentAndColorLines[0]);
                                     OutlineInstances.Add(segmentAndColorLines[1]);
                                     OutlineInstances.Add(segmentAndColorLines[2]);
                                 }
                             }
-
-                            // 合并细分的 Instance 为一个新的 GameObject
-                            //GameObject combinedSubHold = CombineInstances(segmentInstances);
-                            //combinedSubHold.name = $"SubHold{subHoldIndex}";
-                            //subHoldInstances.Add(combinedSubHold);
                         }
 
                         subHoldIndex++;
                     }
 
                     // 合并所有的 SubHold 为一个整个的 Hold
-                    GameObject combinedHold = CombineInstances(subHoldInstances);
+                    GameObject combinedHold = CombineInstances(subHoldInstances, HoldsParent.transform);
                     combinedHold.name = $"Hold{holdIndex}";
-                    combinedHold.transform.SetParent(holdParent.transform);
-                    int parentLayer2 = holdParent.layer;
-                    combinedHold.layer = parentLayer2;
+                    ProcessCombinedInstance(combinedHold, HoldsParent, HoldsParent.layer);
 
                     // 初始化 StartWhiteRect 和 EndWhiteRect
                     float startY1 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList[0].startT);
@@ -985,22 +917,21 @@ public class ChartInstantiator : MonoBehaviour
                     // 创建开头的白色矩形及两侧色条
                     GameObject startOutline = CreateHoldStartAndEndOutlineQuad(startXMinWorld1 - OutlineParams.HoldColorLineWidth, startXMaxWorld1 + OutlineParams.HoldColorLineWidth,
                         startXMinWorld2 - OutlineParams.HoldColorLineWidth, startXMaxWorld2 + OutlineParams.HoldColorLineWidth,
-                        startYWorld1, startYWorld2, startZ1, startZ2, WhiteSprite, $"StartWhiteRect{holdIndex}", holdParent, RenderQueue, shaderName, judgePlaneColor);
+                        startYWorld1, startYWorld2, startZ1, startZ2, WhiteSprite, $"StartWhiteRect{holdIndex}", HoldsParent, RenderQueue, shaderName, planecolor);
 
                     // 创建结尾的白色矩形及两侧色条
                     GameObject endOutline = CreateHoldStartAndEndOutlineQuad(endXMinWorld1 - OutlineParams.HoldColorLineWidth, endXMaxWorld1 + OutlineParams.HoldColorLineWidth,
                         endXMinWorld2 - OutlineParams.HoldColorLineWidth, endXMaxWorld2 + OutlineParams.HoldColorLineWidth,
-                        endYWorld1, endYWorld2, endZ1, endZ2, WhiteSprite, $"EndWhiteRect{holdIndex}", holdParent, RenderQueue, shaderName, judgePlaneColor);
+                        endYWorld1, endYWorld2, endZ1, endZ2, WhiteSprite, $"EndWhiteRect{holdIndex}", HoldsParent, RenderQueue, shaderName, planecolor);
 
                     // 合并 Hold 周围一圈的所有亮条（包括 StartWhiteRect 和 EndWhiteRect）
                     //List<GameObject> allOutlineInstances = new List<GameObject>();
                     OutlineInstances.Add(startOutline);
                     OutlineInstances.Add(endOutline);
 
-                    GameObject combinedHoldOutline = CombineInstances(OutlineInstances);
+                    GameObject combinedHoldOutline = CombineInstances(OutlineInstances, HoldOutlinesParent.transform);
                     combinedHoldOutline.name = $"HoldOutline{holdIndex}";
-                    combinedHoldOutline.transform.SetParent(holdParent.transform);
-                    combinedHoldOutline.layer = parentLayer;
+                    ProcessCombinedInstance(combinedHoldOutline, HoldOutlinesParent, HoldOutlinesParent.layer);
                 }
                 holdIndex++;
             }
@@ -1064,13 +995,8 @@ public class ChartInstantiator : MonoBehaviour
             //先将subStar的起点和终点转换为画布上的坐标
             Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
             Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
-            //Debug.Log(subStarStart);
-            //Debug.Log(subStarEnd);
             Vector2 subStarStartScreen = ScalePositionToScreenStar(subStarStart, SubStarsParentRect);
             Vector2 subStarEndScreen = ScalePositionToScreenStar(subStarEnd, SubStarsParentRect);
-            //Debug.Log(subStarStartScreen);
-            //Debug.Log(subStarEndScreen);
-
 
             if (subStarIndex == 1)
             {
@@ -1125,15 +1051,11 @@ public class ChartInstantiator : MonoBehaviour
     }
 
     private List<GameObject> CreateJudgePlaneAndColorLinesQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName,
-        GameObject judgePlaneParent, GameObject leftColorLine, GameObject rightColorLine, int RenderQueue, string colorHex)
+        GameObject judgePlaneParent, GameObject ColorLinesParent, int RenderQueue, Color planecolor)
     {
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-        //Debug.Log(startY);
-        //Debug.Log(endY);
         float startYWorld = TransformYCoordinate(startY);
         float endYWorld = TransformYCoordinate(endY);
-        //Debug.Log(startYWorld);
-        //Debug.Log(endYWorld);
 
         // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
         float zPositionForStartT = CalculateZAxisPosition(startT);
@@ -1160,11 +1082,11 @@ public class ChartInstantiator : MonoBehaviour
         // 创建JudgePlane实例，使用Sprite的颜色，不再额外赋予灰色
         GameObject judgePlaneInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, judgePlaneParent, RenderQueue, 1f, "MaskMaterial");
         // 为JudgePlane实例创建独立的材质实例
-        MeshRenderer judgePlaneRenderer = judgePlaneInstance.GetComponent<MeshRenderer>();
-        if (judgePlaneRenderer != null)
-        {
-            judgePlaneRenderer.material = new Material(judgePlaneRenderer.material);
-        }
+        //MeshRenderer judgePlaneRenderer = judgePlaneInstance.GetComponent<MeshRenderer>();
+        //if (judgePlaneRenderer != null)
+        //{
+        //    judgePlaneRenderer.material = new Material(judgePlaneRenderer.material);
+        //}
 
         // 创建左侧亮条实例
         Vector3 leftPoint1 = new Vector3(-startXWorldPlus, startYWorld, zPositionForStartT);
@@ -1173,25 +1095,15 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 leftPoint4 = new Vector3(-endXWorldPlus, endYWorld, zPositionForStartT - lengthForZAxis);
 
         //string leftObjectName = $"LeftStrip_{objectName}";
-        GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, sprite, objectName, leftColorLine, RenderQueue, 1f, "MaskMaterialColorLine");
-        Color leftColor;
-        if (!string.IsNullOrEmpty(colorHex))
-        {
-            leftColor = HexToColor(colorHex);
-        }
-        else
-        {
-            //默认颜色为灰色
-            leftColor = new Color(51f / 255f, 51f / 255f, 51f / 255f);
-        }
-        SetSpriteColor(leftStripInstance, leftColor);
+        GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, sprite, objectName, ColorLinesParent, RenderQueue, 1f, "MaskMaterialColorLine");
+        SetSpriteColor(leftStripInstance, planecolor);
 
         // 为左侧亮条实例创建独立的材质实例
-        MeshRenderer leftStripRenderer = leftStripInstance.GetComponent<MeshRenderer>();
-        if (leftStripRenderer != null)
-        {
-            leftStripRenderer.material = new Material(leftStripRenderer.material);
-        }
+        //MeshRenderer leftStripRenderer = leftStripInstance.GetComponent<MeshRenderer>();
+        //if (leftStripRenderer != null)
+        //{
+        //    leftStripRenderer.material = new Material(leftStripRenderer.material);
+        //}
 
         // 创建右侧亮条实例
         Vector3 rightPoint1 = new Vector3(startXWorldPlus, startYWorld, zPositionForStartT);
@@ -1200,25 +1112,15 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 rightPoint4 = new Vector3(endXWorldPlus, endYWorld, zPositionForStartT - lengthForZAxis);
 
         //string rightObjectName = $"RightStrip_{objectName}";
-        GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, sprite, objectName, rightColorLine, RenderQueue, 1f, "MaskMaterialColorLine");
-        Color rightColor;
-        if (!string.IsNullOrEmpty(colorHex))
-        {
-            rightColor = HexToColor(colorHex);
-        }
-        else
-        {
-            //默认颜色为灰色
-            rightColor = new Color(51f / 255f, 51f / 255f, 51f / 255f);
-        }
-        SetSpriteColor(rightStripInstance, rightColor);
+        GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, sprite, objectName, ColorLinesParent, RenderQueue, 1f, "MaskMaterialColorLine");
+        SetSpriteColor(rightStripInstance, planecolor);
 
         // 为右侧亮条实例创建独立的材质实例
-        MeshRenderer rightStripRenderer = rightStripInstance.GetComponent<MeshRenderer>();
-        if (rightStripRenderer != null)
-        {
-            rightStripRenderer.material = new Material(rightStripRenderer.material);
-        }
+        //MeshRenderer rightStripRenderer = rightStripInstance.GetComponent<MeshRenderer>();
+        //if (rightStripRenderer != null)
+        //{
+        //    rightStripRenderer.material = new Material(rightStripRenderer.material);
+        //}
 
         List<GameObject> instances = new List<GameObject>
         {
@@ -1230,26 +1132,11 @@ public class ChartInstantiator : MonoBehaviour
     }
 
 
-    private void SetSpriteColor(GameObject obj, Color color)
-    {
-        MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
-        if (renderer != null)
-        {
-            // 实例化材质
-            Material instanceMaterial = new Material(renderer.material);
-            instanceMaterial.color = color;
-            renderer.material = instanceMaterial;
-            //Debug.Log(renderer.material.color);
-        }
-    }
-
     private GameObject CreateHoldStartAndEndOutlineQuad(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
         float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite sprite, string objectName, GameObject parentObject, int RenderQueue, string shaderName, Color color)
     {
 
         float AlphaOutline = 1f;
-        //Debug.Log(startY);
-        //Debug.Log(endY);
         // 注意四边形顶点顺序
         Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
         Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
@@ -1259,18 +1146,11 @@ public class ChartInstantiator : MonoBehaviour
         GameObject holdInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, AlphaOutline, shaderName);
         SetSpriteColor(holdInstance, color);
 
-        // 为 Hold 实例创建独立的材质实例
-        //MeshRenderer holdRenderer = holdInstance.GetComponent<MeshRenderer>();
-        //if (holdRenderer != null)
-        //{
-        //    holdRenderer.material = new Material(holdRenderer.material);
-        //}
-
         return holdInstance;
     }
 
     private List<GameObject> CreateHoldQuadWithColorLines(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
-        float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite spritehold, Sprite spritecolor, string objectName, GameObject parentObject, int RenderQueue, string shaderName, Color color)
+        float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite spritehold, Sprite spritecolor, string objectName, GameObject parentObject, GameObject colorLineParentObject, int RenderQueue, string shaderName, Color color)
     {
         float AlphaHold = 0.8f;
         float AlphaOutline = 1f;
@@ -1287,13 +1167,6 @@ public class ChartInstantiator : MonoBehaviour
         GameObject holdInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, spritehold, objectName, parentObject, RenderQueue, AlphaHold, shaderName);
         instances.Add(holdInstance);
 
-        // 为 Hold 实例创建独立的材质实例
-        //MeshRenderer holdRenderer = holdInstance.GetComponent<MeshRenderer>();
-        //if (holdRenderer != null)
-        //{
-        //    holdRenderer.material = new Material(holdRenderer.material);
-        //}
-
         // 创建左侧亮条实例
         float leftStartXMinWorld = -startXMinWorld + OutlineParams.HoldColorLineWidth;
         float leftEndXMinWorld = -endXMinWorld + OutlineParams.HoldColorLineWidth;
@@ -1302,15 +1175,9 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 leftPoint3 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
         Vector3 leftPoint4 = new Vector3(leftEndXMinWorld, endY, zPositionForEndT);
 
-        GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, spritecolor, $"Left_{objectName}", parentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
+        GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, spritecolor, $"Left_{objectName}", colorLineParentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
         SetSpriteColor(leftStripInstance, color);
 
-        // 为左侧亮条实例创建独立的材质实例
-        //MeshRenderer leftStripRenderer = leftStripInstance.GetComponent<MeshRenderer>();
-        //if (leftStripRenderer != null)
-        //{
-        //    leftStripRenderer.material = new Material(leftStripRenderer.material);
-        //}
         instances.Add(leftStripInstance);
 
         // 创建右侧亮条实例
@@ -1321,15 +1188,9 @@ public class ChartInstantiator : MonoBehaviour
         Vector3 rightPoint3 = new Vector3(rightEndXMaxWorld, endY, zPositionForEndT);
         Vector3 rightPoint4 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
 
-        GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, spritecolor, $"Right_{objectName}", parentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
+        GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, spritecolor, $"Right_{objectName}", colorLineParentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
         SetSpriteColor(rightStripInstance, color);
 
-        // 为右侧亮条实例创建独立的材质实例
-        //MeshRenderer rightStripRenderer = rightStripInstance.GetComponent<MeshRenderer>();
-        //if (rightStripRenderer != null)
-        //{
-        //    rightStripRenderer.material = new Material(rightStripRenderer.material);
-        //}
         instances.Add(rightStripInstance);
 
         return instances;

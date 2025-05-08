@@ -65,33 +65,65 @@ public static class SongAndChartData
             {
                 Dictionary<string, object> result = new Dictionary<string, object>();
 
-                IXLWorksheet planesSheet = workbook.Worksheet("planes");
-                IXLWorksheet tapsSheet = workbook.Worksheet("taps");
-                IXLWorksheet holdsSheet = workbook.Worksheet("holds");
-                IXLWorksheet slidesSheet = workbook.Worksheet("slides");
-                IXLWorksheet flicksSheet = workbook.Worksheet("flicks");
-                IXLWorksheet starsSheet = workbook.Worksheet("stars");
+                // 处理 speed 数据
+                IXLWorksheet speedSheet = workbook.Worksheet("speed");
+                List<Dictionary<string, object>> speedData = new List<Dictionary<string, object>>();
+                var speedHeaderRow = speedSheet.FirstRowUsed();
+                var speedStartTIndex = GetColumnIndex(speedHeaderRow, "startT");
+                var speedEndTIndex = GetColumnIndex(speedHeaderRow, "endT");
+                var speedSpIndex = GetColumnIndex(speedHeaderRow, "sp");
 
-                // 处理 planes 数据
-                List<Dictionary<string, object>> planesData = new List<Dictionary<string, object>>();
-                var headerRow = planesSheet.FirstRowUsed();
-                var startTIndex = GetColumnIndex(headerRow, "startT");
-                var startYIndex = GetColumnIndex(headerRow, "startY");
-                var endTIndex = GetColumnIndex(headerRow, "endT");
-                var endYIndex = GetColumnIndex(headerRow, "endY");
-                var funcIndex = GetColumnIndex(headerRow, "Func");
-                var idIndex = GetColumnIndex(headerRow, "id");
-                var colorIndex = GetColumnIndex(headerRow, "color");
+                var speedDataRows = speedSheet.RowsUsed().Skip(1);
+                foreach (var row in speedDataRows)
+                {
+                    Dictionary<string, object> speedRow = new Dictionary<string, object>();
+                    speedRow["startT"] = ParseDoubleValue(row.Cell(speedStartTIndex), 3);
+                    speedRow["endT"] = ParseDoubleValue(row.Cell(speedEndTIndex), 3);
+                    speedRow["sp"] = ParseDoubleValue(row.Cell(speedSpIndex), 3);
+                    speedData.Add(speedRow);
+                }
+                result["speed"] = speedData;
 
-                var dataRows = planesSheet.RowsUsed().Skip(1);
+                // 处理 color 数据
+                IXLWorksheet colorSheet = workbook.Worksheet("color");
+                List<Dictionary<string, object>> colorData = new List<Dictionary<string, object>>();
+                var colorHeaderRow = colorSheet.FirstRowUsed();
+                var colorStartTIndex = GetColumnIndex(colorHeaderRow, "startT");
+                var colorEndTIndex = GetColumnIndex(colorHeaderRow, "endT");
+                var colorLcolorIndex = GetColumnIndex(colorHeaderRow, "Lcolor");
+                var colorUcolorIndex = GetColumnIndex(colorHeaderRow, "Ucolor");
+
+                var colorDataRows = colorSheet.RowsUsed().Skip(1);
+                foreach (var row in colorDataRows)
+                {
+                    Dictionary<string, object> colorRow = new Dictionary<string, object>();
+                    colorRow["startT"] = ParseDoubleValue(row.Cell(colorStartTIndex), 3);
+                    colorRow["endT"] = ParseDoubleValue(row.Cell(colorEndTIndex), 3);
+                    colorRow["Lcolor"] = ParseStringValue(row.Cell(colorLcolorIndex));
+                    colorRow["Ucolor"] = ParseStringValue(row.Cell(colorUcolorIndex));
+                    colorData.Add(colorRow);
+                }
+                result["color"] = colorData;
+
+                // 处理 plane 数据
+                IXLWorksheet planeSheet = workbook.Worksheet("plane");
+                List<Dictionary<string, object>> planeData = new List<Dictionary<string, object>>();
+                var planeHeaderRow = planeSheet.FirstRowUsed();
+                var startTIndex = GetColumnIndex(planeHeaderRow, "startT");
+                var startYIndex = GetColumnIndex(planeHeaderRow, "startY");
+                var endTIndex = GetColumnIndex(planeHeaderRow, "endT");
+                var endYIndex = GetColumnIndex(planeHeaderRow, "endY");
+                var funcIndex = GetColumnIndex(planeHeaderRow, "Func");
+                var idIndex = GetColumnIndex(planeHeaderRow, "id");
+
+                var dataRows = planeSheet.RowsUsed().Skip(1);
                 var validRows = dataRows.Where(row => !string.IsNullOrEmpty(row.Cell(idIndex).GetValue<string>()?.Trim()));
-                foreach (var group in validRows.GroupBy(row => ParseIntValue(row.Cell(idIndex), "planes")))
+                foreach (var group in validRows.GroupBy(row => ParseIntValue(row.Cell(idIndex), "plane")))
                 {
                     if (group.Key.HasValue)
                     {
                         Dictionary<string, object> plane = new Dictionary<string, object>();
                         plane["id"] = group.Key.Value;
-                        plane["color"] = ParseStringValue(group.First().Cell(colorIndex));
                         List<Dictionary<string, object>> subData = new List<Dictionary<string, object>>();
                         foreach (var row in group)
                         {
@@ -104,160 +136,165 @@ public static class SongAndChartData
                             subData.Add(subRow);
                         }
                         plane["sub"] = subData;
-                        planesData.Add(plane);
+                        planeData.Add(plane);
                     }
                 }
-                result["planes"] = planesData;
+                result["plane"] = planeData;
 
-                // 处理 taps 数据
-                List<Dictionary<string, object>> tapsData = new List<Dictionary<string, object>>();
-                var tapsHeaderRow = tapsSheet.FirstRowUsed();
-                var tapsStartTIndex = GetColumnIndex(tapsHeaderRow, "startT");
-                var tapsStartXIndex = GetColumnIndex(tapsHeaderRow, "startX");
-                var tapsSizeIndex = GetColumnIndex(tapsHeaderRow, "Size");
-                var tapsPidIndex = GetColumnIndex(tapsHeaderRow, "Pid");
+                // 处理 tap 数据
+                IXLWorksheet tapSheet = workbook.Worksheet("tap");
+                List<Dictionary<string, object>> tapData = new List<Dictionary<string, object>>();
+                var tapHeaderRow = tapSheet.FirstRowUsed();
+                var tapStartTIndex = GetColumnIndex(tapHeaderRow, "startT");
+                var tapStartXIndex = GetColumnIndex(tapHeaderRow, "startX");
+                var tapSizeIndex = GetColumnIndex(tapHeaderRow, "Size");
+                var tapPidIndex = GetColumnIndex(tapHeaderRow, "Pid");
 
-                var tapsDataRows = tapsSheet.RowsUsed().Skip(1);
-                foreach (var row in tapsDataRows)
+                var tapDataRows = tapSheet.RowsUsed().Skip(1);
+                foreach (var row in tapDataRows)
                 {
                     Dictionary<string, object> tap = new Dictionary<string, object>();
-                    tap["startT"] = ParseDoubleValue(row.Cell(tapsStartTIndex), 3);
-                    tap["startX"] = ParseDoubleValue(row.Cell(tapsStartXIndex), 3);
-                    tap["Size"] = ParseDoubleValue(row.Cell(tapsSizeIndex), 3);
-                    tap["Pid"] = ParseIntValue(row.Cell(tapsPidIndex), "taps");
-                    tapsData.Add(tap);
+                    tap["startT"] = ParseDoubleValue(row.Cell(tapStartTIndex), 3);
+                    tap["startX"] = ParseDoubleValue(row.Cell(tapStartXIndex), 3);
+                    tap["Size"] = ParseDoubleValue(row.Cell(tapSizeIndex), 3);
+                    tap["Pid"] = ParseIntValue(row.Cell(tapPidIndex), "tap");
+                    tapData.Add(tap);
                 }
-                result["taps"] = tapsData;
+                result["tap"] = tapData;
 
-                // 处理 holds 数据
-                List<Dictionary<string, object>> holdsData = new List<Dictionary<string, object>>();
-                var holdsHeaderRow = holdsSheet.FirstRowUsed();
-                var holdsStartTIndex = GetColumnIndex(holdsHeaderRow, "startT");
-                var holdsStartXMinIndex = GetColumnIndex(holdsHeaderRow, "startXMin");
-                var holdsStartXMaxIndex = GetColumnIndex(holdsHeaderRow, "startXMax");
-                var holdsEndTIndex = GetColumnIndex(holdsHeaderRow, "endT");
-                var holdsEndXMinIndex = GetColumnIndex(holdsHeaderRow, "endXMin");
-                var holdsEndXMaxIndex = GetColumnIndex(holdsHeaderRow, "endXMax");
-                var holdsLFuncIndex = GetColumnIndex(holdsHeaderRow, "LFunc");
-                var holdsRFuncIndex = GetColumnIndex(holdsHeaderRow, "RFunc");
-                var holdsIdIndex = GetColumnIndex(holdsHeaderRow, "id");
-                var holdsPidIndex = GetColumnIndex(holdsHeaderRow, "Pid");
-                var holdsJagnumIndex = GetColumnIndex(holdsHeaderRow, "Jagnum"); // 新增获取 Jagnum 列索引
+                // 处理 hold 数据
+                IXLWorksheet holdSheet = workbook.Worksheet("hold");
+                List<Dictionary<string, object>> holdData = new List<Dictionary<string, object>>();
+                var holdHeaderRow = holdSheet.FirstRowUsed();
+                var holdStartTIndex = GetColumnIndex(holdHeaderRow, "startT");
+                var holdStartXMinIndex = GetColumnIndex(holdHeaderRow, "startXMin");
+                var holdStartXMaxIndex = GetColumnIndex(holdHeaderRow, "startXMax");
+                var holdEndTIndex = GetColumnIndex(holdHeaderRow, "endT");
+                var holdEndXMinIndex = GetColumnIndex(holdHeaderRow, "endXMin");
+                var holdEndXMaxIndex = GetColumnIndex(holdHeaderRow, "endXMax");
+                var holdLFuncIndex = GetColumnIndex(holdHeaderRow, "LFunc");
+                var holdRFuncIndex = GetColumnIndex(holdHeaderRow, "RFunc");
+                var holdIdIndex = GetColumnIndex(holdHeaderRow, "id");
+                var holdPidIndex = GetColumnIndex(holdHeaderRow, "Pid");
+                var holdJagnumIndex = GetColumnIndex(holdHeaderRow, "Jagnum");
 
-                var holdsDataRows = holdsSheet.RowsUsed().Skip(1);
-                var validHoldsRows = holdsDataRows.Where(row => !string.IsNullOrEmpty(row.Cell(holdsIdIndex).GetValue<string>()?.Trim()));
-                foreach (var group in validHoldsRows.GroupBy(row => ParseIntValue(row.Cell(holdsIdIndex), "holds")))
+                var holdDataRows = holdSheet.RowsUsed().Skip(1);
+                var validHoldRows = holdDataRows.Where(row => !string.IsNullOrEmpty(row.Cell(holdIdIndex).GetValue<string>()?.Trim()));
+                foreach (var group in validHoldRows.GroupBy(row => ParseIntValue(row.Cell(holdIdIndex), "hold")))
                 {
                     if (group.Key.HasValue)
                     {
                         Dictionary<string, object> hold = new Dictionary<string, object>();
-                        hold["Pid"] = ParseIntValue(group.First().Cell(holdsPidIndex), "holds") ?? 0;
+                        hold["Pid"] = ParseIntValue(group.First().Cell(holdPidIndex), "hold") ?? 0;
                         hold["id"] = group.Key.Value;
                         List<Dictionary<string, object>> subData = new List<Dictionary<string, object>>();
                         foreach (var row in group)
                         {
                             Dictionary<string, object> subRow = new Dictionary<string, object>();
-                            subRow["startT"] = ParseDoubleValue(row.Cell(holdsStartTIndex), 3);
-                            subRow["startXMin"] = ParseDoubleValue(row.Cell(holdsStartXMinIndex), 3);
-                            subRow["startXMax"] = ParseDoubleValue(row.Cell(holdsStartXMaxIndex), 3);
-                            subRow["endT"] = ParseDoubleValue(row.Cell(holdsEndTIndex), 3);
-                            subRow["endXMin"] = ParseDoubleValue(row.Cell(holdsEndXMinIndex), 3);
-                            subRow["endXMax"] = ParseDoubleValue(row.Cell(holdsEndXMaxIndex), 3);
-                            subRow["LFunc"] = ParseStringValue(row.Cell(holdsLFuncIndex));
-                            subRow["RFunc"] = ParseStringValue(row.Cell(holdsRFuncIndex));
-                            subRow["Jagnum"] = ParseIntValue(row.Cell(holdsJagnumIndex), "holds") ?? 0; // 新增处理 Jagnum 属性
+                            subRow["startT"] = ParseDoubleValue(row.Cell(holdStartTIndex), 3);
+                            subRow["startXMin"] = ParseDoubleValue(row.Cell(holdStartXMinIndex), 3);
+                            subRow["startXMax"] = ParseDoubleValue(row.Cell(holdStartXMaxIndex), 3);
+                            subRow["endT"] = ParseDoubleValue(row.Cell(holdEndTIndex), 3);
+                            subRow["endXMin"] = ParseDoubleValue(row.Cell(holdEndXMinIndex), 3);
+                            subRow["endXMax"] = ParseDoubleValue(row.Cell(holdEndXMaxIndex), 3);
+                            subRow["LFunc"] = ParseStringValue(row.Cell(holdLFuncIndex));
+                            subRow["RFunc"] = ParseStringValue(row.Cell(holdRFuncIndex));
+                            subRow["Jagnum"] = ParseIntValue(row.Cell(holdJagnumIndex), "hold") ?? 0;
                             subData.Add(subRow);
                         }
                         hold["sub"] = subData;
-                        holdsData.Add(hold);
+                        holdData.Add(hold);
                     }
                 }
-                result["holds"] = holdsData;
+                result["hold"] = holdData;
 
-                // 处理 slides 数据
-                List<Dictionary<string, object>> slidesData = new List<Dictionary<string, object>>();
-                var slidesHeaderRow = slidesSheet.FirstRowUsed();
-                var slidesStartTIndex = GetColumnIndex(slidesHeaderRow, "startT");
-                var slidesStartXIndex = GetColumnIndex(slidesHeaderRow, "startX");
-                var slidesSizeIndex = GetColumnIndex(slidesHeaderRow, "Size");
-                var slidesPidIndex = GetColumnIndex(slidesHeaderRow, "Pid");
+                // 处理 slide 数据
+                IXLWorksheet slideSheet = workbook.Worksheet("slide");
+                List<Dictionary<string, object>> slideData = new List<Dictionary<string, object>>();
+                var slideHeaderRow = slideSheet.FirstRowUsed();
+                var slideStartTIndex = GetColumnIndex(slideHeaderRow, "startT");
+                var slideStartXIndex = GetColumnIndex(slideHeaderRow, "startX");
+                var slideSizeIndex = GetColumnIndex(slideHeaderRow, "Size");
+                var slidePidIndex = GetColumnIndex(slideHeaderRow, "Pid");
 
-                var slidesDataRows = slidesSheet.RowsUsed().Skip(1);
-                foreach (var row in slidesDataRows)
+                var slideDataRows = slideSheet.RowsUsed().Skip(1);
+                foreach (var row in slideDataRows)
                 {
                     Dictionary<string, object> slide = new Dictionary<string, object>();
-                    slide["startT"] = ParseDoubleValue(row.Cell(slidesStartTIndex), 3);
-                    slide["startX"] = ParseDoubleValue(row.Cell(slidesStartXIndex), 3);
-                    slide["Size"] = ParseDoubleValue(row.Cell(slidesSizeIndex), 3);
-                    slide["Pid"] = ParseIntValue(row.Cell(slidesPidIndex), "slides");
-                    slidesData.Add(slide);
+                    slide["startT"] = ParseDoubleValue(row.Cell(slideStartTIndex), 3);
+                    slide["startX"] = ParseDoubleValue(row.Cell(slideStartXIndex), 3);
+                    slide["Size"] = ParseDoubleValue(row.Cell(slideSizeIndex), 3);
+                    slide["Pid"] = ParseIntValue(row.Cell(slidePidIndex), "slide");
+                    slideData.Add(slide);
                 }
-                result["slides"] = slidesData;
+                result["slide"] = slideData;
 
-                // 处理 flicks 数据
-                List<Dictionary<string, object>> flicksData = new List<Dictionary<string, object>>();
-                var flicksHeaderRow = flicksSheet.FirstRowUsed();
-                var flicksStartTIndex = GetColumnIndex(flicksHeaderRow, "startT");
-                var flicksStartXIndex = GetColumnIndex(flicksHeaderRow, "startX");
-                var flicksSizeIndex = GetColumnIndex(flicksHeaderRow, "Size");
-                var flicksDirIndex = GetColumnIndex(flicksHeaderRow, "Dir");
-                var flicksPidIndex = GetColumnIndex(flicksHeaderRow, "Pid");
+                // 处理 flick 数据
+                IXLWorksheet flickSheet = workbook.Worksheet("flick");
+                List<Dictionary<string, object>> flickData = new List<Dictionary<string, object>>();
+                var flickHeaderRow = flickSheet.FirstRowUsed();
+                var flickStartTIndex = GetColumnIndex(flickHeaderRow, "startT");
+                var flickStartXIndex = GetColumnIndex(flickHeaderRow, "startX");
+                var flickSizeIndex = GetColumnIndex(flickHeaderRow, "Size");
+                var flickDirIndex = GetColumnIndex(flickHeaderRow, "Dir");
+                var flickPidIndex = GetColumnIndex(flickHeaderRow, "Pid");
 
-                var flicksDataRows = flicksSheet.RowsUsed().Skip(1);
-                foreach (var row in flicksDataRows)
+                var flickDataRows = flickSheet.RowsUsed().Skip(1);
+                foreach (var row in flickDataRows)
                 {
                     Dictionary<string, object> flick = new Dictionary<string, object>();
-                    flick["startT"] = ParseDoubleValue(row.Cell(flicksStartTIndex), 3);
-                    flick["startX"] = ParseDoubleValue(row.Cell(flicksStartXIndex), 3);
-                    flick["Size"] = ParseDoubleValue(row.Cell(flicksSizeIndex), 3);
-                    flick["Dir"] = ParseStringValue(row.Cell(flicksDirIndex));
-                    flick["Pid"] = ParseIntValue(row.Cell(flicksPidIndex), "flicks");
-                    flicksData.Add(flick);
+                    flick["startT"] = ParseDoubleValue(row.Cell(flickStartTIndex), 3);
+                    flick["startX"] = ParseDoubleValue(row.Cell(flickStartXIndex), 3);
+                    flick["Size"] = ParseDoubleValue(row.Cell(flickSizeIndex), 3);
+                    flick["Dir"] = ParseStringValue(row.Cell(flickDirIndex));
+                    flick["Pid"] = ParseIntValue(row.Cell(flickPidIndex), "flick");
+                    flickData.Add(flick);
                 }
-                result["flicks"] = flicksData;
+                result["flick"] = flickData;
 
-                // 处理 stars 数据
-                List<Dictionary<string, object>> starsData = new List<Dictionary<string, object>>();
-                var starsHeaderRow = starsSheet.FirstRowUsed();
-                var starsStartTIndex = GetColumnIndex(starsHeaderRow, "startT");
-                var starsEndTIndex = GetColumnIndex(starsHeaderRow, "endT");
-                var starsStartXIndex = GetColumnIndex(starsHeaderRow, "startX");
-                var starsStartYIndex = GetColumnIndex(starsHeaderRow, "startY");
-                var starsEndXIndex = GetColumnIndex(starsHeaderRow, "endX");
-                var starsEndYIndex = GetColumnIndex(starsHeaderRow, "endY");
-                var starsFuncIndex = GetColumnIndex(starsHeaderRow, "Func");
-                var starsIdIndex = GetColumnIndex(starsHeaderRow, "id");
-                var starsPidIndex = GetColumnIndex(starsHeaderRow, "Pid");
-                var starsHeadTIndex = GetColumnIndex(starsHeaderRow, "headT");
+                // 处理 star 数据
+                IXLWorksheet starSheet = workbook.Worksheet("star");
+                List<Dictionary<string, object>> starData = new List<Dictionary<string, object>>();
+                var starHeaderRow = starSheet.FirstRowUsed();
+                var starStartTIndex = GetColumnIndex(starHeaderRow, "startT");
+                var starEndTIndex = GetColumnIndex(starHeaderRow, "endT");
+                var starStartXIndex = GetColumnIndex(starHeaderRow, "startX");
+                var starStartYIndex = GetColumnIndex(starHeaderRow, "startY");
+                var starEndXIndex = GetColumnIndex(starHeaderRow, "endX");
+                var starEndYIndex = GetColumnIndex(starHeaderRow, "endY");
+                var starFuncIndex = GetColumnIndex(starHeaderRow, "Func");
+                var starIdIndex = GetColumnIndex(starHeaderRow, "id");
+                var starPidIndex = GetColumnIndex(starHeaderRow, "Pid");
+                var starHeadTIndex = GetColumnIndex(starHeaderRow, "headT");
 
-                var starsDataRows = starsSheet.RowsUsed().Skip(1);
-                var validStarsRows = starsDataRows.Where(row => !string.IsNullOrEmpty(row.Cell(starsIdIndex).GetValue<string>()?.Trim()));
-                foreach (var group in validStarsRows.GroupBy(row => ParseIntValue(row.Cell(starsIdIndex), "stars")))
+                var starDataRows = starSheet.RowsUsed().Skip(1);
+                var validStarRows = starDataRows.Where(row => !string.IsNullOrEmpty(row.Cell(starIdIndex).GetValue<string>()?.Trim()));
+                foreach (var group in validStarRows.GroupBy(row => ParseIntValue(row.Cell(starIdIndex), "star")))
                 {
                     if (group.Key.HasValue)
                     {
                         Dictionary<string, object> star = new Dictionary<string, object>();
-                        star["Pid"] = ParseIntValue(group.First().Cell(starsPidIndex), "stars") ?? 0;
+                        star["Pid"] = ParseIntValue(group.First().Cell(starPidIndex), "star") ?? 0;
                         star["id"] = group.Key.Value;
-                        star["headT"] = ParseDoubleValue(group.First().Cell(starsHeadTIndex), 3);
+                        star["headT"] = ParseDoubleValue(group.First().Cell(starHeadTIndex), 3);
                         List<Dictionary<string, object>> subData = new List<Dictionary<string, object>>();
                         foreach (var row in group)
                         {
                             Dictionary<string, object> subRow = new Dictionary<string, object>();
-                            subRow["startT"] = ParseDoubleValue(row.Cell(starsStartTIndex), 3);
-                            subRow["endT"] = ParseDoubleValue(row.Cell(starsEndTIndex), 3);
-                            subRow["startX"] = ParseDoubleValue(row.Cell(starsStartXIndex), 3);
-                            subRow["startY"] = ParseDoubleValue(row.Cell(starsStartYIndex), 3);
-                            subRow["endX"] = ParseDoubleValue(row.Cell(starsEndXIndex), 3);
-                            subRow["endY"] = ParseDoubleValue(row.Cell(starsEndYIndex), 3);
-                            subRow["Func"] = ParseStringValue(row.Cell(starsFuncIndex));
+                            subRow["startT"] = ParseDoubleValue(row.Cell(starStartTIndex), 3);
+                            subRow["endT"] = ParseDoubleValue(row.Cell(starEndTIndex), 3);
+                            subRow["startX"] = ParseDoubleValue(row.Cell(starStartXIndex), 3);
+                            subRow["startY"] = ParseDoubleValue(row.Cell(starStartYIndex), 3);
+                            subRow["endX"] = ParseDoubleValue(row.Cell(starEndXIndex), 3);
+                            subRow["endY"] = ParseDoubleValue(row.Cell(starEndYIndex), 3);
+                            subRow["Func"] = ParseStringValue(row.Cell(starFuncIndex));
                             subData.Add(subRow);
                         }
                         star["sub"] = subData;
-                        starsData.Add(star);
+                        starData.Add(star);
                     }
                 }
-                result["stars"] = starsData;
+                result["star"] = starData;
 
                 string jsonData = JsonConvert.SerializeObject(result, Formatting.Indented);
                 File.WriteAllText(chartFilePath, jsonData);

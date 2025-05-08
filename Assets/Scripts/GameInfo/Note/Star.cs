@@ -35,6 +35,9 @@ namespace Note
         // 用于存储子星星（subStar）参数的列表
         public List<SubStar> subStarList = new List<SubStar>();
 
+        //Y轴坐标
+        public float startY;
+
         // 内部类，用于表示子星星（subStar）的参数结构
         public class SubStar
         {

@@ -6,6 +6,7 @@ using Params;
 //using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using static Note.Star;
 using System.Collections.Generic;
+using static GradientColorListUnity;
 
 
 
@@ -581,7 +582,7 @@ public class Utility : MonoBehaviour
         }
     }
 
-    public static GameObject CombineInstances(List<GameObject> instances)
+    public static GameObject CombineInstances(List<GameObject> instances, Transform parent)
     {
         GameObject combined = new GameObject("CombinedInstance");
 
@@ -629,107 +630,34 @@ public class Utility : MonoBehaviour
         MeshRenderer combinedRenderer = combined.AddComponent<MeshRenderer>();
         combinedRenderer.material = instances[0].GetComponentInChildren<MeshRenderer>().material;
 
-        // 删除合并前的实例
+        // 先从父物体移除所有子物体
         foreach (GameObject segmentInstance in instances)
         {
-            Destroy(segmentInstance);
+            segmentInstance.transform.SetParent(null);
+        }
+
+        // 设置合并后的物体为父物体的子物体
+        combined.transform.SetParent(parent);
+
+        // 销毁合并前的实例
+        foreach (GameObject segmentInstance in instances)
+        {
+            UnityEngine.Object.Destroy(segmentInstance);
         }
 
         return combined;
     }
 
-    //public static GameObject CombineInstances(List<GameObject> instances)
-    //{
-    //    GameObject combined = new GameObject("CombinedInstance");
+    // 辅助方法，从instanceName中提取数字部分，用于查找对应的Hold索引
+    public static int GetHoldIndexFromInstanceName(string instanceName)
+    {
+        if (instanceName.StartsWith("Hold") && int.TryParse(instanceName.Substring(4), out int index))
+        {
+            return index - 1;
+        }
+        return -1;
+    }
 
-    //    // 用于存储所有顶点、三角形索引和UV坐标
-    //    List<Vector3> vertices = new List<Vector3>();
-    //    List<int>[] subTriangles = new List<int>[instances.Count];
-    //    List<Vector2> uv = new List<Vector2>();
-    //    List<Material> materials = new List<Material>();
-
-    //    int vertexOffset = 0;
-    //    int subMeshIndex = 0;
-
-    //    foreach (GameObject instance in instances)
-    //    {
-    //        MeshFilter meshFilter = instance.GetComponent<MeshFilter>();
-    //        MeshRenderer meshRenderer = instance.GetComponent<MeshRenderer>();
-    //        if (meshFilter != null && meshRenderer != null)
-    //        {
-    //            // 打印当前物体的颜色
-    //            Color color = meshRenderer.material.color;
-    //            //Debug.Log($"物体 {instance.name} 的颜色: R={color.r}, G={color.g}, B={color.b}, A={color.a}");
-
-    //            Mesh mesh = meshFilter.mesh;
-    //            // 添加顶点
-    //            vertices.AddRange(mesh.vertices);
-    //            // 添加UV坐标（如果有的话）
-    //            if (mesh.uv.Length > 0)
-    //            {
-    //                uv.AddRange(mesh.uv);
-    //            }
-
-    //            // 收集材质
-    //            Material material = meshRenderer.material;
-    //            int materialIndex = materials.IndexOf(material);
-    //            if (materialIndex == -1)
-    //            {
-    //                materialIndex = materials.Count;
-    //                materials.Add(material);
-    //                Debug.Log($"新增材质: {material.name}，索引: {materialIndex}");
-    //            }
-    //            else
-    //            {
-    //                Debug.Log($"重用材质: {material.name}，索引: {materialIndex}");
-    //            }
-
-    //            // 处理三角形索引，添加偏移量
-    //            if (subTriangles[materialIndex] == null)
-    //            {
-    //                subTriangles[materialIndex] = new List<int>();
-    //            }
-    //            for (int i = 0; i < mesh.triangles.Length; i++)
-    //            {
-    //                subTriangles[materialIndex].Add(mesh.triangles[i] + vertexOffset);
-    //            }
-
-    //            vertexOffset += mesh.vertices.Length;
-    //            subMeshIndex++;
-    //        }
-    //    }
-
-    //    // 创建新的网格
-    //    Mesh combinedMesh = new Mesh();
-    //    combinedMesh.vertices = vertices.ToArray();
-    //    combinedMesh.subMeshCount = materials.Count;
-    //    for (int i = 0; i < materials.Count; i++)
-    //    {
-    //        if (subTriangles[i] != null)
-    //        {
-    //            combinedMesh.SetTriangles(subTriangles[i].ToArray(), i);
-    //        }
-    //    }
-    //    if (uv.Count > 0)
-    //    {
-    //        combinedMesh.uv = uv.ToArray();
-    //    }
-    //    combinedMesh.RecalculateNormals();
-
-    //    // 添加网格组件和渲染器组件
-    //    MeshFilter combinedMeshFilter = combined.AddComponent<MeshFilter>();
-    //    combinedMeshFilter.mesh = combinedMesh;
-    //    MeshRenderer combinedRenderer = combined.AddComponent<MeshRenderer>();
-    //    combinedRenderer.materials = materials.ToArray();
-
-    //    // 删除合并前的实例
-    //    foreach (GameObject segmentInstance in instances)
-    //    {
-    //        Destroy(segmentInstance);
-    //    }
-
-    //    return combined;
-    //}
 
     public static float CalculateZAxisPosition(float startTime)
     {
@@ -913,6 +841,40 @@ public class Utility : MonoBehaviour
         // 继承父物体的图层
         combinedInstance.layer = parentLayer;
 
+    }
+
+    // 将 GradientColor 列表实例转换为 GradientColorListUnity 实例
+    public static GradientColorListUnity ConvertToUnityList(List<GradientColor> list)
+    {
+        GradientColorListUnity unityList = new GradientColorListUnity();
+        foreach (var gradientColor in list)
+        {
+            unityList.colors.Add(new GradientColorUnity
+            {
+                startT = gradientColor.startT,
+                endT = gradientColor.endT,
+                lowercolor = HexToColor(gradientColor.lowercolor),
+                uppercolor = HexToColor(gradientColor.uppercolor)
+            });
+        }
+        return unityList;
+    }
+
+    public static void SetSpriteColor(GameObject obj, Color color)
+    {
+        MyOutline outline = obj.GetComponent<MyOutline>();
+        if (outline != null)
+        {
+            outline.OutlineColor = color;
+        }
+        else
+        {
+            MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                renderer.material.color = color;
+            }
+        }
     }
 
 }

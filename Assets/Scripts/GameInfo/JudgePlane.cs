@@ -16,9 +16,9 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     [JsonProperty("id")]
     // 判定面的唯一标识，按照要求改为数字编号
     public int id;
-    [JsonProperty("color")]
-    // 判定面的唯一标识，按照要求改为数字编号
-    public string color;
+    //[JsonProperty("color")]
+    //// 判定面的唯一标识，按照要求改为数字编号
+    //public string color;
     [JsonProperty("sub")]
     // 用于存储子判定面参数的列表
     public List<SubJudgePlane> subJudgePlaneList = new List<SubJudgePlane>();
@@ -47,12 +47,18 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
         }
     }
 
+
     // 构造函数，用于初始化时设置唯一标识
-    public JudgePlane(int Id, string uniqueColor)
+    public JudgePlane(int Id)
     {
         id = Id;
-        color = uniqueColor;
     }
+
+    //public JudgePlane(int Id, string uniqueColor)
+    //{
+    //    id = Id;
+    //    color = uniqueColor;
+    //}
 
     // 方法用于向子判定面参数列表中添加子判定面的参数，并检查添加是否合法
     public void AddSubJudgePlane(float startTime, float startY, float endTime, float endY, TransFunctionType yAxisFunction)
@@ -164,7 +170,7 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     }
 
     //方法用于根据给定的Y轴坐标值改变对应JudgePlane下所有SubJudgePlane实例的透明度
-    public void ChangeSubJudgePlaneTransparency(GameObject JudgePlanesParent, float yAxisValue)
+    public void ChangeJudgePlaneTransparency(GameObject JudgePlanesParent, float yAxisValue)
     {
 
         // 计算透明度差值，根据给定的对应关系计算斜率
@@ -177,15 +183,11 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
         GameObject judgePlaneObject = GetJudgePlaneGameObject(JudgePlanesParent);
         if (judgePlaneObject != null)
         {
-            // 直接遍历JudgePlane游戏物体下的所有子物体
-            foreach (Transform child in judgePlaneObject.transform)
+            // 获取物体的MeshRenderer组件（前提是子物体有这个组件用于渲染）
+            MeshRenderer meshRenderer = judgePlaneObject.gameObject.GetComponent<MeshRenderer>();
+            if (meshRenderer != null)
             {
-                // 获取物体的MeshRenderer组件（前提是子物体有这个组件用于渲染）
-                MeshRenderer meshRenderer = child.gameObject.GetComponent<MeshRenderer>();
-                if (meshRenderer != null)
-                {
-                    meshRenderer.material.SetFloat("_Opacity", currentAlpha);
-                }
+                meshRenderer.material.SetFloat("_Opacity", currentAlpha);
             }
         }
     }

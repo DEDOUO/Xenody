@@ -1,8 +1,166 @@
 {
-  "planes": [
+  "speed": [
+    {
+      "startT": 0.0,
+      "endT": 999.0,
+      "sp": 1.0
+    }
+  ],
+  "color": [
+    {
+      "startT": 0.0,
+      "endT": 22.836,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 22.836,
+      "endT": 26.036,
+      "Lcolor": "#d461d6",
+      "Ucolor": "#ffffff"
+    },
+    {
+      "startT": 26.036,
+      "endT": 29.236,
+      "Lcolor": "#3eabef",
+      "Ucolor": "#ffffff"
+    },
+    {
+      "startT": 29.236,
+      "endT": 32.436,
+      "Lcolor": "#6df35e",
+      "Ucolor": "#ffffff"
+    },
+    {
+      "startT": 32.436,
+      "endT": 35.636,
+      "Lcolor": "#fcd956",
+      "Ucolor": "#ffffff"
+    },
+    {
+      "startT": 35.636,
+      "endT": 48.436,
+      "Lcolor": "#d17301",
+      "Ucolor": "#fae6cd"
+    },
+    {
+      "startT": 48.436,
+      "endT": 61.236,
+      "Lcolor": "#bf2d2f",
+      "Ucolor": "#ffcccd"
+    },
+    {
+      "startT": 61.236,
+      "endT": 125.152,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 125.152,
+      "endT": 138.036,
+      "Lcolor": "#ba55d3",
+      "Ucolor": "#ffbbff"
+    },
+    {
+      "startT": 138.036,
+      "endT": 162.736,
+      "Lcolor": "#4a11a6",
+      "Ucolor": "#d5bbff"
+    },
+    {
+      "startT": 162.736,
+      "endT": 162.836,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 162.836,
+      "endT": 162.936,
+      "Lcolor": "#330b74",
+      "Ucolor": "#d5bbff"
+    },
+    {
+      "startT": 162.936,
+      "endT": 163.036,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 163.036,
+      "endT": 163.136,
+      "Lcolor": "#330b74",
+      "Ucolor": "#d5bbff"
+    },
+    {
+      "startT": 163.136,
+      "endT": 163.236,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 163.236,
+      "endT": 163.436,
+      "Lcolor": "#330b74",
+      "Ucolor": "#d5bbff"
+    },
+    {
+      "startT": 163.436,
+      "endT": 175.736,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 175.736,
+      "endT": 175.836,
+      "Lcolor": "#f0ffff",
+      "Ucolor": "#63b8ff"
+    },
+    {
+      "startT": 175.836,
+      "endT": 175.936,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 175.936,
+      "endT": 176.036,
+      "Lcolor": "#f0ffff",
+      "Ucolor": "#63b8ff"
+    },
+    {
+      "startT": 176.036,
+      "endT": 176.136,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 176.136,
+      "endT": 176.236,
+      "Lcolor": "#f0ffff",
+      "Ucolor": "#63b8ff"
+    },
+    {
+      "startT": 176.236,
+      "endT": 176.336,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    },
+    {
+      "startT": 176.336,
+      "endT": 176.436,
+      "Lcolor": "#f0ffff",
+      "Ucolor": "#63b8ff"
+    },
+    {
+      "startT": 176.436,
+      "endT": 999.0,
+      "Lcolor": "#63b8ff",
+      "Ucolor": "#f0ffff"
+    }
+  ],
+  "plane": [
     {
       "id": 1,
-      "color": "#63b8ff",
       "sub": [
         {
           "startT": 0.0,
@@ -568,7 +726,6 @@
     },
     {
       "id": 2,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 1.246,
@@ -665,7 +822,6 @@
     },
     {
       "id": 3,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 35.636,
@@ -706,7 +862,6 @@
     },
     {
       "id": 4,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 36.436,
@@ -719,7 +874,6 @@
     },
     {
       "id": 5,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 37.236,
@@ -732,7 +886,6 @@
     },
     {
       "id": 6,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 38.036,
@@ -745,7 +898,6 @@
     },
     {
       "id": 7,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 38.836,
@@ -758,7 +910,6 @@
     },
     {
       "id": 8,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 39.636,
@@ -771,7 +922,6 @@
     },
     {
       "id": 9,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 40.436,
@@ -784,7 +934,6 @@
     },
     {
       "id": 10,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 41.236,
@@ -797,7 +946,6 @@
     },
     {
       "id": 11,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 42.036,
@@ -810,7 +958,6 @@
     },
     {
       "id": 12,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 42.836,
@@ -823,7 +970,6 @@
     },
     {
       "id": 13,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 43.636,
@@ -836,7 +982,6 @@
     },
     {
       "id": 14,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 44.436,
@@ -849,7 +994,6 @@
     },
     {
       "id": 15,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 45.236,
@@ -862,7 +1006,6 @@
     },
     {
       "id": 16,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 46.036,
@@ -875,7 +1018,6 @@
     },
     {
       "id": 17,
-      "color": "#f0ffff",
       "sub": [
         {
           "startT": 73.036,
@@ -1483,7 +1625,6 @@
     },
     {
       "id": 18,
-      "color": "#dda0dd",
       "sub": [
         {
           "startT": 125.152,
@@ -1531,7 +1672,6 @@
     },
     {
       "id": 19,
-      "color": "#63b8ff",
       "sub": [
         {
           "startT": 188.236,
@@ -1788,7 +1928,7 @@
       ]
     }
   ],
-  "taps": [
+  "tap": [
     {
       "startT": 5.469,
       "startX": 1.2,
@@ -7940,7 +8080,7 @@
       "Pid": 17
     }
   ],
-  "holds": [
+  "hold": [
     {
       "Pid": 1,
       "id": 1,
@@ -8320,7 +8460,7 @@
           "endXMax": 2.0,
           "LFunc": "Linear",
           "RFunc": "Linear",
-          "Jagnum": 0
+          "Jagnum": 10
         }
       ]
     },
@@ -8337,7 +8477,7 @@
           "endXMax": 2.0,
           "LFunc": "Linear",
           "RFunc": "Linear",
-          "Jagnum": 0
+          "Jagnum": 10
         }
       ]
     },
@@ -8371,7 +8511,7 @@
           "endXMax": -0.5,
           "LFunc": "Linear",
           "RFunc": "Linear",
-          "Jagnum": 0
+          "Jagnum": 10
         }
       ]
     },
@@ -8388,7 +8528,7 @@
           "endXMax": -0.5,
           "LFunc": "Linear",
           "RFunc": "Linear",
-          "Jagnum": 0
+          "Jagnum": 10
         }
       ]
     },
@@ -13107,7 +13247,7 @@
       ]
     }
   ],
-  "slides": [
+  "slide": [
     {
       "startT": 1.981,
       "startX": 0.0,
@@ -14999,7 +15139,7 @@
       "Pid": 17
     }
   ],
-  "flicks": [
+  "flick": [
     {
       "startT": 10.036,
       "startX": -1.0,
@@ -15911,7 +16051,7 @@
       "Pid": 19
     }
   ],
-  "stars": [
+  "star": [
     {
       "Pid": 2,
       "id": 1,
@@ -16283,16 +16423,16 @@
         {
           "startT": 45.436,
           "endT": 45.836,
-          "startX": 1.6,
+          "startX": 1.5,
           "startY": 0.0,
-          "endX": -1.6,
+          "endX": -1.5,
           "endY": 1.0,
           "Func": "Linear"
         },
         {
           "startT": 45.836,
           "endT": 46.236,
-          "startX": -1.6,
+          "startX": -1.5,
           "startY": 1.0,
           "endX": 0.0,
           "endY": 0.0,
@@ -16303,7 +16443,7 @@
           "endT": 46.636,
           "startX": 0.0,
           "startY": 0.0,
-          "endX": 1.6,
+          "endX": 1.5,
           "endY": 1.0,
           "Func": "Linear"
         }
@@ -16318,7 +16458,7 @@
           "startT": 45.836,
           "endT": 46.236,
           "startX": -1.5,
-          "startY": 1.0,
+          "startY": 0.0,
           "endX": 0.0,
           "endY": 1.0,
           "Func": "Linear"
