@@ -7,6 +7,7 @@ using Params;
 using static Note.Star;
 using System.Collections.Generic;
 using static GradientColorListUnity;
+using System.Linq;
 
 
 
@@ -659,10 +660,46 @@ public class Utility : MonoBehaviour
     }
 
 
-    public static float CalculateZAxisPosition(float startTime)
+    //public static float CalculateZAxisPosition(float startTime)
+    //{
+    //    // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
+    //    return -startTime * SpeedParams.NoteSpeedDefault;
+    //}
+
+    public static float CalculateZAxisPosition(float startTime, List<Speed> speedList)
     {
-        // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
-        return -startTime * SpeedParams.NoteSpeedDefault;
+        if (speedList == null || speedList.Count == 0)
+        {
+            return -startTime * SpeedParams.NoteSpeedDefault;
+        }
+
+        // 对速度列表按 startT 排序
+        speedList = speedList.OrderBy(s => s.startT).ToList();
+
+        float totalDistance = 0;
+
+        // 处理 startTime 之前的所有速度段
+        foreach (var speed in speedList)
+        {
+            // 如果这一段还没到startTime
+            if (speed.endT <= startTime)
+            {
+                //则加上这一段的所有长度
+                totalDistance += (speed.endT - speed.startT) * speed.sp;
+            }
+            // 如果startTime在这一段里
+            else if (speed.startT <= startTime)
+            {
+                //则加上这一段截至startTime的长度
+                totalDistance += (startTime - speed.startT) * speed.sp;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return -totalDistance * SpeedParams.NoteSpeedDefault;
     }
 
 

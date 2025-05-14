@@ -109,6 +109,17 @@ namespace Note
             return -1; // 返回一个表示错误的值，可根据实际情况调整
         }
 
+        public float GetFirstSubHoldStartX()
+        {
+            if (subHoldList.Count > 0)
+            {
+                return (subHoldList[0].startXMin + subHoldList[0].startXMax)/2;
+            }
+            Debug.LogError("Hold中没有子Hold，无法获取第一个SubHold的startT。");
+            return -1; // 返回一个表示错误的值，可根据实际情况调整
+        }
+
+
         public float GetLastSubHoldEndTime()
         {
             if (subHoldList.Count > 0)
@@ -116,6 +127,16 @@ namespace Note
                 return subHoldList[subHoldList.Count - 1].endT;
             }
             Debug.LogError("Hold中没有子Hold，无法获取最后一个SubHold的endT。");
+            return -1; // 返回一个表示错误的值，可根据实际情况调整
+        }
+
+        public float GetLastSubHoldEndX()
+        {
+            if (subHoldList.Count > 0)
+            {
+                return (subHoldList[subHoldList.Count - 1].endXMin + subHoldList[subHoldList.Count - 1].endXMax) / 2;
+            }
+            Debug.LogError("Hold中没有子Hold，无法获取最后一个SubHold的startT。");
             return -1; // 返回一个表示错误的值，可根据实际情况调整
         }
 

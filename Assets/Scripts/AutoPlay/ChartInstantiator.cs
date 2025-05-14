@@ -40,6 +40,9 @@ public class ChartInstantiator : MonoBehaviour
 
     private Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
     private GradientColorListUnity GradientColorList;
+    private List<KeyValuePair<float, string>> MultiHitDict = new List<KeyValuePair<float, string>>();
+    private Dictionary<float, List<string>> MultiHitPairs = new Dictionary<float, List<string>>();
+    private Dictionary<float, List<Vector3>> MultiHitPairsCoord = new Dictionary<float, List<Vector3>>();
 
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
@@ -74,6 +77,7 @@ public class ChartInstantiator : MonoBehaviour
     private void PrepareStartTimeMapping(Chart chart)
     {
         List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
+        //List<KeyValuePair<float, string>> MultiHitPairs = new List<KeyValuePair<float, string>>();
 
         if (chart.taps != null)
         {
@@ -82,6 +86,7 @@ public class ChartInstantiator : MonoBehaviour
                 var tap = chart.taps[i];
                 string instanceName = $"Tap{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(tap.startT, instanceName));
+                MultiHitDict.Add(new KeyValuePair<float, string>(tap.startT, instanceName));
             }
         }
         if (chart.slides != null)
@@ -91,6 +96,7 @@ public class ChartInstantiator : MonoBehaviour
                 var slide = chart.slides[i];
                 string instanceName = $"Slide{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(slide.startT, instanceName));
+                // Slide不计入多押
             }
         }
         if (chart.flicks != null)
@@ -100,8 +106,23 @@ public class ChartInstantiator : MonoBehaviour
                 var flick = chart.flicks[i];
                 string instanceName = $"Flick{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(flick.startT, instanceName));
+                MultiHitDict.Add(new KeyValuePair<float, string>(flick.startT, instanceName));
+                foreach (var hold in chart.holds)
+                {
+                    //如果Flick是Hold的伴生Flick（在Hold的开头或结尾处）
+                    if (flick.startT == hold.GetFirstSubHoldStartTime() & flick.startX == hold.GetFirstSubHoldStartX() & flick.associatedPlaneId == hold.associatedPlaneId)
+                    {
+                        //则从多押列表里删除该Flick
+                        MultiHitDict.RemoveAll(pair =>
+                            pair.Key == flick.startT &&
+                            pair.Value == $"Flick{i+1}"
+                        );
+                        break;
+                    }
+                }
             }
         }
+
         if (chart.holds != null)
         {
             for (int i = 0; i < chart.holds.Count; i++)
@@ -110,6 +131,7 @@ public class ChartInstantiator : MonoBehaviour
                 float startT = hold.GetFirstSubHoldStartTime();
                 string instanceName = $"Hold{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+                MultiHitDict.Add(new KeyValuePair<float, string>(startT, instanceName));
             }
         }
 
@@ -121,8 +143,17 @@ public class ChartInstantiator : MonoBehaviour
                 float startT = star.starHeadT;
                 string instanceName = $"StarHead{i + 1}";
                 allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+                MultiHitDict.Add(new KeyValuePair<float, string>(startT, instanceName));
             }
         }
+
+        //把多押原始字典映射为时间到实例名的多押字典
+        MultiHitPairs = MultiHitDict.GroupBy(pair => pair.Key)
+                                        .Where(group => group.Count() > 1)
+                                        .ToDictionary(
+                                            group => group.Key,
+                                            group => group.Select(pair => pair.Value).ToList()
+                                        );
 
         // 按照startT进行排序
         allPairs = allPairs.OrderBy(pair => pair.Key).ToList();
@@ -155,6 +186,7 @@ public class ChartInstantiator : MonoBehaviour
         InstantiateHolds(chart);
         InstantiateStarHeads(chart);
         InstantiateSubStars(chart);
+        InstantiateMultiHitLines(chart);
     }
 
 
@@ -189,7 +221,7 @@ public class ChartInstantiator : MonoBehaviour
                     {
                         case TransFunctionType.Linear:
                             List<GameObject> objectsToCombine = CreateJudgePlaneAndColorLinesQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
-                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor);
+                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor, chart.speedList);
 
                             judgePlaneInstances.Add(objectsToCombine[0]);
                             leftStripInstances.Add(objectsToCombine[1]);
@@ -210,7 +242,7 @@ public class ChartInstantiator : MonoBehaviour
                                 float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
                                 float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
                                 List<GameObject> ObjectsToCombine = CreateJudgePlaneAndColorLinesQuad(startY, endY, startT, endT,
-                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor);
+                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor, chart.speedList);
 
                                 judgePlaneInstances.Add(ObjectsToCombine[0]);
                                 leftStripInstances.Add(ObjectsToCombine[1]);
@@ -346,7 +378,8 @@ public class ChartInstantiator : MonoBehaviour
                         tapInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Tap实例的位置（X、Y、Z轴坐标），同时考虑Z轴偏移量
-                        float zPositionForStartT = CalculateZAxisPosition(tap.startT);
+                        float zPositionForStartT = CalculateZAxisPosition(tap.startT, chart.speedList);
+
                         tapInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
                         //Debug.Log(tapInstance.transform.position);
 
@@ -443,7 +476,7 @@ public class ChartInstantiator : MonoBehaviour
                         slideInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Slide实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
-                        float zPositionForStartT = CalculateZAxisPosition(slide.startT);
+                        float zPositionForStartT = CalculateZAxisPosition(slide.startT, chart.speedList);
                         slideInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                         // 获取MyOutline组件并设置属性
@@ -501,6 +534,20 @@ public class ChartInstantiator : MonoBehaviour
                 int flickIndex = 1;
                 foreach (var flick in chart.flicks)
                 {
+                    //foreach (var hold in chart.holds)
+                    //{ 
+                    //    //如果Flick是Hold的伴生Flick（在Hold的开头或结尾处）
+                    //    if (flick.startT == hold.GetFirstSubHoldStartTime() & flick.startX == hold.GetFirstSubHoldStartX() & flick.associatedPlaneId == hold.associatedPlaneId)
+                    //    {
+                    //        //则从多押列表里删除该Flick
+                    //        MultiHitPairs.RemoveAll(pair =>
+                    //            pair.Key == flick.startT &&
+                    //            pair.Value == $"Flick{flickIndex}"
+                    //        );
+                    //        break;
+                    //    }
+                    //}
+
                     // 实例化Flick预制体
                     GameObject flickInstance = Instantiate(flickPrefab);
                     flickInstance.name = $"Flick{flickIndex}"; // 命名
@@ -539,7 +586,7 @@ public class ChartInstantiator : MonoBehaviour
                         flickInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Flick实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
-                        float zPositionForStartT = CalculateZAxisPosition(flick.startT);
+                        float zPositionForStartT = CalculateZAxisPosition(flick.startT, chart.speedList);
                         flickInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                         Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flickInstance);
@@ -653,7 +700,7 @@ public class ChartInstantiator : MonoBehaviour
                     starheadInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                     // 设置StarHead实例的位置（X、Y、Z轴坐标）
-                    float zPositionForStartT = CalculateZAxisPosition(star.starHeadT);
+                    float zPositionForStartT = CalculateZAxisPosition(star.starHeadT, chart.speedList);
                     starheadInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                     // 获取MyOutline组件并设置属性
@@ -733,8 +780,8 @@ public class ChartInstantiator : MonoBehaviour
                                 float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
 
                                 // 根据 startT 和 endT 计算 Z 轴位置
-                                float zPositionForStartT = CalculateZAxisPosition(subHold.startT);
-                                float zPositionForEndT = CalculateZAxisPosition(subHold.endT);
+                                float zPositionForStartT = CalculateZAxisPosition(subHold.startT, chart.speedList);
+                                float zPositionForEndT = CalculateZAxisPosition(subHold.endT, chart.speedList);
 
                                 // 一次性生成整个 SubHold 及两侧色条
                                 List<GameObject> subHoldAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
@@ -774,8 +821,8 @@ public class ChartInstantiator : MonoBehaviour
                                     float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
 
                                     // 根据 startT 和 endT 计算 Z 轴位置
-                                    float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
-                                    float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
+                                    float zPositionForStartT_Inner = CalculateZAxisPosition(startT, chart.speedList);
+                                    float zPositionForEndT_Inner = CalculateZAxisPosition(endT, chart.speedList);
 
                                     // 生成细分的 SubHold 及两侧色条
                                     List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
@@ -838,8 +885,8 @@ public class ChartInstantiator : MonoBehaviour
                                 float middleXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * middleXMax / ChartParams.XaxisMax;
 
                                 // 根据 startT 和 endT 计算 Z 轴位置
-                                float zPositionForStartT_Inner = CalculateZAxisPosition(startT);
-                                float zPositionForEndT_Inner = CalculateZAxisPosition(endT);
+                                float zPositionForStartT_Inner = CalculateZAxisPosition(startT, chart.speedList);
+                                float zPositionForEndT_Inner = CalculateZAxisPosition(endT, chart.speedList);
 
                                 if (i % 2 == 0)
                                 {
@@ -894,8 +941,8 @@ public class ChartInstantiator : MonoBehaviour
                     float startXMinWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld2, 0), HorizontalParams.HorizontalMargin) * startXMin2 / ChartParams.XaxisMax;
                     float startXMaxWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld2, 0), HorizontalParams.HorizontalMargin) * startXMax2 / ChartParams.XaxisMax;
 
-                    float startZ1 = CalculateZAxisPosition(hold.subHoldList[0].startT);
-                    float startZ2 = CalculateZAxisPosition(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
+                    float startZ1 = CalculateZAxisPosition(hold.subHoldList[0].startT, chart.speedList);
+                    float startZ2 = CalculateZAxisPosition(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, chart.speedList);
 
                     // 计算结束部分的四个顶点位置
                     float endXMin1 = CalculatePosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMin, hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMin, hold.subHoldList.Last().XLeftFunction);
@@ -908,8 +955,8 @@ public class ChartInstantiator : MonoBehaviour
                     float endXMinWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld2, 0), HorizontalParams.HorizontalMargin) * endXMin2 / ChartParams.XaxisMax;
                     float endXMaxWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld2, 0), HorizontalParams.HorizontalMargin) * endXMax2 / ChartParams.XaxisMax;
 
-                    float endZ1 = CalculateZAxisPosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
-                    float endZ2 = CalculateZAxisPosition(hold.subHoldList.Last().endT);
+                    float endZ1 = CalculateZAxisPosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, chart.speedList);
+                    float endZ2 = CalculateZAxisPosition(hold.subHoldList.Last().endT, chart.speedList);
 
                     // 增加渲染队列值，确保白色矩形显示在 Hold 之上
                     //int whiteRectRenderQueue = RenderQueue + 1;
@@ -1050,18 +1097,30 @@ public class ChartInstantiator : MonoBehaviour
         }
     }
 
+    public void InstantiateMultiHitLines(Chart chart) 
+    {
+        GameObject MultiHitLinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/MultiHitLine");
+        if (MultiHitLinePrefab != null)
+        {
+
+        }
+
+    }
+
+
     private List<GameObject> CreateJudgePlaneAndColorLinesQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName,
-        GameObject judgePlaneParent, GameObject ColorLinesParent, int RenderQueue, Color planecolor)
+        GameObject judgePlaneParent, GameObject ColorLinesParent, int RenderQueue, Color planecolor, List<Speed> speedList)
     {
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
         float startYWorld = TransformYCoordinate(startY);
         float endYWorld = TransformYCoordinate(endY);
 
         // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
-        float zPositionForStartT = CalculateZAxisPosition(startT);
+        float zPositionForStartT = CalculateZAxisPosition(startT, speedList);
+        float zPositionForEndT = CalculateZAxisPosition(endT, speedList);
 
         // 计算在Z轴方向的长度（之前代码中的height变量，这里改为lengthForZAxis）
-        float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;
+        //float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;
 
         // 假设获取到一个目标点的世界坐标
         Vector3 StartPoint = new Vector3(0, startYWorld, 0);
@@ -1076,51 +1135,32 @@ public class ChartInstantiator : MonoBehaviour
 
         Vector3 point1 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
         Vector3 point2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
-        Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
-        Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
+        Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForEndT);
+        Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForEndT);
 
         // 创建JudgePlane实例，使用Sprite的颜色，不再额外赋予灰色
         GameObject judgePlaneInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, judgePlaneParent, RenderQueue, 1f, "MaskMaterial");
-        // 为JudgePlane实例创建独立的材质实例
-        //MeshRenderer judgePlaneRenderer = judgePlaneInstance.GetComponent<MeshRenderer>();
-        //if (judgePlaneRenderer != null)
-        //{
-        //    judgePlaneRenderer.material = new Material(judgePlaneRenderer.material);
-        //}
 
         // 创建左侧亮条实例
         Vector3 leftPoint1 = new Vector3(-startXWorldPlus, startYWorld, zPositionForStartT);
         Vector3 leftPoint2 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
-        Vector3 leftPoint3 = new Vector3(-endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
-        Vector3 leftPoint4 = new Vector3(-endXWorldPlus, endYWorld, zPositionForStartT - lengthForZAxis);
+        Vector3 leftPoint3 = new Vector3(-endXWorld, endYWorld, zPositionForEndT);
+        Vector3 leftPoint4 = new Vector3(-endXWorldPlus, endYWorld, zPositionForEndT);
 
         //string leftObjectName = $"LeftStrip_{objectName}";
         GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, sprite, objectName, ColorLinesParent, RenderQueue, 1f, "MaskMaterialColorLine");
         SetSpriteColor(leftStripInstance, planecolor);
 
-        // 为左侧亮条实例创建独立的材质实例
-        //MeshRenderer leftStripRenderer = leftStripInstance.GetComponent<MeshRenderer>();
-        //if (leftStripRenderer != null)
-        //{
-        //    leftStripRenderer.material = new Material(leftStripRenderer.material);
-        //}
 
         // 创建右侧亮条实例
         Vector3 rightPoint1 = new Vector3(startXWorldPlus, startYWorld, zPositionForStartT);
         Vector3 rightPoint2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
-        Vector3 rightPoint3 = new Vector3(endXWorld, endYWorld, zPositionForStartT - lengthForZAxis);
-        Vector3 rightPoint4 = new Vector3(endXWorldPlus, endYWorld, zPositionForStartT - lengthForZAxis);
+        Vector3 rightPoint3 = new Vector3(endXWorld, endYWorld, zPositionForEndT);
+        Vector3 rightPoint4 = new Vector3(endXWorldPlus, endYWorld, zPositionForEndT);
 
         //string rightObjectName = $"RightStrip_{objectName}";
         GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, sprite, objectName, ColorLinesParent, RenderQueue, 1f, "MaskMaterialColorLine");
         SetSpriteColor(rightStripInstance, planecolor);
-
-        // 为右侧亮条实例创建独立的材质实例
-        //MeshRenderer rightStripRenderer = rightStripInstance.GetComponent<MeshRenderer>();
-        //if (rightStripRenderer != null)
-        //{
-        //    rightStripRenderer.material = new Material(rightStripRenderer.material);
-        //}
 
         List<GameObject> instances = new List<GameObject>
         {

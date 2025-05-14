@@ -8,6 +8,11 @@ using UnityEngine.SceneManagement;
 using Note;
 using static Utility;
 using static Note.Hold;
+using DocumentFormat.OpenXml.Drawing;
+using Unity.Mathematics;
+using DocumentFormat.OpenXml.Office2016.Drawing.Charts;
+using Unity.VisualScripting;
+using System;
 
 public class MusicAndChartPlayer : MonoBehaviour
 {
@@ -58,8 +63,6 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     // 新增一个列表用于存储当前正在处理的Hold对应的instanceName
     private List<string> currentHoldInstanceNames = new List<string>();
-    //private bool isMusicPlaying; // 用于标识是否已经开始音乐播放阶段
-    //private bool isPaused = false;
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int currentIndex = 0;
     private float totalTime;
@@ -140,7 +143,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         {
             if (audioSource.isPlaying && !pauseManager.isPaused)
             {
-                Updateall();
+                Updateall(false);
                 //audioPrevTime = audioSource.time;
             }
             else if (!audioSource.isPlaying && !pauseManager.isPaused)
@@ -155,103 +158,99 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
-    private void Updateall()
+    //当从暂停状态恢复播放时，IfResumePlay=1，此时所有Note重新计算位置和颜色
+    private void Updateall(bool IfResumePlay)
     {
-        // 只有当明确进入音乐播放阶段才进行后续判断
-        if (audioSource.isPlaying)
+        float currentTime = audioSource.time;
+        //Debug.Log(currentTime);
+
+        // 将所有已经结束的 JudgePlane（endT 小于 currentTime）设置为 setActive(false)
+        for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
         {
-            float currentTime = audioSource.time;
-            //Debug.Log(currentTime);
-
-            // 将所有已经结束的 JudgePlane（endT 小于 currentTime）设置为 setActive(false)
-            //Debug.Log(JudgePlanesParent.transform.childCount);
-            for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
+            //Debug.Log(i);
+            float endT = JudgePlanesEndT[i];
+            if (endT < currentTime)
             {
-                //Debug.Log(i);
-                float endT = JudgePlanesEndT[i];
-                if (endT < currentTime)
+                // 隐藏 JudgePlane
+                var judgePlaneObject = JudgePlanesParent.transform.GetChild(i);
+                if (judgePlaneObject != null)
                 {
-                    // 隐藏 JudgePlane
-                    var judgePlaneObject = JudgePlanesParent.transform.GetChild(i);
-                    if (judgePlaneObject != null)
-                    {
-                        judgePlaneObject.gameObject.SetActive(false);
-                    }
+                    judgePlaneObject.gameObject.SetActive(false);
+                }
 
-                    // 隐藏对应的 LeftColorLine
-                    if (ColorLinesParent.transform.childCount > i * 2)
+                // 隐藏对应的 LeftColorLine
+                if (ColorLinesParent.transform.childCount > i * 2)
+                {
+                    var leftColorLineObject = ColorLinesParent.transform.GetChild(i * 2);
+                    if (leftColorLineObject != null)
                     {
-                        var leftColorLineObject = ColorLinesParent.transform.GetChild(i * 2);
-                        if (leftColorLineObject != null)
-                        {
-                            leftColorLineObject.gameObject.SetActive(false);
-                        }
+                        leftColorLineObject.gameObject.SetActive(false);
                     }
+                }
 
-                    // 隐藏对应的 RightColorLine
-                    if (ColorLinesParent.transform.childCount > i * 2 + 1)
+                // 隐藏对应的 RightColorLine
+                if (ColorLinesParent.transform.childCount > i * 2 + 1)
+                {
+                    var rightColorLineObject = ColorLinesParent.transform.GetChild(i * 2 + 1);
+                    if (rightColorLineObject != null)
                     {
-                        var rightColorLineObject = ColorLinesParent.transform.GetChild(i * 2 + 1);
-                        if (rightColorLineObject != null)
-                        {
-                            rightColorLineObject.gameObject.SetActive(false);
-                        }
+                        rightColorLineObject.gameObject.SetActive(false);
                     }
                 }
             }
-
-            // 使用双指针来维护从上一帧到这一帧的时间，包含哪些note
-            while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
-            {
-                List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
-                foreach (var instanceName in instanceNames)
-                {
-                    //Debug.Log(instanceName);
-                    KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                    keyInfo.isJudged = true;
-                    // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
-                    if (instanceName.StartsWith("Tap"))
-                    {
-                        TapSoundEffect.Play();
-                        //FlickSoundEffect.Play();
-                        PlayAnimation(instanceName, "TapHitEffect");
-                    }
-                    else if (instanceName.StartsWith("Slide"))
-                    {
-                        SlideSoundEffect.Play();
-                        PlayAnimation(instanceName, "SlideEffect");
-                    }
-                    else if (instanceName.StartsWith("Flick"))
-                    {
-                        FlickSoundEffect.Play();
-                        PlayAnimation(instanceName, "FlickEffect");
-                    }
-                    else if (instanceName.StartsWith("Hold"))
-                    {
-                        PlayHoldAnimation(instanceName, currentTime);
-                    }
-                    else if (instanceName.StartsWith("StarHead"))
-                    {
-                        StarHeadSoundEffect.Play();
-                        PlayAnimation(instanceName, "StarHeadEffect");
-                    }
-                    else if (instanceName.StartsWith("Stars"))
-                    {
-                        StarSoundEffect.Play();
-                    }
-                }
-                currentIndex++;
-            }
-            //更新星星划动音频的状态
-            UpdateStarSoundEffect(currentTime);
-            // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
-            UpdateHoldStates(currentTime);
-            //更新所有Note位置和颜色
-            UpdatePositionsAndColor(currentTime);
-            //更新所有Arrow的透明度
-            CheckArrowVisibility(SubStarsParent, currentTime, subStarInfoDict);
-            //Debug.Log("2. " + audioTime);
         }
+
+        // 使用双指针来维护从上一帧到这一帧的时间，包含哪些note
+        while (currentIndex < startTimeToInstanceNames.Count && startTimeToInstanceNames.ElementAt(currentIndex).Key < currentTime)
+        {
+            List<string> instanceNames = startTimeToInstanceNames.ElementAt(currentIndex).Value;
+            foreach (var instanceName in instanceNames)
+            {
+                //Debug.Log(instanceName);
+                KeyInfo keyInfo = keyReachedJudgment[instanceName];
+                keyInfo.isJudged = true;
+                // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
+                if (instanceName.StartsWith("Tap"))
+                {
+                    TapSoundEffect.Play();
+                    //FlickSoundEffect.Play();
+                    PlayAnimation(instanceName, "TapHitEffect");
+                }
+                else if (instanceName.StartsWith("Slide"))
+                {
+                    SlideSoundEffect.Play();
+                    PlayAnimation(instanceName, "SlideEffect");
+                }
+                else if (instanceName.StartsWith("Flick"))
+                {
+                    FlickSoundEffect.Play();
+                    PlayAnimation(instanceName, "FlickEffect");
+                }
+                else if (instanceName.StartsWith("Hold"))
+                {
+                    PlayHoldAnimation(instanceName, currentTime);
+                }
+                else if (instanceName.StartsWith("StarHead"))
+                {
+                    StarHeadSoundEffect.Play();
+                    PlayAnimation(instanceName, "StarHeadEffect");
+                }
+                else if (instanceName.StartsWith("Stars"))
+                {
+                    StarSoundEffect.Play();
+                }
+            }
+            currentIndex++;
+        }
+        //更新星星划动音频的状态
+        UpdateStarSoundEffect(currentTime);
+        // 统一处理当前所有Hold的状态更新（开始、持续、结束判定）
+        UpdateHoldStates(currentTime);
+        //更新所有Note位置和颜色
+        UpdatePositionsAndColor(currentTime, chart.speedList, IfResumePlay);
+        //更新所有Arrow的透明度
+        CheckArrowVisibility(SubStarsParent, currentTime, subStarInfoDict);
+        //Debug.Log("2. " + audioTime);
     }
 
     private void Update()
@@ -406,7 +405,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         for (int i = currentHoldInstanceNames.Count - 1; i >= 0; i--)
         {
             string instanceName = currentHoldInstanceNames[i];
-            GameObject holdObject = GameObject.Find(instanceName);
+            GameObject holdObject = HoldsParent.transform.Find(instanceName).gameObject;
             int holdIndex = GetHoldIndexFromInstanceName(instanceName);
             if (holdIndex >= 0 && holdIndex < chart.holds.Count)
             {
@@ -437,6 +436,17 @@ public class MusicAndChartPlayer : MonoBehaviour
                 //判定结束
                 if (isEnd && !holdKeyInfo.isSoundPlayedAtEnd)
                 {
+                    //先将Hold物体和对应的Outline物体设置为非激活
+                    holdObject.SetActive(false);
+
+                    // 获取 HoldOutlinesParent 下对应的物体
+                    string outlineInstanceName = "HoldOutline" + instanceName.Substring(4);
+                    GameObject outlineGameObject = HoldOutlinesParent.transform.Find(outlineInstanceName).gameObject;
+                    if (outlineGameObject != null)
+                    {
+                        outlineGameObject.SetActive(false);
+                    }
+
                     HoldSoundEffect.Play();
                     holdKeyInfo.isSoundPlayedAtEnd = true;
                     // 如果已经结束判定，从列表中移除该instanceName
@@ -485,8 +495,6 @@ public class MusicAndChartPlayer : MonoBehaviour
                             animator.Play("TapHitEffect");
                             // 检查动画是否播放完毕
                             StartCoroutine(CheckAnimationEnd(animator, holdHitEffect));
-
-                            //PlayAnimation($"Hold{holdIndex + 1}", "HoldEffect");
 
                         }
                     }
@@ -609,168 +617,48 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
-    private void UpdatePositionsAndColor(float currentTime)
+    private void UpdatePositionsAndColor(float currentTime, List<Speed> speedList, bool IfResumePlay)
     {
-        // 计算每帧对应的 Z 轴坐标减少量，假设帧率是固定的（比如 60 帧每秒），然后根据每秒钟变化单位计算每帧变化量
-        float audioTimeDelta = currentTime - audioPrevTime;
-        float zAxisDecreasePerFrame = SpeedParams.NoteSpeedDefault * audioTimeDelta;
+        // 计算每帧对应的 Z 轴坐标减少量
+        //float audioTimeDelta = currentTime - audioPrevTime;
+        float totalDistance = 0;
 
-        UpdateJudgePlanesPosition(currentTime, zAxisDecreasePerFrame);
-        UpdateJudgeLinesPosition(currentTime, zAxisDecreasePerFrame);
-        UpdateNotesPosition(zAxisDecreasePerFrame);
+        // 处理 startTime 之前的所有速度段
+        //注意查找每个速度段与audioPrevTime到currentTime区间是否有交集
+        foreach (var speed in speedList)
+        {
+            //如果全包含
+            if (speed.startT <= audioPrevTime & speed.endT >= currentTime)
+            {
+                totalDistance += (currentTime - audioPrevTime) * speed.sp;
+            }
+            //包含前半段
+            else if (speed.endT > audioPrevTime & speed.endT <= currentTime)
+            {
+                totalDistance += (speed.endT - audioPrevTime) * speed.sp;
+            }
+            //包含后半段
+            else if (speed.startT >= audioPrevTime & speed.startT < currentTime)
+            {
+                totalDistance += (currentTime - speed.startT) * speed.sp;
+            }
+        }
+
+        //Debug.Log(totalDistance);
+        float zAxisDecreasePerFrame = SpeedParams.NoteSpeedDefault * totalDistance;
+        //Debug.Log(zAxisDecreasePerFrame);
+
+
+        UpdateJudgePlanesPosition(currentTime, zAxisDecreasePerFrame, IfResumePlay);
+        UpdateJudgeLinesPosition(currentTime);
+        UpdateNotesPosition(currentTime, zAxisDecreasePerFrame, IfResumePlay);
         //更新所有Note描边颜色
-        UpdateColors(currentTime);
+        UpdateColors(currentTime, IfResumePlay);
 
         audioPrevTime = currentTime;
     }
 
-    //private void UpdateColors(float currentTime)
-    //{
-
-    //    // 处理JudgePlane
-    //    for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
-    //    {
-    //        float endT = JudgePlanesEndT[i];
-    //        //只更新还没消失的JudgePlane的色条颜色
-    //        if (endT > currentTime)
-    //        {
-    //            //Debug.Log(i + 1);
-    //            JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(i + 1);
-    //            Color planecolor = GradientColorList.GetColorAtTimeAndY(currentTime, currentJudgePlane.GetPlaneYAxis(currentTime));
-    //            if (i == 0) { 
-    //            //Debug.Log(planecolor);
-    //            }
-    //            // 设置LeftColorLine颜色
-    //            if (ColorLinesParent.transform.childCount > i * 2)
-    //            {
-    //                var leftColorLineObject = ColorLinesParent.transform.GetChild(i * 2);
-    //                if (leftColorLineObject != null)
-    //                {
-    //                    SetSpriteColor(leftColorLineObject.gameObject, planecolor);
-    //                }
-    //            }
-
-    //            // 设置RightColorLine颜色
-    //            if (ColorLinesParent.transform.childCount > i * 2 + 1)
-    //            {
-    //                var rightColorLineObject = ColorLinesParent.transform.GetChild(i * 2 + 1);
-    //                if (rightColorLineObject != null)
-    //                {
-    //                    SetSpriteColor(rightColorLineObject.gameObject, planecolor);
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    // 处理 HoldOutline
-    //    if (HoldOutlinesParent != null)
-    //    {
-    //        for (int i = 0; i < HoldOutlinesParent.transform.childCount; i++)
-    //        {
-    //            Transform childTransform = HoldOutlinesParent.transform.GetChild(i);
-    //            GameObject keyGameObject = childTransform.gameObject;
-    //            string instanceName = keyGameObject.name;
-    //            Hold hold = chart.holds[i];
-    //            JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
-    //            float currentY = associatedJudgePlaneObject.GetPlaneYAxis(currentTime);
-    //            Color holdcolor = GradientColorList.GetColorAtTimeAndY(currentTime, currentY);
-    //            SetSpriteColor(keyGameObject, holdcolor);
-
-    //        }
-    //    }
-
-    //    //如果正好处于颜色突变时间，则更新所有其他Note的Outline颜色
-    //    //Debug.Log($"{audioPrevTime}   {currentTime}");
-    //    for (int j = 0; j < GradientColorList.colors.Count; j++)
-    //    {
-    //        //Debug.Log(GradientColorList.colors[j].startT);
-    //        if (GradientColorList.colors[j].startT > audioPrevTime & GradientColorList.colors[j].startT <= currentTime)
-    //        {
-    //            //Debug.Log(111);
-    //            // 处理 Taps 键
-    //            if (TapsParent != null)
-    //            {
-    //                for (int i = 0; i < TapsParent.transform.childCount; i++)
-    //                {
-    //                    Transform childTransform = TapsParent.transform.GetChild(i);
-    //                    GameObject keyGameObject = childTransform.gameObject;
-    //                    string instanceName = keyGameObject.name;
-    //                    // 如果是 HitEffect 物体，则跳过
-    //                    if (instanceName.Contains("HitEffect"))
-    //                    {
-    //                        continue;
-    //                    }
-    //                    //Debug.Log(i);
-    //                    //Debug.Log(instanceName);
-    //                    Tap tap = chart.taps[i];
-    //                    Color tapcolor = GradientColorList.GetColorAtTimeAndY(currentTime, tap.startY);
-    //                    //Debug.Log(tapcolor);
-    //                    SetSpriteColor(keyGameObject, tapcolor);
-    //                }
-    //            }
-
-    //            // 处理 Slides 键
-    //            if (SlidesParent != null)
-    //            {
-    //                for (int i = 0; i < SlidesParent.transform.childCount; i++)
-    //                {
-    //                    Transform childTransform = SlidesParent.transform.GetChild(i);
-    //                    GameObject keyGameObject = childTransform.gameObject;
-    //                    string instanceName = keyGameObject.name;
-    //                    // 如果是 HitEffect 物体，则跳过
-    //                    if (instanceName.Contains("HitEffect"))
-    //                    {
-    //                        continue;
-    //                    }
-    //                    Slide slide = chart.slides[i];
-    //                    Color slidecolor = GradientColorList.GetColorAtTimeAndY(currentTime, slide.startY);
-    //                    SetSpriteColor(keyGameObject, slidecolor);
-    //                }
-    //            }
-
-    //            // 处理 Flicks 键
-    //            if (FlicksParent != null)
-    //            {
-    //                for (int i = 0; i < FlicksParent.transform.childCount; i++)
-    //                {
-    //                    Transform childTransform = FlicksParent.transform.GetChild(i);
-    //                    GameObject keyGameObject = childTransform.gameObject;
-    //                    string instanceName = keyGameObject.name;
-    //                    // 如果是 HitEffect 物体，则跳过
-    //                    if (instanceName.Contains("HitEffect"))
-    //                    {
-    //                        continue;
-    //                    }
-    //                    Flick flick = chart.flicks[i];
-    //                    Color flickcolor = GradientColorList.GetColorAtTimeAndY(currentTime, flick.startY);
-    //                    SetSpriteColor(keyGameObject, flickcolor);
-    //                }
-    //            }
-
-    //            // 处理 StarHead 键
-    //            if (StarsParent != null)
-    //            {
-    //                for (int i = 0; i < StarsParent.transform.childCount; i++)
-    //                {
-    //                    Transform childTransform = StarsParent.transform.GetChild(i);
-    //                    GameObject keyGameObject = childTransform.gameObject;
-    //                    string instanceName = keyGameObject.name;
-    //                    // 如果是 HitEffect 物体，则跳过
-    //                    if (instanceName.Contains("HitEffect"))
-    //                    {
-    //                        continue;
-    //                    }
-    //                    Star star = chart.stars[i];
-    //                    Color starcolor = GradientColorList.GetColorAtTimeAndY(currentTime, star.startY);
-    //                    SetSpriteColor(keyGameObject, starcolor);
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //}
-
-    private void UpdateColors(float currentTime)
+    private void UpdateColors(float currentTime, bool IfUpdateAll)
     {
         // 处理JudgePlane
         for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
@@ -823,129 +711,181 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
         }
 
-        //如果正好处于颜色突变时间，则更新所有其他Note的Outline颜色
-        //Debug.Log($"{audioPrevTime}   {currentTime}");
-        for (int j = 0; j < GradientColorList.colors.Count; j++)
+        //如果更新所有其他Note的颜色（暂停结束，恢复播放时使用）
+        if (IfUpdateAll)
         {
-            //Debug.Log(GradientColorList.colors[j].startT);
-            if (GradientColorList.colors[j].startT > audioPrevTime && GradientColorList.colors[j].startT <= currentTime)
+            UpdateOtherNoteColors(currentTime);
+        }
+        else
+        {
+            //否则，如果正好处于颜色突变时间，则更新所有其他Note的Outline颜色
+            for (int j = 0; j < GradientColorList.colors.Count; j++)
             {
-                //Debug.Log(111);
-                // 处理 Taps 键
-                if (TapsParent != null)
+                if (GradientColorList.colors[j].startT > audioPrevTime && GradientColorList.colors[j].startT <= currentTime)
                 {
-                    for (int i = 0; i < TapsParent.transform.childCount; i++)
-                    {
-                        Transform childTransform = TapsParent.transform.GetChild(i);
-                        GameObject keyGameObject = childTransform.gameObject;
-                        if (!keyGameObject.activeSelf) continue;
-
-                        string instanceName = keyGameObject.name;
-                        // 如果是 HitEffect 物体，则跳过
-                        if (instanceName.Contains("HitEffect")) {continue;}
-                        //Debug.Log(i);
-                        //Debug.Log(instanceName);
-                        Tap tap = chart.taps[i];
-                        Color tapcolor = GradientColorList.GetColorAtTimeAndY(currentTime, tap.startY);
-                        //Debug.Log(tapcolor);
-                        SetSpriteColor(keyGameObject, tapcolor);
-                    }
-                }
-
-                // 处理 Slides 键
-                if (SlidesParent != null)
-                {
-                    for (int i = 0; i < SlidesParent.transform.childCount; i++)
-                    {
-                        Transform childTransform = SlidesParent.transform.GetChild(i);
-                        GameObject keyGameObject = childTransform.gameObject;
-                        if (!keyGameObject.activeSelf) continue;
-
-                        string instanceName = keyGameObject.name;
-                        // 如果是 HitEffect 物体，则跳过
-                        if (instanceName.Contains("HitEffect")) { continue; }
-                        Slide slide = chart.slides[i];
-                        Color slidecolor = GradientColorList.GetColorAtTimeAndY(currentTime, slide.startY);
-                        SetSpriteColor(keyGameObject, slidecolor);
-                    }
-                }
-
-                // 处理 Flicks 键
-                if (FlicksParent != null)
-                {
-                    for (int i = 0; i < FlicksParent.transform.childCount; i++)
-                    {
-                        Transform childTransform = FlicksParent.transform.GetChild(i);
-                        GameObject keyGameObject = childTransform.gameObject;
-                        if (!keyGameObject.activeSelf) continue;
-
-                        string instanceName = keyGameObject.name;
-                        // 如果是 HitEffect 物体，则跳过
-                        if (instanceName.Contains("HitEffect")) { continue; }
-                        Flick flick = chart.flicks[i];
-                        Color flickcolor = GradientColorList.GetColorAtTimeAndY(currentTime, flick.startY);
-                        SetSpriteColor(keyGameObject, flickcolor);
-                    }
-                }
-
-                // 处理 StarHead 键
-                if (StarsParent != null)
-                {
-                    for (int i = 0; i < StarsParent.transform.childCount; i++)
-                    {
-                        Transform childTransform = StarsParent.transform.GetChild(i);
-                        GameObject keyGameObject = childTransform.gameObject;
-                        if (!keyGameObject.activeSelf) continue;
-
-                        string instanceName = keyGameObject.name;
-                        // 如果是 HitEffect 物体，则跳过
-                        if (instanceName.Contains("HitEffect")) { continue; }
-                        Star star = chart.stars[i];
-                        Color starcolor = GradientColorList.GetColorAtTimeAndY(currentTime, star.startY);
-                        SetSpriteColor(keyGameObject, starcolor);
-                    }
+                    UpdateOtherNoteColors(currentTime);
                 }
             }
         }
     }
 
-    private void UpdateJudgePlanesPosition(float currentTime, float zAxisDecreasePerFrame)
+    private void UpdateOtherNoteColors(float currentTime)
     {
-        // 如果已经创建了 JudgePlanesParent 并且音频正在播放，更新其子物体的 Z 轴坐标
-        if (JudgePlanesParent != null)
-        {
-            for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
-            {
-                Transform childTransform = JudgePlanesParent.transform.GetChild(i);
-                Vector3 currentPosition = childTransform.position;
-                currentPosition.z += zAxisDecreasePerFrame;
-                childTransform.position = currentPosition;
 
-                // 获取子物体的名称
-                string childName = childTransform.gameObject.name;
-                // 假设子物体名称为 "JudgePlaneX"，提取 X 作为 judgePlaneId
-                int judgePlaneId = int.Parse(childName.Substring("JudgePlane".Length));
-                JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
-                float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
-                // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
-                currentJudgePlane.ChangeJudgePlaneTransparency(JudgePlanesParent, YAxis);
+        // 处理 Taps 键
+        if (TapsParent != null)
+        {
+            for (int i = 0; i < TapsParent.transform.childCount; i++)
+            {
+                Transform childTransform = TapsParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Tap tap = chart.taps[i];
+                Color tapcolor = GradientColorList.GetColorAtTimeAndY(currentTime, tap.startY);
+                //Debug.Log(tapcolor);
+                SetSpriteColor(keyGameObject, tapcolor);
             }
         }
 
-        // 更新 ColorLinesParent 的子对象的位置
-        if (ColorLinesParent != null)
+        // 处理 Slides 键
+        if (SlidesParent != null)
         {
-            for (int i = 0; i < ColorLinesParent.transform.childCount; i++)
+            for (int i = 0; i < SlidesParent.transform.childCount; i++)
             {
-                Transform childTransform = ColorLinesParent.transform.GetChild(i);
-                Vector3 currentPosition = childTransform.position;
-                currentPosition.z += zAxisDecreasePerFrame;
-                childTransform.position = currentPosition;
+                Transform childTransform = SlidesParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Slide slide = chart.slides[i];
+                Color slidecolor = GradientColorList.GetColorAtTimeAndY(currentTime, slide.startY);
+                SetSpriteColor(keyGameObject, slidecolor);
+            }
+        }
+
+        // 处理 Flicks 键
+        if (FlicksParent != null)
+        {
+            for (int i = 0; i < FlicksParent.transform.childCount; i++)
+            {
+                Transform childTransform = FlicksParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Flick flick = chart.flicks[i];
+                Color flickcolor = GradientColorList.GetColorAtTimeAndY(currentTime, flick.startY);
+                SetSpriteColor(keyGameObject, flickcolor);
+            }
+        }
+
+        // 处理 StarHead 键
+        if (StarsParent != null)
+        {
+            for (int i = 0; i < StarsParent.transform.childCount; i++)
+            {
+                Transform childTransform = StarsParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Star star = chart.stars[i];
+                Color starcolor = GradientColorList.GetColorAtTimeAndY(currentTime, star.startY);
+                SetSpriteColor(keyGameObject, starcolor);
             }
         }
     }
 
-    private void UpdateJudgeLinesPosition(float currentTime, float zAxisDecreasePerFrame)
+
+
+    private void UpdateJudgePlanesPosition(float currentTime, float zAxisDecreasePerFrame, bool IfResumePlay)
+    {
+        //如果恢复播放，则重置JudgePlane的位置
+        if (IfResumePlay)
+        {
+            float ZPos = -CalculateZAxisPosition(currentTime, chart.speedList);
+            // 如果已经创建了 JudgePlanesParent 并且音频正在播放，更新其子物体的 Z 轴坐标
+            if (JudgePlanesParent != null)
+            {
+                for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
+                {
+                    Transform childTransform = JudgePlanesParent.transform.GetChild(i);
+                    Vector3 currentPosition = childTransform.position;
+                    currentPosition.z = ZPos;
+                    childTransform.position = currentPosition;
+
+                    // 获取子物体的名称
+                    string childName = childTransform.gameObject.name;
+                    // 假设子物体名称为 "JudgePlaneX"，提取 X 作为 judgePlaneId
+                    int judgePlaneId = int.Parse(childName.Substring("JudgePlane".Length));
+                    JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
+                    float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
+                    // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
+                    currentJudgePlane.ChangeJudgePlaneTransparency(JudgePlanesParent, YAxis);
+                }
+            }
+
+            // 更新 ColorLinesParent 的子对象的位置
+            if (ColorLinesParent != null)
+            {
+                for (int i = 0; i < ColorLinesParent.transform.childCount; i++)
+                {
+                    Transform childTransform = ColorLinesParent.transform.GetChild(i);
+                    Vector3 currentPosition = childTransform.position;
+                    currentPosition.z = ZPos;
+                    childTransform.position = currentPosition;
+                }
+            }
+        }
+        //否则只更新JudgePlane的位置
+        else
+        {
+            // 如果已经创建了 JudgePlanesParent 并且音频正在播放，更新其子物体的 Z 轴坐标
+            if (JudgePlanesParent != null)
+            {
+                for (int i = 0; i < JudgePlanesParent.transform.childCount; i++)
+                {
+                    Transform childTransform = JudgePlanesParent.transform.GetChild(i);
+                    Vector3 currentPosition = childTransform.position;
+                    currentPosition.z += zAxisDecreasePerFrame;
+                    childTransform.position = currentPosition;
+
+                    // 获取子物体的名称
+                    string childName = childTransform.gameObject.name;
+                    // 假设子物体名称为 "JudgePlaneX"，提取 X 作为 judgePlaneId
+                    int judgePlaneId = int.Parse(childName.Substring("JudgePlane".Length));
+                    JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
+                    float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
+                    // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
+                    currentJudgePlane.ChangeJudgePlaneTransparency(JudgePlanesParent, YAxis);
+                }
+            }
+
+            // 更新 ColorLinesParent 的子对象的位置
+            if (ColorLinesParent != null)
+            {
+                for (int i = 0; i < ColorLinesParent.transform.childCount; i++)
+                {
+                    Transform childTransform = ColorLinesParent.transform.GetChild(i);
+                    Vector3 currentPosition = childTransform.position;
+                    currentPosition.z += zAxisDecreasePerFrame;
+                    childTransform.position = currentPosition;
+                }
+            }
+        }
+    }
+
+    private void UpdateJudgeLinesPosition(float currentTime)
     {
         // 如果已经创建了 JudgeLinesParent 并且音频正在播放，更新其子物体的 Y 轴坐标
         if (JudgeLinesParent != null)
@@ -1013,177 +953,233 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
-    private void UpdateNotesPosition(float zAxisDecreasePerFrame)
+    private void UpdateNotesPosition(float currentTime, float zAxisDecreasePerFrame, bool IfResumePlay)
     {
-        // 处理 Taps 键
-        if (TapsParent != null)
+        //如果恢复播放，则重置所有Note的位置
+        if (IfResumePlay)
         {
-            for (int i = 0; i < TapsParent.transform.childCount; i++)
+            int Index = 0;
+            while (Index < startTimeToInstanceNames.Count)
             {
-                Transform childTransform = TapsParent.transform.GetChild(i);
-                GameObject keyGameObject = childTransform.gameObject;
-                string instanceName = keyGameObject.name;
-                // 如果是 HitEffect 物体，则跳过
-                if (instanceName.Contains("HitEffect"))
-                {
-                    continue;
-                }
-                KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                if (!keyInfo.isJudged)
-                {
-                    Vector3 currentPosition = childTransform.position;
-                    currentPosition.z += zAxisDecreasePerFrame;
-                    childTransform.position = currentPosition;
+                float startT = startTimeToInstanceNames.ElementAt(Index).Key;
+                List<string> instanceNames = startTimeToInstanceNames.ElementAt(Index).Value;
 
-                    // 根据 z 轴坐标设置透明度
-                    SetNoteAlpha(keyGameObject, currentPosition.z);
+                foreach (var instanceName in instanceNames)
+                {
+                    GameObject NoteInstance = null;
+                    Sprite sprite = null;
+
+                    // 设置该Note的位置和外观
+                    if (instanceName.StartsWith("Hold"))
+                    {
+                        NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
+                        Vector3 currentPosition = NoteInstance.transform.position;
+                        //注意Hold的Z轴坐标计算逻辑不一样
+                        currentPosition.z = -CalculateZAxisPosition(currentTime, chart.speedList);
+                        NoteInstance.transform.position = currentPosition;
+
+                        // 获取 HoldOutlinesParent 下对应的物体
+                        string outlineInstanceName = "HoldOutline" + instanceName.Substring(4);
+                        GameObject outlineGameObject = HoldOutlinesParent.transform.Find(outlineInstanceName).gameObject;
+                        if (outlineGameObject != null)
+                        {
+                            Vector3 outlinePosition = outlineGameObject.transform.position;
+                            outlinePosition.z = currentPosition.z;
+                            outlineGameObject.transform.position = outlinePosition;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"在 HoldOutlinesParent 下未找到对应的物体 {outlineInstanceName}");
+                        }
+                    }
+                    //对于非JudgePlane和非Hold的其他游戏物体，统一处理位置和外观
+                    else
+                    {
+                        if (instanceName.StartsWith("Tap"))
+                        {
+                            NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
+                            sprite = TapSprite;
+                        }
+                        else if (instanceName.StartsWith("Slide"))
+                        {
+                            NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
+                            sprite = SlideSprite;
+                        }
+                        else if (instanceName.StartsWith("Flick"))
+                        {
+                            NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+                            sprite = FlickSprite;
+
+                            //重置FlickArrow的位置
+                            string numberPart = instanceName.Substring(5);
+                            if (int.TryParse(numberPart, out int flickIndex))
+                            {
+                                GameObject gameobject = FlickArrowsParent.transform.Find($"FlickArrow{flickIndex}").gameObject;
+                                if (gameobject != null)
+                                {
+                                    // 更新FlickArrow位置
+                                    Vector3 currentPos = gameobject.transform.position;
+                                    currentPos.z = CalculateZAxisPosition(startT, chart.speedList) - CalculateZAxisPosition(currentTime, chart.speedList);
+                                    gameobject.transform.position = currentPos;
+                                    Flick flick = chart.flicks[flickIndex - 1];
+                                    float flickDirection = flick.flickDirection;
+
+                                    // 提前更新Flick位置（AdjustFlickArrowPosition需要用到正确的位置）
+                                    currentPos = NoteInstance.transform.position;
+                                    currentPos.z = CalculateZAxisPosition(startT, chart.speedList) - CalculateZAxisPosition(currentTime, chart.speedList) + ChartParams.NoteZAxisOffset;
+                                    NoteInstance.transform.position = currentPos;
+
+                                    // 针对横划键，需要额外调整位置
+                                    AdjustFlickArrowPosition(gameobject, NoteInstance, flickDirection);
+                                }
+                            }
+                        }
+                        else if (instanceName.StartsWith("StarHead"))
+                        {
+                            NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+                            sprite = StarHeadSprite;
+                        }
+                        // 删除Note的Animator组件（如果有）
+                        Animator animator = NoteInstance.GetComponent<Animator>();
+                        if (animator != null)
+                        {
+                            Destroy(animator);
+                            // 将Note的Sprite重置为初始Sprite
+                            if (sprite != null)
+                            {
+                                // 获取SpriteRenderer组件
+                                SpriteRenderer spriteRenderer = NoteInstance.GetComponent<SpriteRenderer>();
+
+                                if (spriteRenderer != null)
+                                {
+                                    // 将加载的Sprite赋值给SpriteRenderer
+                                    spriteRenderer.sprite = sprite;
+                                }
+
+                                // Note在播放动画时，x轴缩放进行了一步放缩，需要再放缩回去
+                                Vector3 currentScale = NoteInstance.transform.localScale;
+                                currentScale.x /= AnimationScaleAdjust;
+                                NoteInstance.transform.localScale = currentScale;
+                            }
+                        }
+                        // 更新Note位置
+                        Vector3 currentPosition = NoteInstance.transform.position;
+                        currentPosition.z = CalculateZAxisPosition(startT, chart.speedList) - CalculateZAxisPosition(currentTime, chart.speedList) + ChartParams.NoteZAxisOffset;
+                        NoteInstance.transform.position = currentPosition;
+                    }
+
                 }
+                Index++;
             }
         }
-
-        // 处理 Slides 键
-        if (SlidesParent != null)
+        //否则只更新所有Note的位置
+        else
         {
-            for (int i = 0; i < SlidesParent.transform.childCount; i++)
+            // 处理 Taps 键
+            if (TapsParent != null)
             {
-                Transform childTransform = SlidesParent.transform.GetChild(i);
-                GameObject keyGameObject = childTransform.gameObject;
-                string instanceName = keyGameObject.name;
-                // 如果是 HitEffect 物体，则跳过
-                if (instanceName.Contains("HitEffect"))
+                for (int i = 0; i < TapsParent.transform.childCount; i++)
                 {
-                    continue;
-                }
-                KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                if (!keyInfo.isJudged)
-                {
-                    Vector3 currentPosition = childTransform.position;
-                    currentPosition.z += zAxisDecreasePerFrame;
-                    childTransform.position = currentPosition;
-
-                    // 根据 z 轴坐标设置透明度
-                    SetNoteAlpha(keyGameObject, currentPosition.z);
+                    Transform childTransform = TapsParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
                 }
             }
-        }
 
-        // 处理 Flicks 键
-        if (FlicksParent != null)
-        {
-            for (int i = 0; i < FlicksParent.transform.childCount; i++)
+            // 处理 Slides 键
+            if (SlidesParent != null)
             {
-                Transform childTransform = FlicksParent.transform.GetChild(i);
-                GameObject keyGameObject = childTransform.gameObject;
-                string instanceName = keyGameObject.name;
-                // 如果是 HitEffect 物体，则跳过
-                if (instanceName.Contains("HitEffect"))
+                for (int i = 0; i < SlidesParent.transform.childCount; i++)
                 {
-                    continue;
-                }
-                KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                if (!keyInfo.isJudged)
-                {
-                    Vector3 currentPosition = childTransform.position;
-                    currentPosition.z += zAxisDecreasePerFrame;
-                    childTransform.position = currentPosition;
-
-                    //根据 z 轴坐标设置透明度
-                    SetNoteAlpha(keyGameObject, currentPosition.z);
+                    Transform childTransform = SlidesParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
                 }
             }
-        }
 
-        // 处理 FlickArrows 键
-        if (FlickArrowsParent != null)
-        {
-            for (int i = 0; i < FlickArrowsParent.transform.childCount; i++)
+            // 处理 Flicks 键
+            if (FlicksParent != null)
             {
-                Transform childTransform = FlickArrowsParent.transform.GetChild(i);
-                GameObject keyGameObject = childTransform.gameObject;
-                string instanceName = keyGameObject.name;
-                // 如果是 HitEffect 物体，则跳过
-                if (instanceName.Contains("HitEffect"))
+                for (int i = 0; i < FlicksParent.transform.childCount; i++)
                 {
-                    continue;
+                    Transform childTransform = FlicksParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
                 }
-                Vector3 currentPosition = childTransform.position;
-                currentPosition.z += zAxisDecreasePerFrame;
-                childTransform.position = currentPosition;
-
-                //根据 z 轴坐标设置透明度
-                SetNoteAlpha(keyGameObject, currentPosition.z);
             }
-        }
 
-        // 处理 Hold 键
-        if (HoldsParent != null)
-        {
-            for (int i = 0; i < HoldsParent.transform.childCount; i++)
+            // 处理 FlickArrows 键
+            if (FlickArrowsParent != null)
             {
-                Transform childTransform = HoldsParent.transform.GetChild(i);
-                GameObject holdGameObject = childTransform.gameObject;
-                string instanceName = holdGameObject.name;
-                // 如果是 HitEffect 或 Outline 物体，则跳过
-                if (instanceName.Contains("HitEffect"))
+                for (int i = 0; i < FlickArrowsParent.transform.childCount; i++)
                 {
-                    continue;
+                    Transform childTransform = FlickArrowsParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
                 }
-
-                // Hold 无论是否判定，位置都要更新
-                Vector3 currentPosition = childTransform.position;
-                currentPosition.z += zAxisDecreasePerFrame;
-                childTransform.position = currentPosition;
-
-                //根据 z 轴坐标设置透明度
-                SetNoteAlpha(holdGameObject, currentPosition.z);
             }
-        }
 
-        // 处理 HoldOutline
-        if (HoldOutlinesParent != null)
-        {
-            for (int i = 0; i < HoldOutlinesParent.transform.childCount; i++)
+            // 处理 Hold 键
+            if (HoldsParent != null)
             {
-                Transform childTransform = HoldOutlinesParent.transform.GetChild(i);
-                GameObject holdOutlineGameObject = childTransform.gameObject;
-                string instanceName = holdOutlineGameObject.name;
-
-                // Hold 无论是否判定，位置都要更新
-                Vector3 currentPosition = childTransform.position;
-                currentPosition.z += zAxisDecreasePerFrame;
-                childTransform.position = currentPosition;
-
-                //根据 z 轴坐标设置透明度
-                SetNoteAlpha(holdOutlineGameObject, currentPosition.z);
-            }
-        }
-
-        // 处理 StarHead 键
-        if (StarsParent != null)
-        {
-            for (int i = 0; i < StarsParent.transform.childCount; i++)
-            {
-                Transform childTransform = StarsParent.transform.GetChild(i);
-                GameObject starHeadGameObject = childTransform.gameObject;
-                string instanceName = starHeadGameObject.name;
-                // 如果是 HitEffect 物体，则跳过
-                if (instanceName.Contains("HitEffect"))
+                for (int i = 0; i < HoldsParent.transform.childCount; i++)
                 {
-                    continue;
+                    Transform childTransform = HoldsParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
                 }
-                KeyInfo keyInfo = keyReachedJudgment[instanceName];
-                if (instanceName.StartsWith("StarHead") && !keyInfo.isJudged)
-                {
-                    Vector3 currentPosition = childTransform.position;
-                    currentPosition.z += zAxisDecreasePerFrame;
-                    childTransform.position = currentPosition;
+            }
 
-                    //根据 z 轴坐标设置透明度
-                    SetNoteAlpha(starHeadGameObject, currentPosition.z);
+            // 处理 HoldOutline
+            if (HoldOutlinesParent != null)
+            {
+                for (int i = 0; i < HoldOutlinesParent.transform.childCount; i++)
+                {
+                    Transform childTransform = HoldOutlinesParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
+                }
+            }
+
+            // 处理 StarHead 键
+            if (StarsParent != null)
+            {
+                for (int i = 0; i < StarsParent.transform.childCount; i++)
+                {
+                    Transform childTransform = StarsParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
                 }
             }
         }
     }
+
+    private void UpdateNotePosition(Transform childTransform, float zAxisDecreasePerFrame)
+    {
+        GameObject keyGameObject = childTransform.gameObject;
+        string instanceName = keyGameObject.name;
+        // 如果是 HitEffect 物体，则跳过
+        if (instanceName.Contains("HitEffect"))
+        {
+            return;
+        }
+
+        KeyInfo keyInfo;
+        if (keyReachedJudgment.TryGetValue(instanceName, out keyInfo))
+        {
+            Vector3 currentPosition = childTransform.position;
+            currentPosition.z += zAxisDecreasePerFrame;
+            childTransform.position = currentPosition;
+
+            //根据 z 轴坐标设置透明度
+            SetNoteAlpha(keyGameObject, currentPosition.z);
+        }
+        else
+        {
+            Vector3 currentPosition = childTransform.position;
+            currentPosition.z += zAxisDecreasePerFrame;
+            childTransform.position = currentPosition;
+
+            //根据 z 轴坐标设置透明度
+            SetNoteAlpha(keyGameObject, currentPosition.z);
+        }
+
+    }
+
+
 
     // 根据 z 轴坐标设置 Note 的透明度
     private void SetNoteAlpha(GameObject noteObject, float zPosition)
@@ -1418,7 +1414,11 @@ public class MusicAndChartPlayer : MonoBehaviour
         {
             string instanceName = holdTimes.ElementAt(holdIndex).Key;
             GameObject NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
-            if (NoteInstance != null)
+            // 获取 HoldOutlinesParent 下对应的物体
+            string outlineInstanceName = "HoldOutline" + instanceName.Substring(4);
+            GameObject outlineGameObject = HoldOutlinesParent.transform.Find(outlineInstanceName).gameObject;
+            
+            if (NoteInstance != null & outlineGameObject != null)
             {
                 float startT = holdTimes.ElementAt(holdIndex).Value[0];
                 float endT = holdTimes.ElementAt(holdIndex).Value[1];
@@ -1454,11 +1454,12 @@ public class MusicAndChartPlayer : MonoBehaviour
                 }
 
                 NoteInstance.SetActive(shouldBeActive);
-                // 同步子物体的激活状态
-                for (int i = 0; i < NoteInstance.transform.childCount; i++)
-                {
-                    NoteInstance.transform.GetChild(i).gameObject.SetActive(shouldBeActive);
-                }
+                outlineGameObject.SetActive(shouldBeActive);
+                //// 同步子物体的激活状态
+                //for (int i = 0; i < NoteInstance.transform.childCount; i++)
+                //{
+                //    NoteInstance.transform.GetChild(i).gameObject.SetActive(shouldBeActive);
+                //}
 
                 //将所有HoldHitEffect效果设置为非激活
                 Transform holdHitEffectTransform = HoldsParent.transform.Find($"HoldHitEffect{holdIndex}");
@@ -1468,6 +1469,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     gameobject.SetActive(false);
                 }
             }
+
             holdIndex++;
         }
 
@@ -1519,176 +1521,171 @@ public class MusicAndChartPlayer : MonoBehaviour
             notJudgedIndex++;
         }
 
-        ResetNotesPositionAndSprite(currentTime);
+        //更新所有谱面元素位置和颜色状态
+        Updateall(true);
+        //ResetNotesPositionAndSprite(currentTime);
         //ResetNotesSprite(currentTime);
     }
 
-    private void ResetNotesPositionAndSprite(float currentTime)
-    {
-        int Index = 0;
-        while (Index < startTimeToInstanceNames.Count)
-        {
-            float startT = startTimeToInstanceNames.ElementAt(Index).Key;
-            List<string> instanceNames = startTimeToInstanceNames.ElementAt(Index).Value;
-            // 判断是否是多押情况
-            bool isMultiTap = instanceNames.Count > 1;
+    //private void ResetNotesPositionAndSprite(float currentTime)
+    //{
+    //    int Index = 0;
+    //    while (Index < startTimeToInstanceNames.Count)
+    //    {
+    //        float startT = startTimeToInstanceNames.ElementAt(Index).Key;
+    //        List<string> instanceNames = startTimeToInstanceNames.ElementAt(Index).Value;
+    //        // 判断是否是多押情况
+    //        bool isMultiTap = instanceNames.Count > 1;
 
-            foreach (var instanceName in instanceNames)
-            {
-                GameObject NoteInstance = null;
-                Sprite sprite = null;
-                // 设置该Note的位置和外观
-                if (instanceName.StartsWith("Hold"))
-                {
-                    NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
-                    Vector3 currentPosition = NoteInstance.transform.position;
-                    //注意Hold的Z轴坐标计算逻辑不一样
-                    currentPosition.z = CalculateZAxisPosition(-currentTime);
-                    NoteInstance.transform.position = currentPosition;
+    //        foreach (var instanceName in instanceNames)
+    //        {
+    //            GameObject NoteInstance = null;
+    //            Sprite sprite = null;
 
-                    // 获取 HoldOutlinesParent 下对应的物体
-                    string outlineInstanceName = "HoldOutline" + instanceName.Substring(4);
-                    GameObject outlineGameObject = HoldOutlinesParent.transform.Find(outlineInstanceName).gameObject;
-                    if (outlineGameObject != null)
-                    {
-                        Vector3 outlinePosition = outlineGameObject.transform.position;
-                        outlinePosition.z = currentPosition.z;
-                        outlineGameObject.transform.position = outlinePosition;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"在 HoldOutlinesParent 下未找到对应的物体 {outlineInstanceName}");
-                    }
-                }
-                //对于非JudgePlane和非Hold的其他游戏物体，统一处理位置和外观
-                else
-                {
-                    if (instanceName.StartsWith("Tap"))
-                    {
-                        NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
-                        sprite = TapSprite;
-                    }
-                    else if (instanceName.StartsWith("Slide"))
-                    {
-                        NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
-                        sprite = SlideSprite;
-                    }
-                    else if (instanceName.StartsWith("Flick"))
-                    {
-                        NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
-                        sprite = FlickSprite;
+    //            // 设置该Note的位置和外观
+    //            if (instanceName.StartsWith("Hold"))
+    //            {
+    //                NoteInstance = HoldsParent.transform.Find(instanceName).gameObject;
+    //                Vector3 currentPosition = NoteInstance.transform.position;
+    //                //注意Hold的Z轴坐标计算逻辑不一样
+    //                currentPosition.z = -CalculateZAxisPosition(currentTime, chart.speedList);
+    //                NoteInstance.transform.position = currentPosition;
 
-                        //重置FlickArrow的位置
-                        string numberPart = instanceName.Substring(5);
-                        if (int.TryParse(numberPart, out int flickIndex))
-                        {
-                            GameObject gameobject = FlickArrowsParent.transform.Find($"FlickArrow{flickIndex}").gameObject;
-                            if (gameobject != null)
-                            {
-                                // 更新FlickArrow位置
-                                Vector3 currentPos = gameobject.transform.position;
-                                currentPos.z = CalculateZAxisPosition(startT - currentTime);
-                                gameobject.transform.position = currentPos;
-                                Flick flick = chart.flicks[flickIndex - 1];
-                                float flickDirection = flick.flickDirection;
+    //                // 获取 HoldOutlinesParent 下对应的物体
+    //                string outlineInstanceName = "HoldOutline" + instanceName.Substring(4);
+    //                GameObject outlineGameObject = HoldOutlinesParent.transform.Find(outlineInstanceName).gameObject;
+    //                if (outlineGameObject != null)
+    //                {
+    //                    Vector3 outlinePosition = outlineGameObject.transform.position;
+    //                    outlinePosition.z = currentPosition.z;
+    //                    outlineGameObject.transform.position = outlinePosition;
+    //                }
+    //                else
+    //                {
+    //                    Debug.LogWarning($"在 HoldOutlinesParent 下未找到对应的物体 {outlineInstanceName}");
+    //                }
+    //            }
+    //            //对于非JudgePlane和非Hold的其他游戏物体，统一处理位置和外观
+    //            else
+    //            {
+    //                if (instanceName.StartsWith("Tap"))
+    //                {
+    //                    NoteInstance = TapsParent.transform.Find(instanceName).gameObject;
+    //                    sprite = TapSprite;
+    //                }
+    //                else if (instanceName.StartsWith("Slide"))
+    //                {
+    //                    NoteInstance = SlidesParent.transform.Find(instanceName).gameObject;
+    //                    sprite = SlideSprite;
+    //                }
+    //                else if (instanceName.StartsWith("Flick"))
+    //                {
+    //                    NoteInstance = FlicksParent.transform.Find(instanceName).gameObject;
+    //                    sprite = FlickSprite;
 
-                                // 提前更新Flick位置（AdjustFlickArrowPosition需要用到正确的位置）
-                                currentPos = NoteInstance.transform.position;
-                                currentPos.z = CalculateZAxisPosition(startT - currentTime) + ChartParams.NoteZAxisOffset;
-                                NoteInstance.transform.position = currentPos;
+    //                    //重置FlickArrow的位置
+    //                    string numberPart = instanceName.Substring(5);
+    //                    if (int.TryParse(numberPart, out int flickIndex))
+    //                    {
+    //                        GameObject gameobject = FlickArrowsParent.transform.Find($"FlickArrow{flickIndex}").gameObject;
+    //                        if (gameobject != null)
+    //                        {
+    //                            // 更新FlickArrow位置
+    //                            Vector3 currentPos = gameobject.transform.position;
+    //                            currentPos.z = CalculateZAxisPosition(startT - currentTime, chart.speedList);
+    //                            gameobject.transform.position = currentPos;
+    //                            Flick flick = chart.flicks[flickIndex - 1];
+    //                            float flickDirection = flick.flickDirection;
 
-                                // 针对横划键，需要额外调整位置
-                                AdjustFlickArrowPosition(gameobject, NoteInstance, flickDirection);
-                            }
-                        }
-                    }
-                    else if (instanceName.StartsWith("StarHead"))
-                    {
-                        NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
-                        sprite = StarHeadSprite;
-                    }
-                    // 删除Note的Animator组件（如果有）
-                    Animator animator = NoteInstance.GetComponent<Animator>();
-                    if (animator != null)
-                    {
-                        Destroy(animator);
-                        // 将Note的Sprite重置为初始Sprite
-                        if (sprite != null)
-                        {
-                            // 获取SpriteRenderer组件
-                            SpriteRenderer spriteRenderer = NoteInstance.GetComponent<SpriteRenderer>();
+    //                            // 提前更新Flick位置（AdjustFlickArrowPosition需要用到正确的位置）
+    //                            currentPos = NoteInstance.transform.position;
+    //                            currentPos.z = CalculateZAxisPosition(startT - currentTime, chart.speedList) + ChartParams.NoteZAxisOffset;
+    //                            NoteInstance.transform.position = currentPos;
 
-                            if (spriteRenderer != null)
-                            {
-                                // 将加载的Sprite赋值给SpriteRenderer
-                                spriteRenderer.sprite = sprite;
-                            }
+    //                            // 针对横划键，需要额外调整位置
+    //                            AdjustFlickArrowPosition(gameobject, NoteInstance, flickDirection);
+    //                        }
+    //                    }
+    //                }
+    //                else if (instanceName.StartsWith("StarHead"))
+    //                {
+    //                    NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
+    //                    sprite = StarHeadSprite;
+    //                }
+    //                // 删除Note的Animator组件（如果有）
+    //                Animator animator = NoteInstance.GetComponent<Animator>();
+    //                if (animator != null)
+    //                {
+    //                    Destroy(animator);
+    //                    // 将Note的Sprite重置为初始Sprite
+    //                    if (sprite != null)
+    //                    {
+    //                        // 获取SpriteRenderer组件
+    //                        SpriteRenderer spriteRenderer = NoteInstance.GetComponent<SpriteRenderer>();
 
-                            // Note在播放动画时，x轴缩放进行了一步放缩，需要再放缩回去
-                            Vector3 currentScale = NoteInstance.transform.localScale;
-                            currentScale.x /= AnimationScaleAdjust;
-                            NoteInstance.transform.localScale = currentScale;
-                        }
-                    }
-                    // 更新Note位置
-                    Vector3 currentPosition = NoteInstance.transform.position;
-                    currentPosition.z = CalculateZAxisPosition(startT - currentTime) + ChartParams.NoteZAxisOffset;
-                    NoteInstance.transform.position = currentPosition;
-                }
+    //                        if (spriteRenderer != null)
+    //                        {
+    //                            // 将加载的Sprite赋值给SpriteRenderer
+    //                            spriteRenderer.sprite = sprite;
+    //                        }
 
-                // 如果是多押情况，将Shader替换为Sprites/Outline
-                if (isMultiTap)
-                {
-                    SpriteRenderer spriteRenderer = NoteInstance.GetComponent<SpriteRenderer>();
-                    if (spriteRenderer != null)
-                    {
-                        spriteRenderer.material.shader = Shader.Find("Sprites/Outline");
-                    }
-                }
-            }
-            Index++;
-        }
-        // 单独处理JudgePlane的位置和外观
-        ResetJudgePlanePositionAndSprite(currentTime);
-        audioPrevTime = currentTime;
-    }
-    private void ResetJudgePlanePositionAndSprite(float currentTime)
-    {
-        if (chart.judgePlanes != null)
-        {
-            for (int i = 0; i < chart.judgePlanes.Count; i++)
-            {
-                var judgePlane = chart.judgePlanes[i];
-                string instanceName = $"JudgePlane{i + 1}";
-                GameObject NoteInstance = JudgePlanesParent.transform.Find(instanceName).gameObject;
-                Vector3 currentPosition = NoteInstance.transform.position;
-                //注意JudgePlane的Z轴坐标计算逻辑不一样
-                currentPosition.z = CalculateZAxisPosition(-currentTime);
-                NoteInstance.transform.position = currentPosition;
+    //                        // Note在播放动画时，x轴缩放进行了一步放缩，需要再放缩回去
+    //                        Vector3 currentScale = NoteInstance.transform.localScale;
+    //                        currentScale.x /= AnimationScaleAdjust;
+    //                        NoteInstance.transform.localScale = currentScale;
+    //                    }
+    //                }
+    //                // 更新Note位置
+    //                Vector3 currentPosition = NoteInstance.transform.position;
+    //                currentPosition.z = CalculateZAxisPosition(startT - currentTime, chart.speedList) + ChartParams.NoteZAxisOffset;
+    //                NoteInstance.transform.position = currentPosition;
+    //            }
 
-                int judgePlaneId = i + 1;
-                JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
-                float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
-                // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
-                currentJudgePlane.ChangeJudgePlaneTransparency(JudgePlanesParent, YAxis);
+    //        }
+    //        Index++;
+    //    }
+    //    // 单独处理JudgePlane的位置和外观
+    //    ResetJudgePlanePositionAndSprite(currentTime);
+    //    audioPrevTime = currentTime;
+    //}
 
-                // 重置对应的 LeftColorLine 和 RightColorLine 的 z 轴位置
-                ResetColorLineZPosition($"LeftColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
-                ResetColorLineZPosition($"RightColorLine{judgePlaneId}", ColorLinesParent, CalculateZAxisPosition(-currentTime));
-            }
-        }
-    }
+    //private void ResetJudgePlanePositionAndSprite(float currentTime)
+    //{
+    //    if (chart.judgePlanes != null)
+    //    {
+    //        for (int i = 0; i < chart.judgePlanes.Count; i++)
+    //        {
+    //            var judgePlane = chart.judgePlanes[i];
+    //            string instanceName = $"JudgePlane{i + 1}";
+    //            GameObject NoteInstance = JudgePlanesParent.transform.Find(instanceName).gameObject;
+    //            Vector3 currentPosition = NoteInstance.transform.position;
+    //            //注意JudgePlane的Z轴坐标计算逻辑不一样
+    //            currentPosition.z = -CalculateZAxisPosition(currentTime, chart.speedList);
+    //            NoteInstance.transform.position = currentPosition;
 
-    private void ResetColorLineZPosition(string objectName, GameObject parentGameObject, float newZPosition)
-    {
-        GameObject colorLineObject = parentGameObject.transform.Find(objectName).gameObject;
-        if (colorLineObject != null)
-        {
-            Vector3 currentPosition = colorLineObject.transform.position;
-            currentPosition.z = newZPosition;
-            colorLineObject.transform.position = currentPosition;
-        }
-    }
+    //            int judgePlaneId = i + 1;
+    //            JudgePlane currentJudgePlane = chart.GetCorrespondingJudgePlane(judgePlaneId);
+    //            float YAxis = currentJudgePlane.GetPlaneYAxis(currentTime);
+    //            // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
+    //            currentJudgePlane.ChangeJudgePlaneTransparency(JudgePlanesParent, YAxis);
+
+    //            // 重置对应的 LeftColorLine 和 RightColorLine 的 z 轴位置
+    //            ResetColorLineZPosition($"LeftColorLine{judgePlaneId}", ColorLinesParent, currentPosition.z);
+    //            ResetColorLineZPosition($"RightColorLine{judgePlaneId}", ColorLinesParent, currentPosition.z);
+    //        }
+    //    }
+    //}
+
+    //private void ResetColorLineZPosition(string objectName, GameObject parentGameObject, float newZPosition)
+    //{
+    //    GameObject colorLineObject = parentGameObject.transform.Find(objectName).gameObject;
+    //    if (colorLineObject != null)
+    //    {
+    //        Vector3 currentPosition = colorLineObject.transform.position;
+    //        currentPosition.z = newZPosition;
+    //        colorLineObject.transform.position = currentPosition;
+    //    }
+    //}
 
     private void LoadNoteSprites()
     {

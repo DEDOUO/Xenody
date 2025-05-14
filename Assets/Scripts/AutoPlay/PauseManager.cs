@@ -70,22 +70,24 @@ public class PauseManager : MonoBehaviour
                 SetChildrenActive(spectrumBorder, true);
             }
         }
+        //如果恢复播放
         if (isPaused)
         {
             Slider slider = MusicSlider.GetComponent<Slider>();
             audioSource.time = slider.value * audioSource.clip.length;
             musicAndChartPlayer.ResetAllNotes(audioSource.time);
-             CheckArrowVisibility(musicAndChartPlayer.SubStarsParent, audioSource.time, musicAndChartPlayer.subStarInfoDict);
-            MusicSlider.SetActive(false);
+            CheckArrowVisibility(musicAndChartPlayer.SubStarsParent, audioSource.time, musicAndChartPlayer.subStarInfoDict);
 
+
+            MusicSlider.SetActive(false);
             audioSource.Play();
             isPaused = false;
         }
+        //如果暂停
         else
         {
             audioSource.Pause();
             isPaused = true;
-
             MusicSlider.SetActive(true);
             Slider slider = MusicSlider.GetComponent<Slider>();
             slider.value = audioSource.time / audioSource.clip.length;
