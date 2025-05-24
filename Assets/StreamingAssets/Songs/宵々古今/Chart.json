@@ -895,37 +895,37 @@
     },
     {
       "startT": 23.782,
-      "startX": -1.5,
+      "startX": -1.0,
       "Size": 0.8,
       "Pid": 2
     },
     {
       "startT": 23.782,
-      "startX": 1.5,
+      "startX": 1.0,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 23.982,
-      "startX": -1.5,
+      "startX": -1.0,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 23.982,
-      "startX": 1.5,
+      "startX": 1.0,
       "Size": 0.8,
       "Pid": 2
     },
     {
       "startT": 24.182,
-      "startX": -1.5,
+      "startX": -1.0,
       "Size": 0.8,
       "Pid": 2
     },
     {
       "startT": 24.182,
-      "startX": 1.5,
+      "startX": 1.0,
       "Size": 0.8,
       "Pid": 1
     },
@@ -1267,13 +1267,13 @@
     },
     {
       "startT": 40.982,
-      "startX": -1.2,
+      "startX": -1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 44.182,
-      "startX": 1.2,
+      "startX": 1.1,
       "Size": 0.8,
       "Pid": 1
     },
@@ -1969,13 +1969,13 @@
     },
     {
       "startT": 76.382,
-      "startX": 1.2,
+      "startX": 1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 76.782,
-      "startX": -1.2,
+      "startX": -1.1,
       "Size": 0.8,
       "Pid": 1
     },
@@ -2473,13 +2473,13 @@
     },
     {
       "startT": 108.182,
-      "startX": 1.2,
+      "startX": 1.1,
       "Size": 0.8,
       "Pid": 3
     },
     {
       "startT": 111.382,
-      "startX": -1.2,
+      "startX": -1.1,
       "Size": 0.8,
       "Pid": 3
     },
@@ -3175,49 +3175,49 @@
     },
     {
       "startT": 145.182,
-      "startX": -1.2,
+      "startX": -1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 145.582,
-      "startX": 1.2,
+      "startX": 1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 145.982,
-      "startX": -1.2,
+      "startX": -1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 146.382,
-      "startX": 1.2,
+      "startX": 1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 146.782,
-      "startX": -1.2,
+      "startX": -1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 147.182,
-      "startX": 1.2,
+      "startX": 1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 147.582,
-      "startX": -1.2,
+      "startX": -1.1,
       "Size": 0.8,
       "Pid": 1
     },
     {
       "startT": 147.582,
-      "startX": 1.2,
+      "startX": 1.1,
       "Size": 0.8,
       "Pid": 1
     },
@@ -6041,21 +6041,13 @@
       "sub": [
         {
           "startT": 39.582,
-          "endT": 39.782,
-          "startX": -1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 39.782,
           "endT": 39.982,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": 1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": -1.1,
+          "startY": 0.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6066,21 +6058,13 @@
       "sub": [
         {
           "startT": 40.382,
-          "endT": 40.582,
-          "startX": 1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 40.582,
           "endT": 40.782,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": -1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": 1.1,
+          "startY": 0.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6091,21 +6075,13 @@
       "sub": [
         {
           "startT": 41.182,
-          "endT": 41.382,
-          "startX": -1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 41.382,
           "endT": 41.582,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": 1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": -1.1,
+          "startY": 0.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6116,21 +6092,13 @@
       "sub": [
         {
           "startT": 41.982,
-          "endT": 42.182,
-          "startX": 1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 42.182,
           "endT": 42.382,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": -1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": 1.1,
+          "startY": 0.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6141,21 +6109,13 @@
       "sub": [
         {
           "startT": 42.782,
-          "endT": 42.982,
-          "startX": 1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 42.982,
           "endT": 43.182,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": -1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": 1.1,
+          "startY": 0.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6166,21 +6126,13 @@
       "sub": [
         {
           "startT": 43.582,
-          "endT": 43.782,
-          "startX": -1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 43.782,
           "endT": 43.982,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": 1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": -1.1,
+          "startY": 0.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6191,21 +6143,13 @@
       "sub": [
         {
           "startT": 44.382,
-          "endT": 44.582,
-          "startX": 1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 44.582,
           "endT": 44.782,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": -1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": 1.1,
+          "startY": 0.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6216,21 +6160,13 @@
       "sub": [
         {
           "startT": 45.182,
-          "endT": 45.382,
-          "startX": -1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 45.382,
           "endT": 45.582,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": 1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": -1.1,
+          "startY": 0.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6241,21 +6177,13 @@
       "sub": [
         {
           "startT": 45.982,
-          "endT": 46.182,
-          "startX": -1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 46.182,
           "endT": 46.382,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": 1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": -1.1,
+          "startY": 0.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6266,21 +6194,13 @@
       "sub": [
         {
           "startT": 46.782,
-          "endT": 46.982,
-          "startX": 1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 46.982,
           "endT": 47.182,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": -1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": 1.1,
+          "startY": 0.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6291,21 +6211,13 @@
       "sub": [
         {
           "startT": 47.582,
-          "endT": 47.782,
-          "startX": 1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 47.782,
           "endT": 47.982,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": -1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": 1.1,
+          "startY": 0.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6316,21 +6228,13 @@
       "sub": [
         {
           "startT": 48.382,
-          "endT": 48.582,
-          "startX": -1.2,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 48.582,
           "endT": 48.782,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": 1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "startX": -1.1,
+          "startY": 0.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": 0.25
         }
       ]
     },
@@ -6389,39 +6293,13 @@
       "sub": [
         {
           "startT": 50.382,
-          "endT": 50.482,
+          "endT": 50.782,
           "startX": 0.0,
           "startY": 0.0,
-          "endX": -0.8,
-          "endY": 0.7,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 50.482,
-          "endT": 50.582,
-          "startX": -0.8,
-          "startY": 0.7,
-          "endX": 0.0,
-          "endY": 1.4,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 50.582,
-          "endT": 50.682,
-          "startX": 0.0,
-          "startY": 1.4,
-          "endX": 0.8,
-          "endY": 0.7,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 50.682,
-          "endT": 50.782,
-          "startX": 0.8,
-          "startY": 0.7,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 0.8,
+          "Angle": 1.0,
+          "Rot": 0.5
         },
         {
           "startT": 50.782,
@@ -7029,11 +6907,12 @@
         {
           "startT": 76.382,
           "endT": 76.582,
-          "startX": 1.2,
+          "startX": 1.1,
           "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.25,
+          "Rot": 0.25
         }
       ]
     },
@@ -7045,11 +6924,12 @@
         {
           "startT": 76.782,
           "endT": 76.982,
-          "startX": -1.2,
+          "startX": -1.1,
           "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.25,
+          "Rot": 0.25
         }
       ]
     },
@@ -7292,21 +7172,13 @@
       "sub": [
         {
           "startT": 106.782,
-          "endT": 106.982,
-          "startX": 1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 106.982,
           "endT": 107.182,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": -1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": 1.1,
+          "startY": 1.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7317,21 +7189,13 @@
       "sub": [
         {
           "startT": 107.582,
-          "endT": 107.782,
-          "startX": -1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 107.782,
           "endT": 107.982,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": -1.1,
+          "startY": 1.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7342,21 +7206,13 @@
       "sub": [
         {
           "startT": 108.382,
-          "endT": 108.582,
-          "startX": 1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 108.582,
           "endT": 108.782,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": -1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": 1.1,
+          "startY": 1.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7367,21 +7223,13 @@
       "sub": [
         {
           "startT": 109.182,
-          "endT": 109.382,
-          "startX": -1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 109.382,
           "endT": 109.582,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": -1.1,
+          "startY": 1.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7392,21 +7240,13 @@
       "sub": [
         {
           "startT": 109.982,
-          "endT": 110.182,
-          "startX": -1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 110.182,
           "endT": 110.382,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": -1.1,
+          "startY": 1.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7417,21 +7257,13 @@
       "sub": [
         {
           "startT": 110.782,
-          "endT": 110.982,
-          "startX": 1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 110.982,
           "endT": 111.182,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": -1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": 1.1,
+          "startY": 1.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7442,21 +7274,13 @@
       "sub": [
         {
           "startT": 111.582,
-          "endT": 111.782,
-          "startX": -1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 111.782,
           "endT": 111.982,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": -1.1,
+          "startY": 1.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7467,21 +7291,13 @@
       "sub": [
         {
           "startT": 112.382,
-          "endT": 112.582,
-          "startX": 1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 112.582,
           "endT": 112.782,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": -1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": 1.1,
+          "startY": 1.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7492,21 +7308,13 @@
       "sub": [
         {
           "startT": 113.182,
-          "endT": 113.382,
-          "startX": 1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 113.382,
           "endT": 113.582,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": -1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": 1.1,
+          "startY": 1.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7517,21 +7325,13 @@
       "sub": [
         {
           "startT": 113.982,
-          "endT": 114.182,
-          "startX": -1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 114.182,
           "endT": 114.382,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": -1.1,
+          "startY": 1.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7542,21 +7342,13 @@
       "sub": [
         {
           "startT": 114.782,
-          "endT": 114.982,
-          "startX": -1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 114.982,
           "endT": 115.182,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": -1.1,
+          "startY": 1.0,
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7567,21 +7359,13 @@
       "sub": [
         {
           "startT": 115.582,
-          "endT": 115.782,
-          "startX": 1.2,
-          "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 115.782,
           "endT": 115.982,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": -1.2,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "startX": 1.1,
+          "startY": 1.0,
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.5,
+          "Rot": -0.25
         }
       ]
     },
@@ -7640,39 +7424,13 @@
       "sub": [
         {
           "startT": 117.582,
-          "endT": 117.732,
+          "endT": 118.182,
           "startX": 0.0,
           "startY": 1.4,
-          "endX": -0.8,
-          "endY": 0.7,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 117.732,
-          "endT": 117.882,
-          "startX": -0.8,
-          "startY": 0.7,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 117.882,
-          "endT": 118.032,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 0.8,
-          "endY": 0.7,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 118.032,
-          "endT": 118.182,
-          "startX": 0.8,
-          "startY": 0.7,
-          "endX": 0.0,
-          "endY": 1.4,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 0.8,
+          "Angle": 1.0,
+          "Rot": 0.5
         },
         {
           "startT": 118.182,
@@ -8280,11 +8038,12 @@
         {
           "startT": 145.182,
           "endT": 145.382,
-          "startX": -1.2,
+          "startX": -1.1,
           "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.25,
+          "Rot": -0.25
         }
       ]
     },
@@ -8296,11 +8055,12 @@
         {
           "startT": 145.582,
           "endT": 145.782,
-          "startX": 1.2,
+          "startX": 1.1,
           "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.25,
+          "Rot": -0.25
         }
       ]
     },
@@ -8312,11 +8072,12 @@
         {
           "startT": 145.982,
           "endT": 146.182,
-          "startX": -1.2,
+          "startX": -1.1,
           "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.25,
+          "Rot": -0.25
         }
       ]
     },
@@ -8328,11 +8089,12 @@
         {
           "startT": 146.382,
           "endT": 146.582,
-          "startX": 1.2,
+          "startX": 1.1,
           "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 1.1,
+          "Angle": 0.25,
+          "Rot": 0.5
         }
       ]
     },
@@ -8344,11 +8106,12 @@
         {
           "startT": 146.782,
           "endT": 146.982,
-          "startX": -1.2,
+          "startX": -1.1,
           "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.1,
+          "Angle": 0.25,
+          "Rot": 0.0
         }
       ]
     },
@@ -8360,7 +8123,7 @@
         {
           "startT": 147.182,
           "endT": 147.382,
-          "startX": 1.2,
+          "startX": 1.1,
           "startY": 1.0,
           "endX": 0.0,
           "endY": 0.0,
@@ -8376,7 +8139,7 @@
         {
           "startT": 147.582,
           "endT": 147.782,
-          "startX": -1.2,
+          "startX": -1.1,
           "startY": 1.0,
           "endX": 0.0,
           "endY": 0.0,

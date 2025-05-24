@@ -5072,6 +5072,12 @@
       "Pid": 3
     },
     {
+      "startT": 149.836,
+      "startX": 0.0,
+      "Size": 0.8,
+      "Pid": 1
+    },
+    {
       "startT": 150.136,
       "startX": 0.5,
       "Size": 0.8,
@@ -16120,18 +16126,18 @@
           "endT": 37.636,
           "startX": -1.0,
           "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.25
         },
         {
           "startT": 37.636,
           "endT": 38.036,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": -1.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         }
       ]
     },
@@ -16145,9 +16151,10 @@
           "endT": 39.236,
           "startX": -1.0,
           "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.0
         }
       ]
     },
@@ -16161,18 +16168,18 @@
           "endT": 40.036,
           "startX": 1.0,
           "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.25
         },
         {
           "startT": 40.036,
           "endT": 40.436,
-          "startX": 0.0,
-          "startY": 1.0,
-          "endX": 1.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         }
       ]
     },
@@ -16218,18 +16225,18 @@
           "endT": 43.036,
           "startX": 1.5,
           "startY": 1.0,
-          "endX": 0.5,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         },
         {
           "startT": 43.036,
           "endT": 43.236,
-          "startX": 0.5,
-          "startY": 0.0,
-          "endX": 1.5,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.25
         }
       ]
     },
@@ -16359,9 +16366,10 @@
           "endT": 49.436,
           "startX": 0.0,
           "startY": 1.0,
-          "endX": -1.0,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.5
         }
       ]
     },
@@ -16375,15 +16383,14 @@
           "endT": 50.836,
           "startX": 1.0,
           "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         },
         {
           "startT": 50.836,
           "endT": 51.036,
-          "startX": 0.0,
-          "startY": 0.0,
           "endX": -1.0,
           "endY": 0.0,
           "Func": "Linear"
@@ -16409,9 +16416,10 @@
           "endT": 52.636,
           "startX": 0.0,
           "startY": 1.0,
-          "endX": 1.0,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.0
         }
       ]
     },
@@ -16425,9 +16433,10 @@
           "endT": 54.036,
           "startX": -1.0,
           "startY": 1.0,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         },
         {
           "startT": 54.036,
@@ -16450,18 +16459,18 @@
           "endT": 55.636,
           "startX": 0.0,
           "startY": 1.0,
-          "endX": -1.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         },
         {
           "startT": 55.636,
           "endT": 55.836,
-          "startX": -1.0,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.25
         }
       ]
     },
@@ -16475,18 +16484,18 @@
           "endT": 57.236,
           "startX": 0.0,
           "startY": 1.0,
-          "endX": 1.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         },
         {
           "startT": 57.236,
           "endT": 57.436,
-          "startX": 1.0,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.25
         }
       ]
     },
@@ -16500,18 +16509,18 @@
           "endT": 58.836,
           "startX": 0.0,
           "startY": 1.0,
-          "endX": -1.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": -0.25
         },
         {
           "startT": 58.836,
           "endT": 59.036,
-          "startX": -1.0,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.0,
+          "Angle": 0.25,
+          "Rot": 0.25
         }
       ]
     },
@@ -16531,39 +16540,13 @@
         },
         {
           "startT": 125.972,
-          "endT": 127.11,
+          "endT": 128.247,
           "startX": 0.0,
           "startY": 1.5,
-          "endX": -1.0,
-          "endY": 0.75,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 127.11,
-          "endT": 128.247,
-          "startX": -1.0,
-          "startY": 0.75,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 125.972,
-          "endT": 127.11,
-          "startX": 0.0,
-          "startY": 1.5,
-          "endX": 1.0,
-          "endY": 0.75,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 127.11,
-          "endT": 128.247,
-          "startX": 1.0,
-          "startY": 0.75,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 0.75,
+          "Angle": 1.0,
+          "Rot": 0.0
         }
       ]
     },
@@ -16586,18 +16569,10 @@
           "endT": 131.542,
           "startX": -1.2,
           "startY": 1.2,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 129.267,
-          "endT": 131.542,
-          "startX": -1.2,
-          "startY": 1.2,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 0.75,
+          "Angle": 1.0,
+          "Rot": 0.625
         }
       ]
     },
@@ -16620,18 +16595,10 @@
           "endT": 134.732,
           "startX": 1.2,
           "startY": 1.2,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 132.457,
-          "endT": 134.732,
-          "startX": 1.2,
-          "startY": 1.2,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 0.75,
+          "Angle": 1.0,
+          "Rot": -0.125
         }
       ]
     },
@@ -16642,56 +16609,19 @@
       "sub": [
         {
           "startT": 134.836,
-          "endT": 135.136,
+          "endT": 135.836,
           "startX": 0.0,
           "startY": 0.0,
-          "endX": 1.0,
-          "endY": 0.75,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 0.75,
+          "Angle": 1.0,
+          "Rot": 0.0
         },
         {
-          "startT": 135.136,
-          "endT": 135.436,
-          "startX": 1.0,
-          "startY": 0.75,
+          "startT": 135.836,
+          "endT": 136.236,
           "endX": 0.0,
           "endY": 1.5,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 135.436,
-          "endT": 135.736,
-          "startX": 0.0,
-          "startY": 1.5,
-          "endX": -1.0,
-          "endY": 0.75,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 135.736,
-          "endT": 136.036,
-          "startX": -1.0,
-          "startY": 0.75,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 134.836,
-          "endT": 135.736,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.5,
-          "Func": "Linear"
-        },
-        {
-          "startT": 135.736,
-          "endT": 136.036,
-          "startX": 0.0,
-          "startY": 1.5,
-          "endX": 0.0,
-          "endY": 0.0,
           "Func": "Linear"
         }
       ]
@@ -16914,36 +16844,26 @@
           "endT": 162.436,
           "startX": -1.2,
           "startY": 1.2,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 1.2,
+          "Angle": 0.25,
+          "Rot": -0.25
         },
         {
           "startT": 162.436,
-          "endT": 162.636,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": 0.6,
-          "endY": 0.6,
-          "Func": "LowerCir"
-        },
-        {
-          "startT": 162.636,
           "endT": 162.836,
-          "startX": 0.6,
-          "startY": 0.6,
-          "endX": 0.0,
-          "endY": 1.2,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 0.6,
+          "Angle": 0.5,
+          "Rot": 0.0
         },
         {
           "startT": 162.836,
           "endT": 163.236,
-          "startX": 0.0,
-          "startY": 1.2,
-          "endX": 1.2,
-          "endY": 0.0,
-          "Func": "UpperCir"
+          "Func": "CWC",
+          "Rad": 1.2,
+          "Angle": 0.25,
+          "Rot": 0.0
         }
       ]
     },
@@ -16957,36 +16877,26 @@
           "endT": 162.436,
           "startX": 1.2,
           "startY": 0.0,
-          "endX": 0.0,
-          "endY": 1.2,
-          "Func": "LowerCir"
+          "Func": "CWC",
+          "Rad": 1.2,
+          "Angle": 0.25,
+          "Rot": 0.5
         },
         {
           "startT": 162.436,
-          "endT": 162.636,
-          "startX": 0.0,
-          "startY": 1.2,
-          "endX": -0.6,
-          "endY": 0.6,
-          "Func": "UpperCir"
-        },
-        {
-          "startT": 162.636,
           "endT": 162.836,
-          "startX": -0.6,
-          "startY": 0.6,
-          "endX": 0.0,
-          "endY": 0.0,
-          "Func": "LowerCir"
+          "Func": "CCWC",
+          "Rad": 0.6,
+          "Angle": 0.5,
+          "Rot": 0.5
         },
         {
           "startT": 162.836,
           "endT": 163.236,
-          "startX": 0.0,
-          "startY": 0.0,
-          "endX": -1.2,
-          "endY": 1.2,
-          "Func": "UpperCir"
+          "Func": "CCWC",
+          "Rad": 1.2,
+          "Angle": 0.25,
+          "Rot": 0.25
         }
       ]
     },

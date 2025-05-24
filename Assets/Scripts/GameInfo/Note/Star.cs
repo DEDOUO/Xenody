@@ -16,6 +16,12 @@ namespace Note
         public float starTrackStartT;
         public float starTrackEndT;
         public float starHeadT;
+        public float starstartT;
+        public float starendT;
+        public bool is_firstsubStar;
+        public GameObject StartArrow;
+        public Star star;
+        public int id;
     }
 
 
@@ -55,6 +61,12 @@ namespace Note
             public float endY;
             [JsonProperty("Func")]
             public Utility.TrackFunctionType trackFunction;
+            [JsonProperty("Rad")]
+            public float Radius;
+            [JsonProperty("Angle")]
+            public float Angle;
+            [JsonProperty("Rot")]
+            public float Rotation;
 
             public SubStar(float startT, float endT, float startXVal, float startYVal, float endXVal, float endYVal, Utility.TrackFunctionType func)
             {
@@ -160,8 +172,19 @@ namespace Note
                 {
                     var star = chart.stars[i];
                     float starHeadT = star.starHeadT;
+                    int id = i + 1;
+
+                    float starstartT = star.subStarList[0].starTrackStartT;
+                    float starendT = star.subStarList[star.subStarList.Count - 1].starTrackEndT;
+
                     for (int j = 0; j < star.subStarList.Count; j++)
                     {
+                        bool is_firstsubStar = false;
+                        GameObject StartArrow = null;
+                        if (j == 0)
+                        {
+                            is_firstsubStar = true;
+                        }
                         var subStar = star.subStarList[j];
                         string instanceName = $"Star{i + 1}SubStar{j + 1}Arrows";
                         GameObject SubStarArrowParent = SubStarsParent.transform.Find(instanceName)?.gameObject;
@@ -171,6 +194,11 @@ namespace Note
                             List<GameObject> arrows = new List<GameObject>();
                             for (int k = 0; k < SubStarArrowParent.transform.childCount; k++)
                             {
+                                if (j==0 & k == 0) 
+                                {
+                                    StartArrow = SubStarArrowParent.transform.GetChild(k).gameObject;
+                                };
+
                                 GameObject arrow = SubStarArrowParent.transform.GetChild(k).gameObject;
                                 arrows.Add(arrow);
                             }
@@ -186,7 +214,13 @@ namespace Note
                                 arrowTimeInterval = arrowTimeInterval,
                                 starTrackStartT = subStar.starTrackStartT,
                                 starTrackEndT = subStar.starTrackEndT,
-                                starHeadT = starHeadT
+                                starHeadT = starHeadT,
+                                starstartT = starstartT,
+                                starendT = starendT,
+                                is_firstsubStar = is_firstsubStar,
+                                StartArrow = StartArrow,
+                                star = star,
+                                id = id
                             };
 
                             subStarInfoDict[(i, j)] = info;

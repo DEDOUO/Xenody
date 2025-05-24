@@ -26,6 +26,7 @@ public class AutoPlay : MonoBehaviour
     public GameObject HoldOutlinesParent;
     public GameObject StarsParent;
     public GameObject subStarsParent;
+    public GameObject MultiHitLinesParent;
     //public RectTransform SubStarsParentRect;
 
     public Sprite JudgePlaneSprite;
@@ -35,7 +36,11 @@ public class AutoPlay : MonoBehaviour
     public GameObject AnimatorContainer;
 
 
-    private Dictionary<GameObject, bool> tapReachedJudgmentLine = new Dictionary<GameObject, bool>();
+    //private List<float> JudgePlanesStartT = new List<float>(); // 判定面的开始时间（用于JudgeLine出现时间计算）
+    //private List<float> JudgePlanesEndT = new List<float>(); // 判定面的结束时间（用于JudgeLine结束时间计算）
+    //public Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
+
+    //private Dictionary<GameObject, bool> tapReachedJudgmentLine = new Dictionary<GameObject, bool>();
     private void Awake()
     {
         // 查找场景内游戏物体
@@ -51,6 +56,7 @@ public class AutoPlay : MonoBehaviour
         HoldOutlinesParent = GameObject.Find("HoldOutlinesParent");
         StarsParent = GameObject.Find("StarsParent");
         subStarsParent = GameObject.Find("SubStarsParent");
+        MultiHitLinesParent = GameObject.Find("MultiHitLinesParent");
         //SubStarsParentRect = subStarsParent.GetComponent<RectTransform>();
 
         // 加载Sprite
@@ -118,9 +124,12 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent,
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, MultiHitLinesParent,
             JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer);
         instantiator.InstantiateAll(chart);
+        //startTimeToInstanceNames = instantiator.startTimeToInstanceNames;
+        //JudgePlanesStartT = instantiator.JudgePlanesStartT;
+        //JudgePlanesEndT = instantiator.JudgePlanesEndT;
 
         // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰
         MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
@@ -134,8 +143,10 @@ public class AutoPlay : MonoBehaviour
         player.enabled = false;
 
         // 播放音乐和更新谱面位置
-        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent,
+        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, MultiHitLinesParent,
             TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart);
+        player.SetParameters2(instantiator.startTimeToInstanceNames, instantiator.holdTimes, instantiator.keyReachedJudgment, 
+            instantiator.JudgePlanesStartT, instantiator.JudgePlanesEndT, instantiator.subStarInfoDict, instantiator.starTrackTimes, instantiator.GradientColorList );
         player.enabled = true;
         player.PlayMusicAndChart(chart);
     }

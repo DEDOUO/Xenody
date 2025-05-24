@@ -7,12 +7,12 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using Note;
 using static Utility;
-using static Note.Hold;
-using DocumentFormat.OpenXml.Drawing;
-using Unity.Mathematics;
-using DocumentFormat.OpenXml.Office2016.Drawing.Charts;
-using Unity.VisualScripting;
-using System;
+//using static Note.Hold;
+//using DocumentFormat.OpenXml.Drawing;
+//using Unity.Mathematics;
+//using DocumentFormat.OpenXml.Office2016.Drawing.Charts;
+//using Unity.VisualScripting;
+//using System;
 
 public class MusicAndChartPlayer : MonoBehaviour
 {
@@ -30,6 +30,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject HoldOutlinesParent;
     private GameObject StarsParent;
     public GameObject SubStarsParent;
+    private GameObject MultiHitLinesParent;
     public GameObject MusicSlider;
 
     private Sprite TapSprite;
@@ -54,6 +55,8 @@ public class MusicAndChartPlayer : MonoBehaviour
     public Dictionary<(int, int), SubStarInfo> subStarInfoDict = new Dictionary<(int, int), SubStarInfo>();
     // 新增一个字典，用于存储每个星星的划动开始和结束时间
     private Dictionary<string, (float startT, float endT)> starTrackTimes = new Dictionary<string, (float startT, float endT)>();
+    private GradientColorListUnity GradientColorList;
+
     // 记录当前正在播放音频的星星实例名
     private string currentPlayingStar = null;
     // 记录开始音量衰减的时间
@@ -70,27 +73,27 @@ public class MusicAndChartPlayer : MonoBehaviour
     private float AnimationScaleAdjust = 0.8f;  // 播放动画时x轴缩放调整
     private float HoldAnimationScaleAdjust = 0.7f;  // 播放Hold动画时x轴缩放调整
 
-    private GradientColorListUnity GradientColorList;
+    //private GradientColorListUnity GradientColorList;
 
     // 内部类，用于存储键的相关信息以及判定状态
-    private class KeyInfo
-    {
-        public float startT;
-        public bool isJudged;
-        public bool isSoundPlayedAtStart;
-        public bool isSoundPlayedAtEnd;
-        public KeyInfo(float startTime)
-        {
-            startT = startTime;
-            isJudged = false;
-            isSoundPlayedAtStart = false;
-            isSoundPlayedAtEnd = false;
-        }
-    }
+    //private class KeyInfo
+    //{
+    //    public float startT;
+    //    public bool isJudged;
+    //    public bool isSoundPlayedAtStart;
+    //    public bool isSoundPlayedAtEnd;
+    //    public KeyInfo(float startTime)
+    //    {
+    //        startT = startTime;
+    //        isJudged = false;
+    //        isSoundPlayedAtStart = false;
+    //        isSoundPlayedAtEnd = false;
+    //    }
+    //}
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent,
-        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject substarsParent,
+        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject substarsParent, GameObject multiHitLinesParent,
         AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect, AudioSource starSoundEffect,
         Chart chart)
     {
@@ -106,6 +109,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         HoldOutlinesParent = holdOutlinesParent;
         StarsParent = starsParent;
         SubStarsParent = substarsParent;
+        MultiHitLinesParent = multiHitLinesParent;
         TapSoundEffect = tapSoundEffect;
         SlideSoundEffect = slideSoundEffect;
         FlickSoundEffect = flickSoundEffect;
@@ -117,16 +121,30 @@ public class MusicAndChartPlayer : MonoBehaviour
         //Debug.Log(FlickSoundEffect);
     }
 
+    public void SetParameters2(Dictionary<float, List<string>> StartTimeToInstanceNames, Dictionary<string, List<float>> HoldTimes, Dictionary<string, KeyInfo> KeyReachedJudgment,
+            List<float> judgePlanesStartT, List<float> judgePlanesEndT, Dictionary<(int, int), SubStarInfo> SubStarInfoDict, Dictionary<string, (float startT, float endT)> StarTrackTimes, GradientColorListUnity gradientColorList)
+    {
+        startTimeToInstanceNames = StartTimeToInstanceNames;
+        holdTimes = HoldTimes;
+        keyReachedJudgment = KeyReachedJudgment;
+        JudgePlanesStartT = judgePlanesStartT;
+        JudgePlanesEndT = judgePlanesEndT;
+        subStarInfoDict = SubStarInfoDict;
+        starTrackTimes = StarTrackTimes;
+        GradientColorList = gradientColorList;
+    }
+
     public void PlayMusicAndChart(Chart chart)
     {
-        GradientColorList = ConvertToUnityList(chart.gradientColorList);
+        //GradientColorList = ConvertToUnityList(chart.gradientColorList);
         pauseManager = GetComponent<PauseManager>();
         MusicSlider = GameObject.Find("MusicSlider");
         MusicSlider.SetActive(false);
         //Debug.Log(MusicSlider);
         // 提前加工Chart里所有键（Tap和Slide等）的startT与对应实例名的映射关系，并按照startT排序
-        PrepareChartMapping(chart);
-        subStarInfoDict = Star.InitializeSubStarInfo(chart, SubStarsParent);
+        //PrepareChartMapping(chart);
+        //subStarInfoDict = Star.InitializeSubStarInfo(chart, SubStarsParent);
+        //Debug.Log(subStarInfoDict);
         LoadNoteSprites();
         audioSource.Play();
         //isMusicPlaying = true;
@@ -234,10 +252,41 @@ public class MusicAndChartPlayer : MonoBehaviour
                 {
                     StarHeadSoundEffect.Play();
                     PlayAnimation(instanceName, "StarHeadEffect");
+
+                    //// 查找并激活对应的粒子系统
+                    //string targetName = "StarStartFX" + instanceName.Substring("StarHead".Length);
+                    //Transform targetTransform = SubStarsParent.transform.Find(targetName);
+                    //if (targetTransform != null)
+                    //{
+                    //    // 激活物体并播放粒子系统
+                    //    targetTransform.gameObject.SetActive(true);
+
+                    //    // 获取并播放粒子系统
+                    //    ParticleSystem particleSystem = targetTransform.GetComponent<ParticleSystem>();
+                    //    if (particleSystem != null)
+                    //    {
+                    //        particleSystem.Play();
+                    //    }
+                    //    else
+                    //    {
+                    //        Debug.LogWarning($"物体 {targetName} 上未找到 ParticleSystem 组件");
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    Debug.LogWarning($"在 SubStarsParent 下未找到 {targetName} 物体");
+                    //}
+
                 }
                 else if (instanceName.StartsWith("Stars"))
                 {
                     StarSoundEffect.Play();
+                }
+                else if (instanceName.StartsWith("MultiHitLine"))
+                {
+                    GameObject keyGameObject = MultiHitLinesParent.transform.Find(instanceName).gameObject;
+                    keyGameObject.SetActive(false);
+                    //Destroy(keyGameObject);
                 }
             }
             currentIndex++;
@@ -248,8 +297,8 @@ public class MusicAndChartPlayer : MonoBehaviour
         UpdateHoldStates(currentTime);
         //更新所有Note位置和颜色
         UpdatePositionsAndColor(currentTime, chart.speedList, IfResumePlay);
-        //更新所有Arrow的透明度
-        CheckArrowVisibility(SubStarsParent, currentTime, subStarInfoDict);
+        //更新所有Arrow的透明度（以及更新启动Arrow位置）
+        CheckArrowVisibility(currentTime, subStarInfoDict, SubStarsParent);
         //Debug.Log("2. " + audioTime);
     }
 
@@ -515,107 +564,105 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
+    //private void PrepareChartMapping(Chart chart)
+    //{
+    //    List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
 
 
-    private void PrepareChartMapping(Chart chart)
-    {
-        List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
+    //    if (chart.judgePlanes != null)
+    //    {
+    //        for (int i = 0; i < chart.judgePlanes.Count; i++)
+    //        {
+    //            var judgePlane = chart.judgePlanes[i];
+    //            float startT = judgePlane.subJudgePlaneList[0].startT;
+    //            float endT = judgePlane.subJudgePlaneList[judgePlane.subJudgePlaneList.Count - 1].endT;
+    //            JudgePlanesStartT.Add(startT);
+    //            JudgePlanesEndT.Add(endT);
+    //        }
+    //    }
 
+    //    if (chart.taps != null)
+    //    {
+    //        for (int i = 0; i < chart.taps.Count; i++)
+    //        {
+    //            var tap = chart.taps[i];
+    //            string instanceName = $"Tap{i + 1}";
+    //            allPairs.Add(new KeyValuePair<float, string>(tap.startT, instanceName));
+    //            keyReachedJudgment[instanceName] = new KeyInfo(tap.startT);
+    //        }
+    //    }
+    //    if (chart.slides != null)
+    //    {
+    //        for (int i = 0; i < chart.slides.Count; i++)
+    //        {
+    //            var slide = chart.slides[i];
+    //            string instanceName = $"Slide{i + 1}";
+    //            allPairs.Add(new KeyValuePair<float, string>(slide.startT, instanceName));
+    //            keyReachedJudgment[instanceName] = new KeyInfo(slide.startT);
+    //        }
+    //    }
+    //    if (chart.flicks != null)
+    //    {
+    //        for (int i = 0; i < chart.flicks.Count; i++)
+    //        {
+    //            var flick = chart.flicks[i];
+    //            string instanceName = $"Flick{i + 1}";
+    //            allPairs.Add(new KeyValuePair<float, string>(flick.startT, instanceName));
+    //            keyReachedJudgment[instanceName] = new KeyInfo(flick.startT);
+    //        }
+    //    }
+    //    if (chart.holds != null)
+    //    {
+    //        for (int i = 0; i < chart.holds.Count; i++)
+    //        {
+    //            var hold = chart.holds[i];
+    //            float startT = hold.GetFirstSubHoldStartTime();
+    //            float endT = hold.GetLastSubHoldEndTime();
+    //            string instanceName = $"Hold{i + 1}";
+    //            allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+    //            keyReachedJudgment[instanceName] = new KeyInfo(startT);
+    //            if (!holdTimes.ContainsKey(instanceName))
+    //            {
+    //                holdTimes[instanceName] = new List<float>();
+    //            }
+    //            // 记录Hold的开始和结束时间
+    //            holdTimes[instanceName].Add(startT);
+    //            holdTimes[instanceName].Add(endT);
+    //        }
+    //    }
 
-        if (chart.judgePlanes != null)
-        {
-            for (int i = 0; i < chart.judgePlanes.Count; i++)
-            {
-                var judgePlane = chart.judgePlanes[i];
-                float startT = judgePlane.subJudgePlaneList[0].startT;
-                float endT = judgePlane.subJudgePlaneList[judgePlane.subJudgePlaneList.Count - 1].endT;
-                JudgePlanesStartT.Add(startT);
-                JudgePlanesEndT.Add(endT);
-            }
-        }
+    //    if (chart.stars != null)
+    //    {
+    //        for (int i = 0; i < chart.stars.Count; i++)
+    //        {
+    //            var star = chart.stars[i];
+    //            float startT = star.starHeadT;
+    //            //存储星星头判定时间
+    //            string instanceName = $"StarHead{i + 1}";
+    //            allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
+    //            keyReachedJudgment[instanceName] = new KeyInfo(startT);
+    //            // 记录每个星星的划动开始和结束时间
+    //            float starstartT = star.subStarList[0].starTrackStartT;
+    //            float starendT = star.subStarList[star.subStarList.Count - 1].starTrackEndT;
+    //            starTrackTimes[instanceName] = (starstartT, starendT);
+    //        }
+    //    }
 
-        if (chart.taps != null)
-        {
-            for (int i = 0; i < chart.taps.Count; i++)
-            {
-                var tap = chart.taps[i];
-                string instanceName = $"Tap{i + 1}";
-                allPairs.Add(new KeyValuePair<float, string>(tap.startT, instanceName));
-                keyReachedJudgment[instanceName] = new KeyInfo(tap.startT);
-            }
-        }
-        if (chart.slides != null)
-        {
-            for (int i = 0; i < chart.slides.Count; i++)
-            {
-                var slide = chart.slides[i];
-                string instanceName = $"Slide{i + 1}";
-                allPairs.Add(new KeyValuePair<float, string>(slide.startT, instanceName));
-                keyReachedJudgment[instanceName] = new KeyInfo(slide.startT);
-            }
-        }
-        if (chart.flicks != null)
-        {
-            for (int i = 0; i < chart.flicks.Count; i++)
-            {
-                var flick = chart.flicks[i];
-                string instanceName = $"Flick{i + 1}";
-                allPairs.Add(new KeyValuePair<float, string>(flick.startT, instanceName));
-                keyReachedJudgment[instanceName] = new KeyInfo(flick.startT);
-            }
-        }
-        if (chart.holds != null)
-        {
-            for (int i = 0; i < chart.holds.Count; i++)
-            {
-                var hold = chart.holds[i];
-                float startT = hold.GetFirstSubHoldStartTime();
-                float endT = hold.GetLastSubHoldEndTime();
-                string instanceName = $"Hold{i + 1}";
-                allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
-                keyReachedJudgment[instanceName] = new KeyInfo(startT);
-                if (!holdTimes.ContainsKey(instanceName))
-                {
-                    holdTimes[instanceName] = new List<float>();
-                }
-                // 记录Hold的开始和结束时间
-                holdTimes[instanceName].Add(startT);
-                holdTimes[instanceName].Add(endT);
-            }
-        }
+    //    // 按照startT进行排序
+    //    allPairs = allPairs.OrderBy(pair => pair.Key).ToList();
 
-        if (chart.stars != null)
-        {
-            for (int i = 0; i < chart.stars.Count; i++)
-            {
-                var star = chart.stars[i];
-                float startT = star.starHeadT;
-                //存储星星头判定时间
-                string instanceName = $"StarHead{i + 1}";
-                allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
-                keyReachedJudgment[instanceName] = new KeyInfo(startT);
-                // 记录每个星星的划动开始和结束时间
-                float starstartT = star.subStarList[0].starTrackStartT;
-                float starendT = star.subStarList[star.subStarList.Count - 1].starTrackEndT;
-                starTrackTimes[instanceName] = (starstartT, starendT);
-            }
-        }
-
-        // 按照startT进行排序
-        allPairs = allPairs.OrderBy(pair => pair.Key).ToList();
-
-        foreach (var pair in allPairs)
-        {
-            float startTime = pair.Key;
-            string instanceName = pair.Value;
-            if (!startTimeToInstanceNames.ContainsKey(startTime))
-            {
-                startTimeToInstanceNames[startTime] = new List<string>();
-            }
-            startTimeToInstanceNames[startTime].Add(instanceName);
-            //Debug.Log(startTimeToInstanceNames[startTime]);
-        }
-    }
+    //    foreach (var pair in allPairs)
+    //    {
+    //        float startTime = pair.Key;
+    //        string instanceName = pair.Value;
+    //        if (!startTimeToInstanceNames.ContainsKey(startTime))
+    //        {
+    //            startTimeToInstanceNames[startTime] = new List<string>();
+    //        }
+    //        startTimeToInstanceNames[startTime].Add(instanceName);
+    //        //Debug.Log(startTimeToInstanceNames[startTime]);
+    //    }
+    //}
 
     private void UpdatePositionsAndColor(float currentTime, List<Speed> speedList, bool IfResumePlay)
     {
@@ -1039,6 +1086,13 @@ public class MusicAndChartPlayer : MonoBehaviour
                             NoteInstance = StarsParent.transform.Find(instanceName).gameObject;
                             sprite = StarHeadSprite;
                         }
+                        else if (instanceName.StartsWith("MultiHitLine"))
+                        {
+                            //Debug.Log(instanceName);
+                            NoteInstance = MultiHitLinesParent.transform.Find(instanceName).gameObject;
+                            sprite = null;
+                        }
+
                         // 删除Note的Animator组件（如果有）
                         Animator animator = NoteInstance.GetComponent<Animator>();
                         if (animator != null)
@@ -1066,6 +1120,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                         Vector3 currentPosition = NoteInstance.transform.position;
                         currentPosition.z = CalculateZAxisPosition(startT, chart.speedList) - CalculateZAxisPosition(currentTime, chart.speedList) + ChartParams.NoteZAxisOffset;
                         NoteInstance.transform.position = currentPosition;
+                        NoteInstance.SetActive(true);
                     }
 
                 }
@@ -1144,6 +1199,16 @@ public class MusicAndChartPlayer : MonoBehaviour
                     UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
                 }
             }
+
+            // 处理 MultiHitLine
+            if (MultiHitLinesParent != null)
+            {
+                for (int i = 0; i < MultiHitLinesParent.transform.childCount; i++)
+                {
+                    Transform childTransform = MultiHitLinesParent.transform.GetChild(i);
+                    UpdateNotePosition(childTransform, zAxisDecreasePerFrame);
+                }
+            }
         }
     }
 
@@ -1157,25 +1222,32 @@ public class MusicAndChartPlayer : MonoBehaviour
             return;
         }
 
-        KeyInfo keyInfo;
-        if (keyReachedJudgment.TryGetValue(instanceName, out keyInfo))
-        {
-            Vector3 currentPosition = childTransform.position;
-            currentPosition.z += zAxisDecreasePerFrame;
-            childTransform.position = currentPosition;
+        Vector3 currentPosition = childTransform.position;
+        currentPosition.z += zAxisDecreasePerFrame;
+        childTransform.position = currentPosition;
 
-            //根据 z 轴坐标设置透明度
-            SetNoteAlpha(keyGameObject, currentPosition.z);
-        }
-        else
-        {
-            Vector3 currentPosition = childTransform.position;
-            currentPosition.z += zAxisDecreasePerFrame;
-            childTransform.position = currentPosition;
+        //根据 z 轴坐标设置透明度
+        SetNoteAlpha(keyGameObject, currentPosition.z);
 
-            //根据 z 轴坐标设置透明度
-            SetNoteAlpha(keyGameObject, currentPosition.z);
-        }
+        //KeyInfo keyInfo;
+        //if (keyReachedJudgment.TryGetValue(instanceName, out keyInfo))
+        //{
+        //    Vector3 currentPosition = childTransform.position;
+        //    currentPosition.z += zAxisDecreasePerFrame;
+        //    childTransform.position = currentPosition;
+
+        //    //根据 z 轴坐标设置透明度
+        //    SetNoteAlpha(keyGameObject, currentPosition.z);
+        //}
+        //else
+        //{
+        //    Vector3 currentPosition = childTransform.position;
+        //    currentPosition.z += zAxisDecreasePerFrame;
+        //    childTransform.position = currentPosition;
+
+        //    //根据 z 轴坐标设置透明度
+        //    SetNoteAlpha(keyGameObject, currentPosition.z);
+        //}
 
     }
 

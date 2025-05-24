@@ -76,7 +76,7 @@ public class PauseManager : MonoBehaviour
             Slider slider = MusicSlider.GetComponent<Slider>();
             audioSource.time = slider.value * audioSource.clip.length;
             musicAndChartPlayer.ResetAllNotes(audioSource.time);
-            CheckArrowVisibility(musicAndChartPlayer.SubStarsParent, audioSource.time, musicAndChartPlayer.subStarInfoDict);
+            CheckArrowVisibility(audioSource.time, musicAndChartPlayer.subStarInfoDict, musicAndChartPlayer.SubStarsParent);
 
 
             MusicSlider.SetActive(false);
