@@ -39,7 +39,8 @@ public class GradientColorListUnity
     {
         foreach (var color in colors)
         {
-            if (t >= color.startT && t <= color.endT)
+            // 这里需要包含t<=0，即音乐还没开始播放时的状态
+            if ( t<= 0 | (t >= color.startT && t <= color.endT))
             {
                 if (y <= 0)
                 {

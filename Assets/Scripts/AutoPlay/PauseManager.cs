@@ -10,13 +10,43 @@ public class PauseManager : MonoBehaviour
     public AudioSource audioSource;
     public GameObject MusicSlider;
     public MusicAndChartPlayer musicAndChartPlayer; // 引用 MusicAndChartPlayer 实例
-    public AspectRatioManager aspectRatioManager; // 引用 MusicAndChartPlayer 实例
+    public AspectRatioManager aspectRatioManager; // 引用 AspectRatioManager 实例
+
+    private Slider slider;
+    //private bool isDragging = false;
 
     private void Start()
     {
         musicAndChartPlayer = GetComponent<MusicAndChartPlayer>();
         aspectRatioManager = GetComponent<AspectRatioManager>();
+        audioSource = musicAndChartPlayer.audioSource;
+        MusicSlider = musicAndChartPlayer.MusicSlider;
+
+        // 初始化滑块引用并添加事件监听
+        if (MusicSlider != null)
+        {
+            slider = MusicSlider.GetComponent<Slider>();
+            if (slider != null)
+            {
+                slider.onValueChanged.AddListener(OnSliderValueChanged);
+            }
+        }
     }
+
+    // 实现 IBeginDragHandler 接口（开始拖动时触发）
+    //public void OnBeginDrag(PointerEventData eventData)
+    //{
+    //    if (eventData.pointerDrag != null && eventData.pointerDrag.TryGetComponent<Slider>(out Slider slider))
+    //    {
+    //        isDragging = true;
+    //    }
+    //}
+
+    //// 实现 IEndDragHandler 接口（结束拖动时触发）
+    //public void OnEndDrag(PointerEventData eventData)
+    //{
+    //    isDragging = false;
+    //}
 
     public void CheckPauseButtonClick()
     {
@@ -54,9 +84,9 @@ public class PauseManager : MonoBehaviour
     public void TogglePause()
     {
         audioSource = musicAndChartPlayer.audioSource;
-        MusicSlider = musicAndChartPlayer.MusicSlider;
+        //MusicSlider = musicAndChartPlayer.MusicSlider;
         GameObject spectrumBorder = aspectRatioManager.spectrumBorder;
-        //Debug.Log(spectrumBorder);
+
         if (spectrumBorder != null)
         {
             if (isPaused)
@@ -70,29 +100,52 @@ public class PauseManager : MonoBehaviour
                 SetChildrenActive(spectrumBorder, true);
             }
         }
-        //如果恢复播放
+
+        // 如果恢复播放
         if (isPaused)
         {
-            Slider slider = MusicSlider.GetComponent<Slider>();
+            // 默认鼠标拖动的时候，Note也会实时更新
+
             audioSource.time = slider.value * audioSource.clip.length;
             musicAndChartPlayer.ResetAllNotes(audioSource.time);
-            CheckArrowVisibility(audioSource.time, musicAndChartPlayer.subStarInfoDict, musicAndChartPlayer.SubStarsParent);
+            CheckArrowVisibility(audioSource.time,musicAndChartPlayer.subStarInfoDict,musicAndChartPlayer.SubStarsParent);
 
-
+            musicAndChartPlayer.elapsedTime = audioSource.time;
+            musicAndChartPlayer.accumulatedTime = 0f;
             MusicSlider.SetActive(false);
             audioSource.Play();
+            musicAndChartPlayer.IsPlaying = true;
             isPaused = false;
         }
-        //如果暂停
+        // 如果暂停
         else
         {
             audioSource.Pause();
+            musicAndChartPlayer.IsPlaying = false;
             isPaused = true;
             MusicSlider.SetActive(true);
-            Slider slider = MusicSlider.GetComponent<Slider>();
+            //Debug.Log(slider);
+            //Debug.Log(audioSource);
             slider.value = audioSource.time / audioSource.clip.length;
         }
     }
+
+    // 滑块值变化时立即更新谱面
+    private void OnSliderValueChanged(float value)
+    {
+        if (isPaused && slider != null && audioSource != null && musicAndChartPlayer != null)
+        {
+            float time = value * audioSource.clip.length;
+            audioSource.time = time;
+            musicAndChartPlayer.elapsedTime = audioSource.time;
+            musicAndChartPlayer.accumulatedTime = 0f;
+            musicAndChartPlayer.ResetAllNotes(time);
+            CheckArrowVisibility(time,
+                musicAndChartPlayer.subStarInfoDict,
+                musicAndChartPlayer.SubStarsParent);
+        }
+    }
+
 
     private void SetChildrenActive(GameObject parent, bool active)
     {

@@ -8,10 +8,10 @@ using static Note.Star;
 using System.Collections.Generic;
 using static GradientColorListUnity;
 using System.Linq;
-using DocumentFormat.OpenXml.InkML;
-using System.Text.RegularExpressions;
-using UnityEngine.Windows;
-using Unity.VisualScripting;
+//using DocumentFormat.OpenXml.InkML;
+//using System.Text.RegularExpressions;
+//using UnityEngine.Windows;
+//using Unity.VisualScripting;
 
 
 
@@ -29,7 +29,7 @@ public class Utility : MonoBehaviour
     //sin和cos涉及曲线计算的部分，不能用初等函数表示，只能通过数值计算，暂时忽略
     //Linear:线性
     //CWC：顺时针圆  CCWC：逆时针圆
-    public enum TrackFunctionType { Linear, CWC, CCWC}
+    public enum TrackFunctionType { Linear, CWC, CCWC }
 
 
     /// 根据给定的时间、起始值、结束值以及坐标变化函数类型来计算相应的位置值。
@@ -73,92 +73,6 @@ public class Utility : MonoBehaviour
         return result;
     }
 
-    // 根据给定时间和子星星参数计算当前子星星的位置
-    //public static Vector2 CalculateSubStarPosition(float currentRate, Star.SubStar subStar)
-    //{
-    //    Vector2 result = Vector2.zero;
-    //    Vector2 offset = Vector2.zero;
-    //    float a = 0f;
-    //    float b = 0f;
-    //    float theta = 0f;
-    //    float k = 0f;
-    //    float t = 0f;
-    //    switch (subStar.trackFunction)
-    //    {
-    //        case TrackFunctionType.Linear:
-    //            // 线性函数计算当前位置
-    //            result.x = subStar.startX + ((subStar.endX - subStar.startX) * currentRate);
-    //            result.y = subStar.startY + ((subStar.endY - subStar.startY) * currentRate);
-    //            break;
-    //        case TrackFunctionType.UpperCir:
-    //            // UpperCir指向上凸起的圆弧（详见说明）
-    //            a = Mathf.Abs(subStar.endX - subStar.startX);
-    //            b = Mathf.Abs(subStar.endY - subStar.startY);
-    //            if (subStar.startX < subStar.endX && subStar.startY < subStar.endY)
-    //            {
-    //                theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.endX;
-    //                offset.y = subStar.startY;
-    //            }
-    //            if (subStar.startX < subStar.endX && subStar.startY > subStar.endY)
-    //            {
-    //                theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.startX;
-    //                offset.y = subStar.endY;
-    //            }
-    //            if (subStar.startX > subStar.endX && subStar.startY < subStar.endY)
-    //            {
-    //                theta = currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.endX;
-    //                offset.y = subStar.startY;
-    //            }
-    //            if (subStar.startX > subStar.endX && subStar.startY > subStar.endY)
-    //            {
-    //                theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.startX;
-    //                offset.y = subStar.endY;
-    //            }
-    //            k = Mathf.Tan(theta);
-    //            t = Mathf.Atan(k * a / b);
-    //            result.x = offset.x + a * Mathf.Cos(t);
-    //            result.y = offset.y + b * Mathf.Sin(t);
-    //            break;
-    //        case TrackFunctionType.LowerCir:
-    //            // LowerCir指向下凸起的圆弧（详见说明）
-    //            a = Mathf.Abs(subStar.endX - subStar.startX);
-    //            b = Mathf.Abs(subStar.endY - subStar.startY);
-    //            if (subStar.startX < subStar.endX && subStar.startY < subStar.endY)
-    //            {
-    //                theta = 1.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.startX;
-    //                offset.y = subStar.endY;
-    //            }
-    //            if (subStar.startX < subStar.endX && subStar.startY > subStar.endY)
-    //            {
-    //                theta = Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.endX;
-    //                offset.y = subStar.startY;
-    //            }
-    //            if (subStar.startX > subStar.endX && subStar.startY < subStar.endY)
-    //            {
-    //                theta = 1.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.startX;
-    //                offset.y = subStar.endY;
-    //            }
-    //            if (subStar.startX > subStar.endX && subStar.startY > subStar.endY)
-    //            {
-    //                theta = -currentRate * 0.5f * Mathf.PI;
-    //                offset.x = subStar.endX;
-    //                offset.y = subStar.startY;
-    //            }
-    //            k = Mathf.Tan(theta);
-    //            t = Mathf.Atan(k * a / b);
-    //            result.x = offset.x + a * Mathf.Cos(t);
-    //            result.y = offset.y + b * Mathf.Sin(t);
-    //            break;
-    //    }
-    //    return result;
-    //}
 
     public static float ConvertAngle(float theta, float a, float b)
     {
@@ -190,114 +104,6 @@ public class Utility : MonoBehaviour
         return t;
     }
 
-    //public static Vector2 CalculateSubArrowPosition(float currentRate, Vector2 subStarStartScreen, Vector2 subStarEndScreen, TrackFunctionType trackFunction)
-    //{
-    //    float x1 = subStarStartScreen.x;
-    //    float y1 = subStarStartScreen.y;
-    //    float x2 = subStarEndScreen.x;
-    //    float y2 = subStarEndScreen.y;
-
-    //    Vector2 result = Vector2.zero;
-    //    Vector2 offset = Vector2.zero;
-    //    float a = 0f;
-    //    float b = 0f;
-    //    float theta = 0f;
-    //    //float k = 0f;
-    //    float t = 0f;
-    //    switch (trackFunction)
-    //    {
-    //        case TrackFunctionType.Linear:
-    //            // 线性函数计算当前位置
-    //            result.x = x1 + ((x2 - x1) * currentRate);
-    //            result.y = y1 + ((y2 - y1) * currentRate);
-    //            break;
-    //        case TrackFunctionType.UpperCir:
-    //            // UpperCir指向上凸起的圆弧（详见说明）
-    //            a = Mathf.Abs(x2 - x1);
-    //            b = Mathf.Abs(y2 - y1);
-    //            if (x1 < x2 && y1 < y2)
-    //            {
-    //                theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x2;
-    //                offset.y = y1;
-    //            }
-    //            if (x1 < x2 && y1 > y2)
-    //            {
-    //                theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x1;
-    //                offset.y = y2;
-    //                //Debug.Log(theta);
-    //                //Debug.Log(offset);
-    //            }
-    //            if (x1 > x2 && y1 < y2)
-    //            {
-    //                theta = currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x2;
-    //                offset.y = y1;
-    //            }
-    //            if (x1 > x2 && y1 > y2)
-    //            {
-    //                theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x1;
-    //                offset.y = y2;
-    //            }
-    //            //先判断theta是否为π/2或3/2π（无正切值）
-    //            if (Mathf.Abs(Mathf.Cos(theta)) < 0.001f)
-    //            {
-    //                result.x = offset.x;
-    //                result.y = offset.y + b;
-    //                break;
-    //            }
-    //            t = ConvertAngle(theta, a, b);
-    //            result.x = offset.x + a * Mathf.Cos(t);
-    //            result.y = offset.y + b * Mathf.Sin(t);
-    //            //Debug.Log(result);
-    //            break;
-    //        case TrackFunctionType.LowerCir:
-    //            // LowerCir指向下凸起的圆弧（详见说明）
-    //            a = Mathf.Abs(x2 - x1);
-    //            b = Mathf.Abs(y2 - y1);
-    //            if (x1 < x2 && y1 < y2)
-    //            {
-    //                theta = -0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x1;
-    //                offset.y = y2;
-    //            }
-    //            if (x1 < x2 && y1 > y2)
-    //            {
-    //                theta = -Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x2;
-    //                offset.y = y1;
-    //                //Debug.Log(theta);
-    //                //Debug.Log(offset);
-    //            }
-    //            if (x1 > x2 && y1 < y2)
-    //            {
-    //                theta = -0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x1;
-    //                offset.y = y2;
-    //            }
-    //            if (x1 > x2 && y1 > y2)
-    //            {
-    //                theta = -currentRate * 0.5f * Mathf.PI;
-    //                offset.x = x2;
-    //                offset.y = y1;
-    //            }
-    //            //先判断theta是否为π/2或3/2π（无正切值）
-    //            if (Mathf.Abs(Mathf.Cos(theta)) < 0.001f)
-    //            {
-    //                result.x = offset.x;
-    //                result.y = offset.y - b;
-    //                break;
-    //            }
-    //            t = ConvertAngle(theta, a, b);
-    //            result.x = offset.x + a * Mathf.Cos(t);
-    //            result.y = offset.y + b * Mathf.Sin(t);
-    //            break;
-    //    }
-    //    return result;
-    //}
-
     public static Vector2 CalculateSubArrowPositionCircle(float currentRate, Vector2 subStarStartScreen, RectTransform canvas, SubStar subStar)
     {
 
@@ -305,13 +111,14 @@ public class Utility : MonoBehaviour
 
         float canvasWidth = canvas.sizeDelta.x;
         //float canvasHeight = canvas.sizeDelta.y;
-
-        float screenXRange = canvasWidth * (1 - 2 * HorizontalParams.HorizontalMargin);
+        float croppedcanvasWidth = AspectRatioManager.croppedScreenWidth / Screen.width * canvasWidth;
+        float screenXRange = croppedcanvasWidth * (1 - 2 * HorizontalParams.HorizontalMargin);
         //注意以X轴坐标单位为基准
         float UnitXPxiel = screenXRange / ChartParams.XaxisMax / 2;
 
         // 将圆弧半径转换为画布上的坐标长度
         float radiusInCanvas = subStar.Radius * UnitXPxiel;
+        //Debug.Log(radiusInCanvas);
         // 将角度从 0 - 1 范围转换为 0 - 360 度
         // 注意这里角度要乘以当前rate
         float angleDegree = subStar.Angle * 360f * currentRate;
@@ -339,7 +146,7 @@ public class Utility : MonoBehaviour
             centerX = startX - radiusInCanvas * Mathf.Cos(rotationRadian + 0.5f * Mathf.PI);
             centerY = startY - radiusInCanvas * Mathf.Sin(rotationRadian + 0.5f * Mathf.PI);
             // 终点为圆心从 rotationDegree-90 度开始，转 angleRadian
-            endX =  centerX + radiusInCanvas * Mathf.Cos(rotationRadian + 0.5f * Mathf.PI - angleRadian);
+            endX = centerX + radiusInCanvas * Mathf.Cos(rotationRadian + 0.5f * Mathf.PI - angleRadian);
             endY = centerY + radiusInCanvas * Mathf.Sin(rotationRadian + 0.5f * Mathf.PI - angleRadian);
         }
         else if (subStar.trackFunction == TrackFunctionType.CCWC) // 逆时针圆弧
@@ -349,7 +156,7 @@ public class Utility : MonoBehaviour
             centerX = startX - radiusInCanvas * Mathf.Cos(rotationRadian - 0.5f * Mathf.PI);
             centerY = startY - radiusInCanvas * Mathf.Sin(rotationRadian - 0.5f * Mathf.PI);
             // 终点为圆心从 rotationDegree+90 度开始，转 -angleRadian
-            endX =  centerX + radiusInCanvas * Mathf.Cos(rotationRadian - 0.5f * Mathf.PI + angleRadian);
+            endX = centerX + radiusInCanvas * Mathf.Cos(rotationRadian - 0.5f * Mathf.PI + angleRadian);
             endY = centerY + radiusInCanvas * Mathf.Sin(rotationRadian - 0.5f * Mathf.PI + angleRadian);
         }
         else
@@ -378,100 +185,9 @@ public class Utility : MonoBehaviour
     }
 
 
-    //public static float CalculateSubArrowRotation(float currentRate, Vector2 subStarStartScreen, Vector2 subStarEndScreen, TrackFunctionType trackFunction)
-    //{
-    //    //注意Camera在画布背面，Arrow旋转好像需要镜像？
-    //    float x1 = subStarStartScreen.x;
-    //    float y1 = subStarStartScreen.y;
-    //    float x2 = subStarEndScreen.x;
-    //    float y2 = subStarEndScreen.y;
-
-    //    //float result = 0f;
-    //    float theta = 0f;
-
-    //    //先处理x轴坐标相同的情况
-    //    if (x1 == x2)
-    //    {
-    //        if (y1 < y2)
-    //        {
-    //            return 0f;
-    //        }
-    //        else
-    //        {
-    //            return 180f;
-    //        }
-    //    }
-
-    //    switch (trackFunction)
-    //    {
-    //        case TrackFunctionType.Linear:
-    //            // 线性函数计算当前位置
-    //            if (x1 <= x2 && y1 <= y2)
-    //            {
-    //                theta = Mathf.Atan((y2 - y1) / (x2 - x1));
-    //            }
-    //            else if (x1 <= x2 && y1 > y2)
-    //            {
-    //                theta = Mathf.Atan((y2 - y1) / (x2 - x1));
-    //            }
-    //            else if (x1 > x2 && y1 <= y2)
-    //            {
-    //                theta = Mathf.Atan((y2 - y1) / (x2 - x1)) + Mathf.PI;
-    //            }
-    //            else if (x1 > x2 && y1 > y2)
-    //            {
-    //                theta = Mathf.Atan((y2 - y1) / (x2 - x1)) + Mathf.PI;
-    //            }
-    //            theta -= 0.5f * Mathf.PI;
-    //            theta *= Mathf.Rad2Deg;
-    //            break;
-    //        case TrackFunctionType.UpperCir:
-    //            // UpperCir指向上凸起的圆弧（详见说明）
-    //            if (x1 <= x2 && y1 <= y2)
-    //            {
-    //                theta = currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            else if (x1 <= x2 && y1 > y2)
-    //            {
-    //                theta = 0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            else if (x1 > x2 && y1 <= y2)
-    //            {
-    //                theta = -currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            else if (x1 > x2 && y1 > y2)
-    //            {
-    //                theta = -0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            theta *= -Mathf.Rad2Deg;
-    //            break;
-    //        case TrackFunctionType.LowerCir:
-    //            // LowerCir指向下凸起的圆弧（详见说明）
-    //            if (x1 <= x2 && y1 <= y2)
-    //            {
-    //                theta = 0.5f * Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            if (x1 <= x2 && y1 > y2)
-    //            {
-    //                theta = Mathf.PI - currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            if (x1 > x2 && y1 <= y2)
-    //            {
-    //                theta = -0.5f * Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            if (x1 > x2 && y1 > y2)
-    //            {
-    //                theta = -Mathf.PI + currentRate * 0.5f * Mathf.PI;
-    //            }
-    //            theta *= -Mathf.Rad2Deg;
-    //            break;
-    //    }
-    //    return theta;
-    //}
-
     public static float CalculateSubArrowRotationCircle(float currentRate, Vector2 subStarStartScreen, SubStar subStar)
     {
-       
+
 
         // 将角度从 0 - 1 范围转换为 0 - 360 度
         // 注意这里角度要乘以当前rate
@@ -548,28 +264,6 @@ public class Utility : MonoBehaviour
         return theta;
     }
 
-    //public static float CalculateSubStarCurveLength(SubStar subStar)
-    //{
-    //    float length = 0.0f;
-    //    switch (subStar.trackFunction)
-    //    {
-    //        case TrackFunctionType.Linear:
-    //            // 计算直线长度
-    //            length = Vector2.Distance(new Vector2(subStar.startX, subStar.startY), new Vector2(subStar.endX, subStar.endY));
-    //            break;
-    //        case TrackFunctionType.UpperCir:
-    //        case TrackFunctionType.LowerCir:
-    //            // 对于圆弧，这里使用简单的椭圆周长近似公式：π * (3 * (a + b) - Mathf.Sqrt((3 * a + b) * (a + 3 * b)))
-    //            float a = Mathf.Abs(subStar.endX - subStar.startX);
-    //            float b = Mathf.Abs(subStar.endY - subStar.startY);
-    //            length = Mathf.PI * (3 * (a + b) - Mathf.Sqrt((3 * a + b) * (a + 3 * b))) / 4;
-    //            break;
-    //        default:
-    //            // 对于其他未定义的情况，可以添加相应的处理或抛出异常
-    //            break;
-    //    }
-    //    return length;
-    //}
 
     public static float CalculateSubStarCurveLength(SubStar subStar)
     {
@@ -641,12 +335,10 @@ public class Utility : MonoBehaviour
         float canvasWidth = canvas.sizeDelta.x;
         float canvasHeight = canvas.sizeDelta.y;
 
-        float screenXMin = canvasWidth * HorizontalParams.HorizontalMargin;
-        float screenXMax = canvasWidth * (1 - HorizontalParams.HorizontalMargin);
-        float screenXRange = screenXMax - screenXMin;
-
         // 以下Y轴坐标计算逻辑与 ScalePositionToScreenJudgeLine 保持一致
         float croppedcanvasHeight = AspectRatioManager.croppedScreenHeight / Screen.height * canvasHeight;
+        float croppedcanvasWidth = AspectRatioManager.croppedScreenWidth / Screen.width * canvasWidth;
+        float screenXRange = croppedcanvasWidth * (1 - 2 * HorizontalParams.HorizontalMargin);
 
         float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom);
         float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling);
@@ -660,25 +352,28 @@ public class Utility : MonoBehaviour
 
         return new Vector2(scaledX, scaledY);
     }
+
     public static Vector2 ScreenPositionToScaleStar(Vector2 position, RectTransform canvas)
     {
         // 获取画布的长宽
         float canvasWidth = canvas.sizeDelta.x;
         float canvasHeight = canvas.sizeDelta.y;
 
-        float screenXMin = canvasWidth * HorizontalParams.HorizontalMargin;
-        float screenXMax = canvasWidth * (1 - HorizontalParams.HorizontalMargin);
-        float screenXRange = screenXMax - screenXMin;
-
+        // 计算裁剪后的画布尺寸（新增逻辑）
         float croppedcanvasHeight = AspectRatioManager.croppedScreenHeight / Screen.height * canvasHeight;
+        float croppedcanvasWidth = AspectRatioManager.croppedScreenWidth / Screen.width * canvasWidth;
+        float screenXRange = croppedcanvasWidth * (1 - 2 * HorizontalParams.HorizontalMargin);
+
+        // 计算垂直边界像素（Y轴逻辑未变）
         float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom);
         float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling);
         float ScreenYBottom = bottomPixel * canvasHeight / Screen.height;
         float ScreenYCeiling = topPixel * canvasHeight / Screen.height;
 
-        // 反向计算X轴坐标
-        float originalX = (position.x / (screenXRange / 2)) * ChartParams.XaxisMax;
-        // 反向计算Y轴坐标
+        // 反向计算X轴坐标（关键修改点）
+        float originalX = (position.x * 2 / screenXRange) * ChartParams.XaxisMax;
+
+        // 反向计算Y轴坐标（保持不变）
         float yDiff = (croppedcanvasHeight / 2) - position.y - ScreenYBottom;
         float originalY = (yDiff / (ScreenYCeiling - ScreenYBottom)) * ChartParams.YaxisMax;
 
@@ -689,7 +384,6 @@ public class Utility : MonoBehaviour
     {
         return CalculateSubArrowPositionCircle(1f, subStarStartScreen, canvas, subStar);
     }
-
 
 
     // JudgeLine的X轴坐标一直为0，简化计算
@@ -795,7 +489,7 @@ public class Utility : MonoBehaviour
             // 当时间处于 starTrackStartT 和 starTrackEndT 之间时，按箭头顺序，将该 substar 下所有非启动 arrow 的透明度由 1 线性地变为 0
             else if (currentTime >= starTrackStartT && currentTime <= starTrackEndT)
             {
-                
+
                 SubStarArrowParent.SetActive(true);
                 if (arrows.Count != 0)
                 {
@@ -821,7 +515,7 @@ public class Utility : MonoBehaviour
 
                         // 注意跳过启动Arrow
                         if (!is_firstsubStar | k != 0)
-                        { 
+                        {
                             SetArrowAlpha(arrows[k], alpha);
                         }
                     }
@@ -838,8 +532,8 @@ public class Utility : MonoBehaviour
                 else
                 {
                     if (currentTime > starendT)
-                    { 
-                        SubStarArrowParent.SetActive(false); 
+                    {
+                        SubStarArrowParent.SetActive(false);
                     }
                     else
                     {
@@ -848,7 +542,7 @@ public class Utility : MonoBehaviour
                             SetArrowAlpha(arrows[k], 0.0f);
                         }
                     }
-                    
+
                 }
             }
             else if (currentTime < starHeadT - ChartParams.StarAppearTime)
@@ -918,7 +612,7 @@ public class Utility : MonoBehaviour
 
                 Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
                 Vector2 subStarStartScreen = ScalePositionToScreenStar(subStarStart, SubStarsParentRect);
-                
+
                 switch (subStar.trackFunction)
                 {
 
@@ -949,7 +643,7 @@ public class Utility : MonoBehaviour
                         return;
                 }
             }
-        subStarIndex += 1;
+            subStarIndex += 1;
         }
         return;
     }
@@ -970,6 +664,16 @@ public class Utility : MonoBehaviour
             if (meshFilter != null)
             {
                 Mesh mesh = meshFilter.mesh;
+
+                //Vector3[] Vertices = mesh.vertices;
+                //for (int i = 0; i < Vertices.Length; i++)
+                //{
+                //    if (float.IsNaN(Vertices[i].x) || float.IsNaN(Vertices[i].y) || float.IsNaN(Vertices[i].z))
+                //    {
+                //        Debug.LogError($"Invalid vertex at{instance.name}, index {i}: {Vertices[i]}");
+                //    }
+                //}
+
                 // 添加顶点
                 vertices.AddRange(mesh.vertices);
                 // 处理三角形索引，添加偏移量
@@ -1031,13 +735,7 @@ public class Utility : MonoBehaviour
     }
 
 
-    //public static float CalculateZAxisPosition(float startTime)
-    //{
-    //    // 假设存在SpeedParams.NoteSpeedDefault这个速度参数，你需根据实际情况调整
-    //    return -startTime * SpeedParams.NoteSpeedDefault;
-    //}
-
-    public static float CalculateZAxisPosition(float startTime, List<Speed> speedList)
+    public static float CalculateZAxisPosition(float startTime, float Offset, List<Speed> speedList)
     {
         if (speedList == null || speedList.Count == 0)
         {
@@ -1048,6 +746,13 @@ public class Utility : MonoBehaviour
         speedList = speedList.OrderBy(s => s.startT).ToList();
 
         float totalDistance = 0;
+
+        //对于startTime <0（对应音乐播放前的偏移），需要正确计算
+        if (startTime < 0) 
+        {
+            //减去偏移量
+            totalDistance += startTime;
+        }
 
         // 处理 startTime 之前的所有速度段
         foreach (var speed in speedList)
@@ -1069,6 +774,9 @@ public class Utility : MonoBehaviour
                 break;
             }
         }
+
+        //加上偏移量
+        totalDistance += Offset;
 
         return -totalDistance * SpeedParams.NoteSpeedDefault;
     }
@@ -1170,24 +878,6 @@ public class Utility : MonoBehaviour
         return rightMiddlePos;
     }
 
-    //public static float TransformYCoordinate(float startY)
-    //{
-    //    Camera mainCamera = Camera.main;
-
-    //    // 获取世界坐标 (0, 0, 0) 和 (0, HeightParams.HeightDefault, 0) 在摄像机屏幕中的坐标
-    //    Vector3 screenPoint0 = mainCamera.WorldToScreenPoint(new Vector3(0, 0, 0));
-    //    Vector3 screenPoint1 = mainCamera.WorldToScreenPoint(new Vector3(0, HeightParams.HeightDefault, 0));
-
-    //    // 计算 startY 对应的屏幕坐标，即使 startY 超出 [0, 1] 范围也能正确计算
-    //    Vector3 tempScreenPoint = screenPoint0 + startY * (screenPoint1 - screenPoint0);
-
-    //    // 将临时屏幕点转换回世界坐标
-    //    Vector3 worldPoint = mainCamera.ScreenToWorldPoint(tempScreenPoint);
-
-    //    // 返回世界坐标中的 Y 值
-    //    return worldPoint.y;
-    //}
-
     public static float TransformYCoordinate(float startY)
     {
         Camera mainCamera = Camera.main;
@@ -1284,6 +974,98 @@ public class Utility : MonoBehaviour
             }
         }
     }
+
+
+    public Dictionary<float, int> CalculateNoteDensity(Chart chart)
+    {
+        var densityMap = new Dictionary<float, int>();
+
+        // 处理 Tap
+        if (chart.taps != null)
+        {
+            foreach (var tap in chart.taps)
+            {
+                AddOrIncrement(densityMap, tap.startT, 1);
+            }
+        }
+
+        // 处理 Slide
+        if (chart.slides != null)
+        {
+            foreach (var slide in chart.slides)
+            {
+                AddOrIncrement(densityMap, slide.startT, 1);
+            }
+        }
+
+        // 处理 Flick
+        if (chart.flicks != null)
+        {
+            foreach (var flick in chart.flicks)
+            {
+                AddOrIncrement(densityMap, flick.startT, 1);
+            }
+        }
+
+        // 处理 Hold
+        if (chart.holds != null)
+        {
+            foreach (var hold in chart.holds)
+            {
+                foreach (var subHold in hold.subHoldList)
+                {
+                    float startT = subHold.startT;
+                    float endT = subHold.endT;
+                    float duration = endT - startT;
+                    int intervals = (int)Math.Round(duration / 50f);
+
+                    // 添加起始点
+                    AddOrIncrement(densityMap, startT, 1);
+
+                    // 添加中间点
+                    for (int i = 1; i <= intervals; i++)
+                    {
+                        float timePoint = startT + (i * duration / intervals);
+                        AddOrIncrement(densityMap, timePoint, 1);
+                    }
+                }
+            }
+        }
+
+        // 处理 Star
+        if (chart.stars != null)
+        {
+            foreach (var star in chart.stars)
+            {
+                // 星星头物量
+                AddOrIncrement(densityMap, star.starHeadT, 1);
+
+                // 完整星星物量（使用第一个子星星的开始时间）
+                if (star.subStarList != null && star.subStarList.Count > 0)
+                {
+                    AddOrIncrement(densityMap, star.subStarList[0].starTrackStartT, 1);
+                }
+            }
+        }
+
+        return densityMap;
+    }
+
+    // 辅助方法：添加或增加字典中的值
+    private void AddOrIncrement(Dictionary<float, int> dict, float key, int value)
+    {
+        if (dict.TryGetValue(key, out int existingValue))
+        {
+            dict[key] = existingValue + value;
+        }
+        else
+        {
+            dict[key] = value;
+        }
+    }
+
+
+    
 
 }
 

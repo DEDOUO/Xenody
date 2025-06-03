@@ -18,12 +18,12 @@ namespace Params
     {
         // 谱面参数
         // X轴坐标从 -2 到 2
-        public static float XaxisMin = -2;
-        public static float XaxisMax = 2;
+        public static float XaxisMin = -2f;
+        public static float XaxisMax = 2f;
 
         // Y轴坐标从 0 到 1
-        public static float YaxisMin = 0;
-        public static float YaxisMax = 1;
+        public static float YaxisMin = 0f;
+        public static float YaxisMax = 1f;
 
         //StarHead默认的X轴坐标宽度
         public static float StarHeadXAxis = 0.8f;
@@ -46,7 +46,33 @@ namespace Params
         // 所有3DNote默认Z轴偏移坐标（为NoteZ轴宽度的一半）
         public static float NoteZAxisOffset = -0.55f;
 
+        //描边宽度
         public static float OutlineWidth = 0.15f;
+
+        //谱面开始偏移秒数
+        public static float ChartStartTimeOffset = 3f;
+
+        //Note提前开始渲染秒数
+        public static float NoteRenderTimeOffset = 3f;
+
+        //Hold每多少ms判定一次(100ms)
+        public static float HoldJudgeTimeInterval = 0.1f;
+    }
+
+    //得分相关参数
+    public static class ScoreParams
+    {
+        public static float TapScoreWeight = 1f;
+        public static float SlideScoreWeight = 0.5f;
+        public static float FlickScoreWeight = 1f;
+        public static float HoldScoreWeight = 0.5f;
+        public static float StarHeadScoreWeight = 1f;
+        public static float StarScoreWeight = 3f;
+
+        public static float TotalScore = 1000000f;
+
+        public static float MinCombo = 5;
+
     }
 
     public static class SpeedParams

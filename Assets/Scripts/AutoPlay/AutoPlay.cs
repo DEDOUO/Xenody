@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TMPro;
 
 
 public class AutoPlay : MonoBehaviour
@@ -27,6 +28,11 @@ public class AutoPlay : MonoBehaviour
     public GameObject StarsParent;
     public GameObject subStarsParent;
     public GameObject MultiHitLinesParent;
+    [SerializeField] private TMP_Text fpsText;
+    [SerializeField] private TMP_Text ComboText;
+    [SerializeField] private TMP_Text ScoreText;
+
+
     //public RectTransform SubStarsParentRect;
 
     public Sprite JudgePlaneSprite;
@@ -57,6 +63,10 @@ public class AutoPlay : MonoBehaviour
         StarsParent = GameObject.Find("StarsParent");
         subStarsParent = GameObject.Find("SubStarsParent");
         MultiHitLinesParent = GameObject.Find("MultiHitLinesParent");
+        fpsText = GameObject.Find("FPS").GetComponent<TextMeshProUGUI>();
+        ComboText = GameObject.Find("ComboText").GetComponent<TextMeshProUGUI>();
+        ScoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
+
         //SubStarsParentRect = subStarsParent.GetComponent<RectTransform>();
 
         // 加载Sprite
@@ -125,11 +135,13 @@ public class AutoPlay : MonoBehaviour
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
         instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, MultiHitLinesParent,
-            JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer);
+            JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer, fpsText);
         instantiator.InstantiateAll(chart);
-        //startTimeToInstanceNames = instantiator.startTimeToInstanceNames;
-        //JudgePlanesStartT = instantiator.JudgePlanesStartT;
-        //JudgePlanesEndT = instantiator.JudgePlanesEndT;
+
+        // 计算连击和得分列表
+        ScoreManager scoreManager = GetComponent<ScoreManager>();
+        scoreManager.CalculateAutoPlayScores(chart);
+
 
         // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰
         MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
@@ -144,9 +156,10 @@ public class AutoPlay : MonoBehaviour
 
         // 播放音乐和更新谱面位置
         player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, MultiHitLinesParent,
-            TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart);
+            TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart, fpsText, ComboText, ScoreText);
         player.SetParameters2(instantiator.startTimeToInstanceNames, instantiator.holdTimes, instantiator.keyReachedJudgment, 
-            instantiator.JudgePlanesStartT, instantiator.JudgePlanesEndT, instantiator.subStarInfoDict, instantiator.starTrackTimes, instantiator.GradientColorList );
+            instantiator.JudgePlanesStartT, instantiator.JudgePlanesEndT, instantiator.subStarInfoDict, instantiator.starTrackTimes, instantiator.GradientColorList, instantiator.ChartStartTime);
+        player.SetParameters3(scoreManager.SumComboMap, scoreManager.SumScoreMap);
         player.enabled = true;
         player.PlayMusicAndChart(chart);
     }

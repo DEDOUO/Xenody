@@ -9,16 +9,13 @@ using System;
 using Note;
 using static JudgePlane;
 using System.Linq;
-using static KeyInfo;
-using DocumentFormat.OpenXml.Math;
-//using DocumentFormat.OpenXml.Drawing;
-//using Unity.VisualScripting;
-//using DocumentFormat.OpenXml.Drawing.Charts;
+using TMPro;
+using DocumentFormat.OpenXml.InkML;
+//using DocumentFormat.OpenXml.Wordprocessing;
+//using static KeyInfo;
+//using DocumentFormat.OpenXml.Math;
 //using DocumentFormat.OpenXml.Presentation;
 //using Unity.VisualScripting;
-//using DocumentFormat.OpenXml.Presentation;
-//using System.Drawing;
-//using UnityEngine.Rendering;
 
 
 
@@ -36,6 +33,7 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject StarsParent;
     private GameObject SubStarsParent;
     private GameObject MultiHitLinesParent;
+    [SerializeField] private TMP_Text fpsText; // 需在Inspector中关联TextMeshPro组件
 
     private Sprite JudgePlaneSprite;
     private Sprite HoldSprite;
@@ -56,12 +54,14 @@ public class ChartInstantiator : MonoBehaviour
     private List<KeyValuePair<float, string>> MultiHitDict = new List<KeyValuePair<float, string>>();
     private Dictionary<float, List<string>> MultiHitPairs = new Dictionary<float, List<string>>();
     private Dictionary<float, List<Vector3>> MultiHitPairsCoord = new Dictionary<float, List<Vector3>>();
+    private float FirstNoteStartTime = 0f;
+    public float ChartStartTime = 0f;
 
-
+    
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
     public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent,
         GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject subStarsParent, GameObject multiHitLinesParent,
-        Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer)
+        Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer, TMP_Text FpsText)
     {
         JudgePlanesParent = judgePlanesParent;
         JudgeLinesParent = judgeLinesParent;
@@ -79,6 +79,7 @@ public class ChartInstantiator : MonoBehaviour
         HoldSprite = holdSprite;
         renderOrderManager = globalRenderOrderManager;
         videoPlayerContainer = animatorContainer;
+        fpsText = FpsText;
 
         WhiteSprite = Resources.Load<Sprite>("Sprites/WhiteSprite");
         if (WhiteSprite == null)
@@ -90,6 +91,16 @@ public class ChartInstantiator : MonoBehaviour
 
     private void PrepareStartTimeMapping(Chart chart)
     {
+        //根据摄像头范围，更新FPS文本的位置
+        //float screenHeight = Screen.height;
+        //Vector2 fpsTextPos = fpsText.gameObject.GetComponent<RectTransform>().position;
+        //Debug.Log(fpsTextPos);
+        //fpsTextPos.y += (screenHeight - AspectRatioManager.croppedScreenHeight)/2;
+        //fpsText.gameObject.GetComponent<RectTransform>().position = fpsTextPos;
+        //Debug.Log(fpsText.gameObject.GetComponent<RectTransform>().position);
+
+
+        //Debug.Log("start..");
         List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
         //List<KeyValuePair<float, string>> MultiHitPairs = new List<KeyValuePair<float, string>>();
 
@@ -98,10 +109,12 @@ public class ChartInstantiator : MonoBehaviour
             for (int i = 0; i < chart.judgePlanes.Count; i++)
             {
                 var judgePlane = chart.judgePlanes[i];
+                string instanceName = $"JudgePlane{i + 1}";
                 float startT = judgePlane.subJudgePlaneList[0].startT;
                 float endT = judgePlane.subJudgePlaneList[judgePlane.subJudgePlaneList.Count - 1].endT;
                 JudgePlanesStartT.Add(startT);
                 JudgePlanesEndT.Add(endT);
+                allPairs.Add(new KeyValuePair<float, string>(startT, instanceName));
             }
         }
 
@@ -204,6 +217,17 @@ public class ChartInstantiator : MonoBehaviour
         // 按照startT进行排序
         allPairs = allPairs.OrderBy(pair => pair.Key).ToList();
 
+        // 新增：从allPairs中筛选排除所有JudgePlane实例
+        List<KeyValuePair<float, string>> nonJudgePlanePairs = allPairs
+            .Where(pair => !pair.Value.StartsWith("JudgePlane")) // 按实例名前缀筛选
+            .ToList();
+        //第一个Note的判定时间（用于计算谱面开始偏移时间）
+        FirstNoteStartTime = nonJudgePlanePairs[0].Key;
+        //谱面开始偏移时间（第一个Note时值为0时，最多可偏移2s；第一个Note时值≥2s时不偏移）
+        ChartStartTime = Math.Max(ChartParams.ChartStartTimeOffset - FirstNoteStartTime, 0f);
+        //Debug.Log($"首个Note时间：{FirstNoteStartTime}");
+        Debug.Log($"谱面偏移时间：{ChartStartTime}");
+
         foreach (var pair in allPairs)
         {
             float startTime = pair.Key;
@@ -232,7 +256,7 @@ public class ChartInstantiator : MonoBehaviour
         InstantiateHolds(chart);
         InstantiateStarHeads(chart);
         InstantiateSubStars(chart);
-        InstantiateMultiHitLines(chart);
+        InstantiateMultiHitLines();
 
         subStarInfoDict = Star.InitializeSubStarInfo(chart, SubStarsParent);
     }
@@ -244,7 +268,7 @@ public class ChartInstantiator : MonoBehaviour
         {
             foreach (var judgePlane in chart.judgePlanes)
             {
-                //Debug.Log(judgePlane.color);
+                //Debug.Log(judgePlane.id);
                 int RenderQueue = 3000;
                 int judgePlaneIndex = judgePlane.id;
 
@@ -426,7 +450,7 @@ public class ChartInstantiator : MonoBehaviour
                         tapInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Tap实例的位置（X、Y、Z轴坐标），同时考虑Z轴偏移量
-                        float zPositionForStartT = CalculateZAxisPosition(tap.startT, chart.speedList);
+                        float zPositionForStartT = CalculateZAxisPosition(tap.startT, ChartStartTime, chart.speedList);
 
                         tapInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
                         //Debug.Log(tapInstance.transform.position);
@@ -463,6 +487,11 @@ public class ChartInstantiator : MonoBehaviour
                         MultiHitPairsCoord[tap.startT].Add(tapInstance.transform.position);
                     }
 
+                    //未到达渲染时间的设置为非激活
+                    if (tap.startT > ChartParams.NoteRenderTimeOffset)
+                    {
+                        tapInstance.SetActive(false);
+                    }
 
                     tapIndex++;
                 }
@@ -538,7 +567,7 @@ public class ChartInstantiator : MonoBehaviour
                         slideInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Slide实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
-                        float zPositionForStartT = CalculateZAxisPosition(slide.startT, chart.speedList);
+                        float zPositionForStartT = CalculateZAxisPosition(slide.startT, ChartStartTime, chart.speedList);
                         slideInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                         // 获取MyOutline组件并设置属性
@@ -558,6 +587,12 @@ public class ChartInstantiator : MonoBehaviour
                     if (!slide.IsInXAxisRange())
                     {
                         Debug.LogWarning($"Slide with startT: {slide.startT} and startX: {slide.startX} is out of valid range!");
+                    }
+
+                    //未到达渲染时间的设置为非激活
+                    if (slide.startT > ChartParams.NoteRenderTimeOffset)
+                    {
+                        slideInstance.SetActive(false);
                     }
 
                     slideIndex++;
@@ -635,7 +670,7 @@ public class ChartInstantiator : MonoBehaviour
                         flickInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                         // 设置Flick实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
-                        float zPositionForStartT = CalculateZAxisPosition(flick.startT, chart.speedList);
+                        float zPositionForStartT = CalculateZAxisPosition(flick.startT, ChartStartTime, chart.speedList);
                         flickInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                         Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flickInstance);
@@ -666,6 +701,13 @@ public class ChartInstantiator : MonoBehaviour
                         else
                         {
                             Debug.Log($"Flick实例 {flickInstance.name} 缺少MyOutline组件！");
+                        }
+
+                        //未到达渲染时间的设置为非激活
+                        if (flick.startT > ChartParams.NoteRenderTimeOffset)
+                        {
+                            flickInstance.SetActive(false);
+                            flickArrowInstance.SetActive(false);
                         }
                     }
 
@@ -772,7 +814,7 @@ public class ChartInstantiator : MonoBehaviour
                     starheadInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
                     // 设置StarHead实例的位置（X、Y、Z轴坐标）
-                    float zPositionForStartT = CalculateZAxisPosition(star.starHeadT, chart.speedList);
+                    float zPositionForStartT = CalculateZAxisPosition(star.starHeadT, ChartStartTime, chart.speedList);
                     starheadInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                     //先把启动特效设置为未激活
@@ -810,6 +852,11 @@ public class ChartInstantiator : MonoBehaviour
                         MultiHitPairsCoord[star.starHeadT].Add(starheadInstance.transform.position);
                     }
 
+                    //未到达渲染时间的设置为非激活
+                    if (star.starHeadT > ChartParams.NoteRenderTimeOffset)
+                    {
+                        starheadInstance.SetActive(false);
+                    }
 
                     starIndex++;
                 }
@@ -871,8 +918,8 @@ public class ChartInstantiator : MonoBehaviour
                                 float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
 
                                 // 根据 startT 和 endT 计算 Z 轴位置
-                                float zPositionForStartT = CalculateZAxisPosition(subHold.startT, chart.speedList);
-                                float zPositionForEndT = CalculateZAxisPosition(subHold.endT, chart.speedList);
+                                float zPositionForStartT = CalculateZAxisPosition(subHold.startT, ChartStartTime, chart.speedList);
+                                float zPositionForEndT = CalculateZAxisPosition(subHold.endT, ChartStartTime, chart.speedList);
 
                                 // 一次性生成整个 SubHold 及两侧色条
                                 List<GameObject> subHoldAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
@@ -912,8 +959,8 @@ public class ChartInstantiator : MonoBehaviour
                                     float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
 
                                     // 根据 startT 和 endT 计算 Z 轴位置
-                                    float zPositionForStartT_Inner = CalculateZAxisPosition(startT, chart.speedList);
-                                    float zPositionForEndT_Inner = CalculateZAxisPosition(endT, chart.speedList);
+                                    float zPositionForStartT_Inner = CalculateZAxisPosition(startT, ChartStartTime, chart.speedList);
+                                    float zPositionForEndT_Inner = CalculateZAxisPosition(endT, ChartStartTime, chart.speedList);
 
                                     // 生成细分的 SubHold 及两侧色条
                                     List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
@@ -976,8 +1023,8 @@ public class ChartInstantiator : MonoBehaviour
                                 float middleXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * middleXMax / ChartParams.XaxisMax;
 
                                 // 根据 startT 和 endT 计算 Z 轴位置
-                                float zPositionForStartT_Inner = CalculateZAxisPosition(startT, chart.speedList);
-                                float zPositionForEndT_Inner = CalculateZAxisPosition(endT, chart.speedList);
+                                float zPositionForStartT_Inner = CalculateZAxisPosition(startT, ChartStartTime, chart.speedList);
+                                float zPositionForEndT_Inner = CalculateZAxisPosition(endT, ChartStartTime, chart.speedList);
 
                                 if (i % 2 == 0)
                                 {
@@ -1032,8 +1079,8 @@ public class ChartInstantiator : MonoBehaviour
                     float startXMinWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld2, 0), HorizontalParams.HorizontalMargin) * startXMin2 / ChartParams.XaxisMax;
                     float startXMaxWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld2, 0), HorizontalParams.HorizontalMargin) * startXMax2 / ChartParams.XaxisMax;
 
-                    float startZ1 = CalculateZAxisPosition(hold.subHoldList[0].startT, chart.speedList);
-                    float startZ2 = CalculateZAxisPosition(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, chart.speedList);
+                    float startZ1 = CalculateZAxisPosition(hold.subHoldList[0].startT, ChartStartTime, chart.speedList);
+                    float startZ2 = CalculateZAxisPosition(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, ChartStartTime, chart.speedList);
 
                     // 计算结束部分的四个顶点位置
                     float endXMin1 = CalculatePosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMin, hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMin, hold.subHoldList.Last().XLeftFunction);
@@ -1046,8 +1093,8 @@ public class ChartInstantiator : MonoBehaviour
                     float endXMinWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld2, 0), HorizontalParams.HorizontalMargin) * endXMin2 / ChartParams.XaxisMax;
                     float endXMaxWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld2, 0), HorizontalParams.HorizontalMargin) * endXMax2 / ChartParams.XaxisMax;
 
-                    float endZ1 = CalculateZAxisPosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, chart.speedList);
-                    float endZ2 = CalculateZAxisPosition(hold.subHoldList.Last().endT, chart.speedList);
+                    float endZ1 = CalculateZAxisPosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, ChartStartTime, chart.speedList);
+                    float endZ2 = CalculateZAxisPosition(hold.subHoldList.Last().endT, ChartStartTime, chart.speedList);
 
                     // 增加渲染队列值，确保白色矩形显示在 Hold 之上
                     //int whiteRectRenderQueue = RenderQueue + 1;
@@ -1084,7 +1131,7 @@ public class ChartInstantiator : MonoBehaviour
                     float startXWorld = worldUnitToScreenPixelX * HoldstartX / ChartParams.XaxisMax;
 
                     // Hold实例的标准位置
-                    float zPosForStartT = CalculateZAxisPosition(HoldstartT, chart.speedList);
+                    float zPosForStartT = CalculateZAxisPosition(HoldstartT, ChartStartTime, chart.speedList);
                     Vector3 HoldPos = new Vector3(-startXWorld, yPos, zPosForStartT);
 
                     // 检查时间点和实例名是否都在 MultiHitPairs 中
@@ -1180,6 +1227,8 @@ public class ChartInstantiator : MonoBehaviour
             //先将subStar的起点和终点转换为画布上的坐标
             Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
             Vector2 subStarStartScreen = ScalePositionToScreenStar(subStarStart, SubStarsParentRect);
+            //Debug.Log(subStarStart);
+            //Debug.Log(subStarStartScreen);
 
             switch (subStar.trackFunction)
             {
@@ -1238,152 +1287,73 @@ public class ChartInstantiator : MonoBehaviour
                     // 这里暂时先返回传入的subStar的起始信息，后续需补充正确的计算逻辑
                     return (subStar.starTrackEndT, subStar.endX, subStar.endY);
 
-            // 如果是圆弧，则首先需要计算终止位置
-            case TrackFunctionType.CWC:
-            case TrackFunctionType.CCWC:
+                // 如果是圆弧，则首先需要计算终止位置
+                case TrackFunctionType.CWC:
+                case TrackFunctionType.CCWC:
 
-                
-                Vector2 substarEndScreen = CauculateEndScreenStar(subStarStartScreen, SubStarsParentRect, subStar);
-                //Debug.Log(substarEndScreen);
-                Vector2 substarEnd = ScreenPositionToScaleStar(substarEndScreen, SubStarsParentRect);
-                //Debug.Log(substarEnd);
 
-                if (subStarIndex == 1)
-                {
-                    // 当 subStarIndex 为 1 时，初始化第一个箭头；否则忽略第一个箭头
-                    //计算箭头位置
-                    //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
-                    Vector2 position = CalculateSubArrowPositionCircle(currentRate, subStarStartScreen, SubStarsParentRect, subStar);
-                    float rotation = CalculateSubArrowRotationCircle(currentRate, subStarStartScreen, subStar);
-                    // 初始化箭头
-                    GameObject arrow = Instantiate(StarStartArrowPrefab);
-                    arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{0 + 1}";
-                    RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
-                    arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
-                    // 继承父物体的图层
-                    int parentLayer2 = subStarArrowContainer.layer;
-                    arrow.layer = parentLayer2;
+                    Vector2 substarEndScreen = CauculateEndScreenStar(subStarStartScreen, SubStarsParentRect, subStar);
+                    //Debug.Log(substarEndScreen);
+                    Vector2 substarEnd = ScreenPositionToScaleStar(substarEndScreen, SubStarsParentRect);
+                    //Debug.Log(substarEnd);
 
-                    arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
-                    arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
-                    arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
-                    arrow.SetActive(false);
-                    //arrowInstances.Add(arrow);
-                }
+                    if (subStarIndex == 1)
+                    {
+                        // 当 subStarIndex 为 1 时，初始化第一个箭头；否则忽略第一个箭头
+                        //计算箭头位置
+                        //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
+                        Vector2 position = CalculateSubArrowPositionCircle(currentRate, subStarStartScreen, SubStarsParentRect, subStar);
+                        float rotation = CalculateSubArrowRotationCircle(currentRate, subStarStartScreen, subStar);
+                        // 初始化箭头
+                        GameObject arrow = Instantiate(StarStartArrowPrefab);
+                        arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{0 + 1}";
+                        RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
+                        arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
+                        // 继承父物体的图层
+                        int parentLayer2 = subStarArrowContainer.layer;
+                        arrow.layer = parentLayer2;
 
-                currentRate += rateStep;
-                for (int i = 1; i < numArrows; i++)
-                {
-                    //计算箭头位置
-                    //if (starIndex == 16)
-                    //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
-                    Vector2 position = CalculateSubArrowPositionCircle(currentRate, subStarStartScreen, SubStarsParentRect, subStar);
+                        arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
+                        arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
+                        arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
+                        arrow.SetActive(false);
+                        //arrowInstances.Add(arrow);
+                    }
+
+                    currentRate += rateStep;
+                    for (int i = 1; i < numArrows; i++)
+                    {
+                        //计算箭头位置
+                        //if (starIndex == 16)
+                        //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
+                        Vector2 position = CalculateSubArrowPositionCircle(currentRate, subStarStartScreen, SubStarsParentRect, subStar);
                         float rotation = CalculateSubArrowRotationCircle(currentRate, subStarStartScreen, subStar);
                         // 初始化箭头
                         GameObject arrow = Instantiate(StarArrowPrefab);
-                    arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{i + 1}";
-                    RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
-                    arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
-                    // 继承父物体的图层
-                    int parentLayer2 = subStarArrowContainer.layer;
-                    arrow.layer = parentLayer2;
+                        arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{i + 1}";
+                        RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
+                        arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
+                        // 继承父物体的图层
+                        int parentLayer2 = subStarArrowContainer.layer;
+                        arrow.layer = parentLayer2;
 
-                    arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
-                    arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
-                    arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
-                    arrow.SetActive(false);
-                    //arrowInstances.Add(arrow);
-                    currentRate += rateStep;
-                }
+                        arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
+                        arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
+                        arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
+                        arrow.SetActive(false);
+                        //arrowInstances.Add(arrow);
+                        currentRate += rateStep;
+                    }
 
-                // 这里暂时先返回传入的subStar的起始信息，后续需补充正确的计算逻辑
-                return (subStar.starTrackEndT, substarEnd.x, substarEnd.y);
+                    // 这里暂时先返回传入的subStar的起始信息，后续需补充正确的计算逻辑
+                    return (subStar.starTrackEndT, substarEnd.x, substarEnd.y);
             }
         }
         // 如果预制体未找到，返回默认值
         return (0, 0, 0);
     }
 
-    //public void InitiateStarArrows(Star.SubStar subStar, int starIndex, int subStarIndex, int numArrows, float rateStep)
-    //{
-    //    GameObject StarArrowPrefab = Resources.Load<GameObject>("Prefabs/GamePlay/StarArrow");
-    //    if (StarArrowPrefab != null)
-    //    {
-    //        float currentRate = 0.0f;
-
-    //        RectTransform SubStarsParentRect = SubStarsParent.GetComponent<RectTransform>();
-    //        GameObject subStarArrowContainer = new GameObject($"Star{starIndex}SubStar{subStarIndex}Arrows", typeof(RectTransform));
-    //        RectTransform subStarArrowContainerRectTransform = subStarArrowContainer.GetComponent<RectTransform>();
-    //        subStarArrowContainerRectTransform.SetParent(SubStarsParentRect);
-    //        // 继承父物体的图层
-    //        int parentLayer = SubStarsParent.layer;
-    //        subStarArrowContainer.layer = parentLayer;
-
-    //        // 将 subStarArrowContainer 的位置、旋转和缩放设置为默认值
-    //        subStarArrowContainerRectTransform.anchoredPosition3D = Vector3.zero;
-    //        subStarArrowContainerRectTransform.localRotation = Quaternion.identity;
-    //        subStarArrowContainerRectTransform.localScale = Vector3.one;
-    //        subStarArrowContainerRectTransform.sizeDelta = SubStarsParentRect.sizeDelta;
-
-    //        //先将subStar的起点和终点转换为画布上的坐标
-    //        Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
-    //        Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
-    //        Vector2 subStarStartScreen = ScalePositionToScreenStar(subStarStart, SubStarsParentRect);
-    //        Vector2 subStarEndScreen = ScalePositionToScreenStar(subStarEnd, SubStarsParentRect);
-
-    //        if (subStarIndex == 1)
-    //        {
-    //            // 当 subStarIndex 为 1 时，初始化第一个箭头；否则忽略第一个箭头
-    //            //计算箭头位置
-    //            //if (starIndex == 16)
-    //            //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
-    //            Vector2 position = CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
-    //            //Debug.Log(position);
-    //            float rotation = CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
-    //            // 初始化箭头
-    //            GameObject arrow = Instantiate(StarArrowPrefab);
-    //            arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{0 + 1}";
-    //            RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
-    //            arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
-    //            // 继承父物体的图层
-    //            int parentLayer2 = subStarArrowContainer.layer;
-    //            arrow.layer = parentLayer2;
-
-    //            arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
-    //            arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
-    //            arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
-    //            arrow.SetActive(false);
-    //            //arrowInstances.Add(arrow);
-    //        }
-
-    //        currentRate += rateStep;
-    //        for (int i = 1; i < numArrows; i++)
-    //        {
-    //            //计算箭头位置
-    //            //if (starIndex == 16)
-    //            //{ Debug.Log(currentRate + "   " + subStarStartScreen + "   " + subStarEndScreen); }
-    //            Vector2 position = CalculateSubArrowPosition(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
-    //            float rotation = CalculateSubArrowRotation(currentRate, subStarStartScreen, subStarEndScreen, subStar.trackFunction);
-    //            // 初始化箭头
-    //            GameObject arrow = Instantiate(StarArrowPrefab);
-    //            arrow.name = $"Star{starIndex}SubStar{subStarIndex}Arrow{i + 1}";
-    //            RectTransform arrowRectTransform = arrow.GetComponent<RectTransform>();
-    //            arrowRectTransform.SetParent(subStarArrowContainerRectTransform);
-    //            // 继承父物体的图层
-    //            int parentLayer2 = subStarArrowContainer.layer;
-    //            arrow.layer = parentLayer2;
-
-    //            arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
-    //            arrowRectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
-    //            arrowRectTransform.localScale = Vector3.one * StarArrowParams.defaultScale;
-    //            arrow.SetActive(false);
-    //            //arrowInstances.Add(arrow);
-    //            currentRate += rateStep;
-    //        }
-    //    }
-    //}
-
-    public void InstantiateMultiHitLines(Chart chart)
+    public void InstantiateMultiHitLines()
     {
         GameObject multiHitLinePrefab = Resources.Load<GameObject>("Prefabs/GamePlay/MultiHitLine");
         if (multiHitLinePrefab == null)
@@ -1398,6 +1368,7 @@ public class ChartInstantiator : MonoBehaviour
         // 遍历所有多押时间点的坐标列表
         foreach (var timeGroup in MultiHitPairsCoord)
         {
+            float startT = timeGroup.Key;
             List<Vector3> coordinates = timeGroup.Value;
             if (coordinates.Count < 2) continue; // 至少需要2个坐标才能连线
 
@@ -1409,12 +1380,14 @@ public class ChartInstantiator : MonoBehaviour
                     Vector3 pointB = coordinates[j];
                     if (pointA.y != pointB.y) // 仅当y轴坐标不同时连线
                     {
-                        CreateMultiHitLine(multiHitLinePrefab, pointA, pointB, timeGroup.Key, Index);
+                        CreateMultiHitLine(multiHitLinePrefab, pointA, pointB, startT, Index);
                         Index += 1;
                     }
                 }
             }
         }
+
+
     }
 
     /// <summary>
@@ -1426,14 +1399,7 @@ public class ChartInstantiator : MonoBehaviour
         GameObject lineInstance = Instantiate(prefab);
         lineInstance.name = $"MultiHitLine_{Index}";
 
-        // 添加到时间-实例映射
-        if (!startTimeToInstanceNames.ContainsKey(startT))
-        {
-            startTimeToInstanceNames[startT] = new List<string>();
-        }
-        startTimeToInstanceNames[startT].Add(lineInstance.name);
 
-        keyReachedJudgment[lineInstance.name] = new KeyInfo(startT);
 
         // 设置父节点和图层
         lineInstance.transform.SetParent(MultiHitLinesParent.transform);
@@ -1472,6 +1438,22 @@ public class ChartInstantiator : MonoBehaviour
             lineInstance.transform.localScale.y,
             lineInstance.transform.localScale.z
         );
+
+        //未到达渲染时间的设置为非激活
+        if (startT > ChartParams.NoteRenderTimeOffset)
+        {
+            lineInstance.SetActive(false);
+        }
+
+        // 添加到时间-实例映射
+        if (!startTimeToInstanceNames.ContainsKey(startT))
+        {
+            startTimeToInstanceNames[startT] = new List<string>();
+        }
+        startTimeToInstanceNames[startT].Add(lineInstance.name);
+
+        keyReachedJudgment[lineInstance.name] = new KeyInfo(startT);
+
     }
 
     // 获取预制体的原始x轴长度（模型导入时的实际大小，不受缩放影响）
@@ -1496,13 +1478,20 @@ public class ChartInstantiator : MonoBehaviour
     private List<GameObject> CreateJudgePlaneAndColorLinesQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName,
         GameObject judgePlaneParent, GameObject ColorLinesParent, int RenderQueue, Color planecolor, List<Speed> speedList)
     {
+        // 只有当startT为0时，startT往前推ChartStartTime
+        if (Math.Abs(startT - 0f) <= 0.001)
+        {
+            startT -= ChartStartTime;
+        }
+
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
         float startYWorld = TransformYCoordinate(startY);
         float endYWorld = TransformYCoordinate(endY);
 
         // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
-        float zPositionForStartT = CalculateZAxisPosition(startT, speedList);
-        float zPositionForEndT = CalculateZAxisPosition(endT, speedList);
+        float zPositionForStartT = CalculateZAxisPosition(startT, ChartStartTime, speedList);
+        //Debug.Log(zPositionForStartT);
+        float zPositionForEndT = CalculateZAxisPosition(endT, ChartStartTime, speedList);
 
         // 计算在Z轴方向的长度（之前代码中的height变量，这里改为lengthForZAxis）
         //float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;

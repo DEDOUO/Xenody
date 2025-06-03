@@ -97,7 +97,7 @@ public class SongSelect : MonoBehaviour
                 // 根据字体设置字体大小
                 if (IsNotoSansFont(fontAsset))
                 {
-                    textComponent.fontSize = 40;
+                    textComponent.fontSize = 35;
                 }
                 else
                 {
@@ -150,53 +150,83 @@ public class SongSelect : MonoBehaviour
     // 根据字符串包含的文字类型返回对应的字体
     private TMP_FontAsset GetFontBasedOnCharacters(string input)
     {
-        if (ContainsKorean(input))
+        if (string.IsNullOrEmpty(input)) return null; // 空字符串处理
+
+        // 先判断中文（范围：0x4E00 ~ 0x9FFF）
+        if (ContainsChinese(input))
+        {
+            return Resources.Load<TMP_FontAsset>("Fonts/NotoSansSC-Regular SDF");
+        }
+        // 再判断韩文（范围：0xAC00 ~ 0xD7AF 等）
+        else if (ContainsKorean(input))
         {
             return Resources.Load<TMP_FontAsset>("Fonts/NotoSansKR-Regular SDF");
         }
+        // 最后判断日文（仅包含平假名、片假名，不含汉字）
         else if (ContainsJapanese(input))
         {
             return Resources.Load<TMP_FontAsset>("Fonts/NotoSansJP-Regular SDF");
         }
-        else if (ContainsChinese(input))
-        {
-            return Resources.Load<TMP_FontAsset>("Fonts/NotoSansSC-Regular SDF");
-        }
+        // 其他语言（英文、数字、符号等）
         return Resources.Load<TMP_FontAsset>("Fonts/Jupiter SDF");
     }
 
-    // 判断字符串是否包含韩文
-    private bool ContainsKorean(string input)
+    // 判断是否为 CJK 统一表意文字（汉字，排除日文假名、韩文组合字符等）
+    private bool IsCJKUnifiedIdeograph(char c)
     {
-        foreach (char c in input)
-        {
-            if ((c >= 0xAC00 && c <= 0xD7AF) || (c >= 0x1100 && c <= 0x11FF) || (c >= 0x3130 && c <= 0x318F))
-            {
-                return true;
-            }
-        }
-        return false;
+        // 中文、日文、韩文共用的统一表意文字范围（0x4E00 ~ 0x9FFF 和 0x3400 ~ 0x4DBF 等）
+        // 注意：此范围包含中日韩汉字，需结合具体需求调整
+        return (c >= 0x4E00 && c <= 0x9FFF) ||
+               (c >= 0x3400 && c <= 0x4DBF) ||
+               (c >= 0x20000 && c <= 0x2A6DF) ||
+               (c >= 0x2A700 && c <= 0x2B73F) ||
+               (c >= 0x2B740 && c <= 0x2B81F) ||
+               (c >= 0x2B820 && c <= 0x2CEAF) ||
+               (c >= 0xF900 && c <= 0xFAFF) ||
+               (c >= 0x2F800 && c <= 0x2FA1F);
     }
 
-    // 判断字符串是否包含日文
-    private bool ContainsJapanese(string input)
-    {
-        foreach (char c in input)
-        {
-            if ((c >= 0x3040 && c <= 0x309F) || (c >= 0x30A0 && c <= 0x30FF) || (c >= 0x4E00 && c <= 0x9FFF))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // 判断字符串是否包含中文
+    // 判断是否包含中文（使用自定义的 CJK 检查）
     private bool ContainsChinese(string input)
     {
         foreach (char c in input)
         {
-            if ((c >= 0x4E00) && (c <= 0x9FFF))
+            if (IsCJKUnifiedIdeograph(c))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    // 判断是否包含韩文
+    private bool ContainsKorean(string input)
+    {
+        foreach (char c in input)
+        {
+            // 韩文基本字符 + 组合字符 + 扩展字符
+            if ((c >= 0xAC00 && c <= 0xD7AF) || // 韩文音节
+                (c >= 0x1100 && c <= 0x11FF) || // 韩文声母
+                (c >= 0x3130 && c <= 0x318F) || // 韩文韵母
+                (c >= 0xA960 && c <= 0xA97F) || // 韩文扩展
+                (c >= 0xD7B0 && c <= 0xD7FF))    // 韩文扩展
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 判断是否包含日文（仅平假名、片假名，不含汉字）
+    private bool ContainsJapanese(string input)
+    {
+        foreach (char c in input)
+        {
+            // 平假名（ぁ-ゖ）
+            if ((c >= 0x3040 && c <= 0x309F) ||
+                // 片假名（ァ-ヺ、ㇰ-ㇿ）
+                (c >= 0x30A0 && c <= 0x30FF) ||
+                // 片假名扩展（ヵ-ヶ、ㇰ-ㇿ）
+                (c >= 0x31F0 && c <= 0x31FF))
             {
                 return true;
             }
