@@ -732,11 +732,12 @@ public class MusicAndChartPlayer : MonoBehaviour
 
         // 处理 startTime 之前的所有速度段
         //注意查找每个速度段与audioPrevTime到currentTime区间是否有交集
+        float FirstSpeed = speedList[0].sp;
 
-        //如果这个时候音乐还没播放，就按照正常速度
+        //如果这个时候音乐还没播放，就按照第一个速度
         if (currentTime <= 0) 
         {
-            totalDistance += (currentTime - audioPrevTime);
+            totalDistance += (currentTime - audioPrevTime) * FirstSpeed;
         }
         else 
         { 
@@ -813,8 +814,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         {
             for (int i = 0; i < HoldOutlinesParent.transform.childCount; i++)
             {
-                Transform childTransform = HoldOutlinesParent.transform.GetChild(i);
-                GameObject keyGameObject = childTransform.gameObject;
+                GameObject keyGameObject = HoldOutlinesParent.transform.GetChild(i).gameObject;
                 if (!keyGameObject.activeSelf) continue;
 
                 //string instanceName = keyGameObject.name;
@@ -838,6 +838,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 if (GradientColorList.colors[j].startT > audioPrevTime && GradientColorList.colors[j].startT <= currentTime)
                 {
+                    //Debug.Log("换颜色！");
                     UpdateOtherNoteColors(currentTime);
                 }
             }
@@ -854,7 +855,6 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 Transform childTransform = TapsParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
-                if (!keyGameObject.activeSelf) continue;
 
                 string instanceName = keyGameObject.name;
                 // 如果是 HitEffect 物体，则跳过
@@ -873,7 +873,6 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 Transform childTransform = SlidesParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
-                if (!keyGameObject.activeSelf) continue;
 
                 string instanceName = keyGameObject.name;
                 // 如果是 HitEffect 物体，则跳过
@@ -891,7 +890,6 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 Transform childTransform = FlicksParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
-                if (!keyGameObject.activeSelf) continue;
 
                 string instanceName = keyGameObject.name;
                 // 如果是 HitEffect 物体，则跳过
@@ -909,7 +907,6 @@ public class MusicAndChartPlayer : MonoBehaviour
             {
                 Transform childTransform = StarsParent.transform.GetChild(i);
                 GameObject keyGameObject = childTransform.gameObject;
-                if (!keyGameObject.activeSelf) continue;
 
                 string instanceName = keyGameObject.name;
                 // 如果是 HitEffect 物体，则跳过

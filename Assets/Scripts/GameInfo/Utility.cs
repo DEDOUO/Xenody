@@ -747,11 +747,12 @@ public class Utility : MonoBehaviour
 
         float totalDistance = 0;
 
+        float FirstSpeed = speedList[0].sp;
         //对于startTime <0（对应音乐播放前的偏移），需要正确计算
         if (startTime < 0) 
         {
-            //减去偏移量
-            totalDistance += startTime;
+            // 减去偏移量(0s以前用speed列表的第一个speed
+            totalDistance += startTime * FirstSpeed;
         }
 
         // 处理 startTime 之前的所有速度段
