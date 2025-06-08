@@ -10,8 +10,8 @@
     {
       "startT": 0.0,
       "endT": 154.828,
-      "Lcolor": "#63b8ff",
-      "Ucolor": "#f0ffff"
+      "StartLcolor": "#63b8ff",
+      "StartUcolor": "#f0ffff"
     }
   ],
   "plane": [

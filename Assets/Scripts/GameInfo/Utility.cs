@@ -919,6 +919,7 @@ public class Utility : MonoBehaviour
 
     public static Color HexToColor(string hex)
     {
+        //Debug.Log(hex);
         hex = hex.Replace("#", "");
         if (hex.Length == 6)
         {
@@ -943,21 +944,21 @@ public class Utility : MonoBehaviour
     }
 
     // 将 GradientColor 列表实例转换为 GradientColorListUnity 实例
-    public static GradientColorListUnity ConvertToUnityList(List<GradientColor> list)
-    {
-        GradientColorListUnity unityList = new GradientColorListUnity();
-        foreach (var gradientColor in list)
-        {
-            unityList.colors.Add(new GradientColorUnity
-            {
-                startT = gradientColor.startT,
-                endT = gradientColor.endT,
-                lowercolor = HexToColor(gradientColor.lowercolor),
-                uppercolor = HexToColor(gradientColor.uppercolor)
-            });
-        }
-        return unityList;
-    }
+    //public static GradientColorListUnity ConvertToUnityList(List<GradientColor> list)
+    //{
+    //    GradientColorListUnity unityList = new GradientColorListUnity();
+    //    foreach (var gradientColor in list)
+    //    {
+    //        unityList.colors.Add(new GradientColorUnity
+    //        {
+    //            startT = gradientColor.startT,
+    //            endT = gradientColor.endT,
+    //            lowercolor = HexToColor(gradientColor.lowercolor),
+    //            uppercolor = HexToColor(gradientColor.uppercolor)
+    //        });
+    //    }
+    //    return unityList;
+    //}
 
     public static void SetSpriteColor(GameObject obj, Color color)
     {

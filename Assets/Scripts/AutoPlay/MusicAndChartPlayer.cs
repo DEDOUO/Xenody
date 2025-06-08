@@ -8,7 +8,10 @@ using UnityEngine.SceneManagement;
 using Note;
 using static Utility;
 using TMPro;
-using Unity.VisualScripting;
+using static GradientColorListUnity;
+using static UnityEditor.Experimental.GraphView.GraphView;
+using UnityEngine.UIElements;
+//using Unity.VisualScripting;
 //using DocumentFormat.OpenXml.Wordprocessing;
 //using DocumentFormat.OpenXml.Spreadsheet;
 
@@ -29,6 +32,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GameObject HoldOutlinesParent;
     private GameObject StarsParent;
     public GameObject SubStarsParent;
+    public GameObject JudgeTexturesParent;
     private GameObject MultiHitLinesParent;
     public GameObject MusicSlider;
     [SerializeField] private TMP_Text fpsText;
@@ -39,6 +43,10 @@ public class MusicAndChartPlayer : MonoBehaviour
     private Sprite SlideSprite;
     private Sprite FlickSprite;
     private Sprite StarHeadSprite;
+    private Sprite Sync;
+    private Sprite Link;
+    private Sprite Fuzz;
+    private Sprite Null;
 
     private AudioSource TapSoundEffect;
     private AudioSource SlideSoundEffect;
@@ -60,6 +68,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private GradientColorListUnity GradientColorList;
     private Dictionary<float, int> comboMap;
     private Dictionary<float, int> scoreMap;
+    private Dictionary<float, List<Vector2>> JudgePosMap;
     private int ComboIndex = 0;
 
 
@@ -75,6 +84,7 @@ public class MusicAndChartPlayer : MonoBehaviour
     private Chart chart; // 用于存储传入的Chart实例，方便在Update里使用
     private int ActiveStateIndex = 0;
     private int JudgementIndex = 0;
+    private int JudgeTextureIndex = 0;
     private float totalTime;
     //private float AnimationScaleAdjust = 772f / 165f;  // 播放动画时x轴缩放调整
     private float AnimationScaleAdjust = 0.8f;  // 播放动画时x轴缩放调整
@@ -89,7 +99,8 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent,
-        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject substarsParent, GameObject multiHitLinesParent,
+        GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent, GameObject holdsParent, GameObject holdOutlinesParent, 
+        GameObject starsParent, GameObject substarsParent, GameObject judgeTexturesParent, GameObject multiHitLinesParent,
         AudioSource tapSoundEffect, AudioSource slideSoundEffect, AudioSource flickSoundEffect, AudioSource holdSoundEffect, AudioSource starheadSoundEffect, AudioSource starSoundEffect,
         Chart chart, TMP_Text FpsText, TMP_Text ComboText, TMP_Text ScoreText)
     {
@@ -105,6 +116,7 @@ public class MusicAndChartPlayer : MonoBehaviour
         HoldOutlinesParent = holdOutlinesParent;
         StarsParent = starsParent;
         SubStarsParent = substarsParent;
+        JudgeTexturesParent = judgeTexturesParent;
         MultiHitLinesParent = multiHitLinesParent;
         TapSoundEffect = tapSoundEffect;
         SlideSoundEffect = slideSoundEffect;
@@ -134,10 +146,29 @@ public class MusicAndChartPlayer : MonoBehaviour
         ChartStartTime = chartStartTime;
     }
 
-    public void SetParameters3(Dictionary<float, int> comboMap, Dictionary<float, int> scoreMap)
+    public void SetParameters3(Dictionary<float, int> comboMap, Dictionary<float, int> scoreMap, Dictionary<float, List<Vector2>> JudgePosMap)
     {
         this.comboMap = comboMap;
         this.scoreMap = scoreMap;
+        this.JudgePosMap = JudgePosMap;
+
+        // 打印JudgePosMap的所有内容
+        //if (JudgePosMap != null && JudgePosMap.Count > 0)
+        //{
+        //    Debug.Log($"JudgePosMap 包含 {JudgePosMap.Count} 个时间点：");
+
+        //    foreach (var time in JudgePosMap.Keys)
+        //    {
+        //        var positions = JudgePosMap[time];
+        //        string posString = string.Join(" | ", positions.Select(p => $"({p.x}, {p.y})"));
+        //        Debug.Log($"时间 {time}s: {positions.Count} 个坐标 [{posString}]");
+        //    }
+        //}
+        //else
+        //{
+        //    Debug.Log("JudgePosMap 为空或未初始化");
+        //}
+
     }
 
     private void Start()
@@ -173,7 +204,8 @@ public class MusicAndChartPlayer : MonoBehaviour
     private IEnumerator WaitAndPlayAudio(float delay)
     {
         yield return new WaitUntil(() => Time.time >= startTime + delay);
-        audioSource.Play();
+        if (IsPlaying && !pauseManager.isPaused)
+        { audioSource.Play(); }
     }
 
 
@@ -222,17 +254,6 @@ public class MusicAndChartPlayer : MonoBehaviour
     private void Updateall(bool IfResumePlay)
     {
         float currentTime = elapsedTime;
-
-        //if (audioSource.isPlaying)
-        //{
-        //    currentTime = audioSource.time;
-        //}
-        //else
-        //{
-        //    currentTime = elapsedTime - ChartStartTime;
-        //}
-        //Debug.Log($"CurT:{currentTime}");
-        //Debug.Log($"MusicT:{audioSource.time}");
 
         //将已经结束的JudgePlane设置为非激活
         UpdateJudgePlaneActiveState(currentTime);
@@ -393,12 +414,12 @@ public class MusicAndChartPlayer : MonoBehaviour
             foreach (var instanceName in instanceNames)
             {
                 //Debug.Log(instanceName);
-                if (! instanceName.StartsWith("JudgePlane"))
+                if (!instanceName.StartsWith("JudgePlane"))
                 {
                     KeyInfo keyInfo = keyReachedJudgment[instanceName];
                     keyInfo.isJudged = true;
                 }
-               
+
                 // 根据是Tap、Slide还是Flick等不同类型的键，播放对应的音效和动画（这里简单示例，实际可能需要更精确判断类型的逻辑）
                 if (instanceName.StartsWith("Tap"))
                 {
@@ -439,6 +460,73 @@ public class MusicAndChartPlayer : MonoBehaviour
             }
             JudgementIndex++;
         }
+
+        while (JudgeTextureIndex < JudgePosMap.Count && JudgePosMap.ElementAt(JudgeTextureIndex).Key < currentTime)
+        {
+            List<Vector2> Positions = JudgePosMap.ElementAt(JudgeTextureIndex).Value;
+            foreach (Vector2 Pos in Positions)
+            {
+                // 创建一个新的挂载SpriteRenderer的游戏物体
+                string newName = "JudgeTexture";
+                GameObject newGameObject = new GameObject(newName, typeof(RectTransform), typeof(SpriteRenderer));
+                SpriteRenderer spriteRenderer = newGameObject.GetComponent<SpriteRenderer>();
+                spriteRenderer.sprite = Sync;
+
+                Color SpriteColor = spriteRenderer.color; // 初始颜色 (Alpha=1)
+                Color NewColor = new Color(SpriteColor.r, SpriteColor.g, SpriteColor.b, JudgeTextureParams.StartAlpla);
+                spriteRenderer.color = NewColor;
+
+
+                RectTransform newGameObjectRectTransform = newGameObject.GetComponent<RectTransform>();
+
+                // 设置新物体的父物体
+                newGameObjectRectTransform.SetParent(JudgeTexturesParent.GetComponent<RectTransform>(), false);
+                // false 表示不保留世界坐标，适配 UI 层级的位置计算
+
+                // 设置位置：UI 元素用 anchoredPosition 来设置位置更合适
+                newGameObjectRectTransform.anchoredPosition = new Vector2(Pos.x, Pos.y);
+                newGameObjectRectTransform.localScale = Vector3.one * JudgeTextureParams.Scale;
+
+                // 继承父物体的图层
+                int parentLayer = JudgeTexturesParent.layer;
+                newGameObject.layer = parentLayer;
+
+                // 启动动画协程
+                StartCoroutine(AnimateAndDestroy(newGameObject));
+            }
+            JudgeTextureIndex++;
+        }
+
+    }
+
+    // 控制动画和销毁的协程
+    private IEnumerator AnimateAndDestroy(GameObject target)
+    {
+        float elapsedTime = 0;
+        Vector3 startScale = Vector3.one * JudgeTextureParams.Scale; // 初始缩放 (100%)
+        Vector3 endScale = Vector3.one * JudgeTextureParams.Scale * JudgeTextureParams.EndSize; // 最终缩放 (70%)
+
+        SpriteRenderer spriteRenderer = target.GetComponent<SpriteRenderer>();
+        Color SpriteColor = spriteRenderer.color; // 初始颜色 (Alpha=1)
+        
+        float duration = JudgeTextureParams.FadeTime;
+
+        while (elapsedTime < duration)
+        {
+            float progress = elapsedTime / duration;
+
+            // 平滑插值更新缩放和透明度
+            target.transform.localScale = Vector3.Lerp(startScale, endScale, progress);
+            float alpha = JudgeTextureParams.StartAlpla + (JudgeTextureParams.EndAlpla - JudgeTextureParams.StartAlpla) * progress;
+
+            Color Color = new Color(SpriteColor.r, SpriteColor.g, SpriteColor.b, alpha);
+            spriteRenderer.color = Color;
+
+            elapsedTime += Time.deltaTime;
+            yield return null; // 等待下一帧
+        }
+
+        Destroy(target); // 动画结束后销毁对象
     }
 
     private void UpdateStarSoundEffect(float currentTime)
@@ -507,7 +595,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                 int Combo = comboMap.ElementAt(ComboIndex).Value;
                 if (Combo >= ScoreParams.MinCombo)
                 {
-                    ComboText.text = $"{comboMap.ElementAt(ComboIndex).Value}";
+                    ComboText.text = $"Combo {comboMap.ElementAt(ComboIndex).Value}";
                 }
                 else 
                 {
@@ -527,6 +615,10 @@ public class MusicAndChartPlayer : MonoBehaviour
                     break; // 到达集合末尾时退出循环
                 }
             }
+
+            //int JudgeIndex = ComboIndex - 1;
+
+
         }
 
     }
@@ -836,10 +928,16 @@ public class MusicAndChartPlayer : MonoBehaviour
             //否则，如果正好处于颜色突变时间，则更新所有其他Note的Outline颜色
             for (int j = 0; j < GradientColorList.colors.Count; j++)
             {
-                if (GradientColorList.colors[j].startT > audioPrevTime && GradientColorList.colors[j].startT <= currentTime)
+                GradientColorUnity color = GradientColorList.colors[j];
+                if (color.startT > audioPrevTime && color.startT <= currentTime)
                 {
                     //Debug.Log("换颜色！");
                     UpdateOtherNoteColors(currentTime);
+                }
+                //当前所处时段为需要随时间变化的时段时，仅变化处于激活状态的Note
+                else if (currentTime >= color.startT && currentTime <= color.endT && color.isTimeInterpolationNeeded)
+                {
+                    UpdateOtherActiveNoteColors(currentTime);
                 }
             }
         }
@@ -918,7 +1016,82 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
+    private void UpdateOtherActiveNoteColors(float currentTime)
+    {
 
+        // 处理 Taps 键
+        if (TapsParent != null)
+        {
+            for (int i = 0; i < TapsParent.transform.childCount; i++)
+            {
+                Transform childTransform = TapsParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Tap tap = chart.taps[i];
+                Color tapcolor = GradientColorList.GetColorAtTimeAndY(currentTime, tap.startY);
+                //Debug.Log(tapcolor);
+                SetSpriteColor(keyGameObject, tapcolor);
+            }
+        }
+
+        // 处理 Slides 键
+        if (SlidesParent != null)
+        {
+            for (int i = 0; i < SlidesParent.transform.childCount; i++)
+            {
+                Transform childTransform = SlidesParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Slide slide = chart.slides[i];
+                Color slidecolor = GradientColorList.GetColorAtTimeAndY(currentTime, slide.startY);
+                SetSpriteColor(keyGameObject, slidecolor);
+            }
+        }
+
+        // 处理 Flicks 键
+        if (FlicksParent != null)
+        {
+            for (int i = 0; i < FlicksParent.transform.childCount; i++)
+            {
+                Transform childTransform = FlicksParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Flick flick = chart.flicks[i];
+                Color flickcolor = GradientColorList.GetColorAtTimeAndY(currentTime, flick.startY);
+                SetSpriteColor(keyGameObject, flickcolor);
+            }
+        }
+
+        // 处理 StarHead 键
+        if (StarsParent != null)
+        {
+            for (int i = 0; i < StarsParent.transform.childCount; i++)
+            {
+                Transform childTransform = StarsParent.transform.GetChild(i);
+                GameObject keyGameObject = childTransform.gameObject;
+                if (!keyGameObject.activeSelf) continue;
+
+                string instanceName = keyGameObject.name;
+                // 如果是 HitEffect 物体，则跳过
+                if (instanceName.Contains("HitEffect")) { continue; }
+                Star star = chart.stars[i];
+                Color starcolor = GradientColorList.GetColorAtTimeAndY(currentTime, star.startY);
+                SetSpriteColor(keyGameObject, starcolor);
+            }
+        }
+    }
 
     private void UpdateJudgePlanesPosition(float currentTime, float zAxisDecreasePerFrame, bool IfResumePlay)
     {
@@ -1681,6 +1854,13 @@ public class MusicAndChartPlayer : MonoBehaviour
             ActiveStateIndex++;
         }
 
+
+        //重置判定文本编号
+        JudgeTextureIndex = 0;
+        while (JudgeTextureIndex < JudgePosMap.Count && JudgePosMap.ElementAt(JudgeTextureIndex).Key < currentTime)
+        { JudgeTextureIndex += 1; }
+
+
         //更新所有谱面元素位置和颜色状态
         Updateall(true);
 
@@ -1696,6 +1876,12 @@ public class MusicAndChartPlayer : MonoBehaviour
         FlickSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/FlickNote");
         // 加载 StarHead 音符的 Sprite
         StarHeadSprite = Resources.Load<Sprite>("Textures/Gameplay/Note/StarHead");
+
+        // 加载判定文字的Sprite
+        Sync = Resources.Load<Sprite>("Textures/Gameplay/Particles/TextSync");
+        Link = Resources.Load<Sprite>("Textures/Gameplay/Particles/TextLink");
+        Fuzz = Resources.Load<Sprite>("Textures/Gameplay/Particles/TextFuzz");
+        Null = Resources.Load<Sprite>("Textures/Gameplay/Particles/TextNull");
 
         // 检查是否成功加载
         if (TapSprite == null)

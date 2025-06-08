@@ -40,194 +40,182 @@
     {
       "startT": 0.0,
       "endT": 13.45,
-      "Lcolor": "#0000cd",
-      "Ucolor": "#0000cd"
+      "StartLcolor": "#6767ff",
+      "StartUcolor": "#6767ff"
     },
     {
       "startT": 13.45,
-      "endT": 15.05,
-      "Lcolor": "#0000ff",
-      "Ucolor": "#0000ff"
-    },
-    {
-      "startT": 15.05,
-      "endT": 16.65,
-      "Lcolor": "#1e90ff",
-      "Ucolor": "#1e90ff"
-    },
-    {
-      "startT": 16.65,
       "endT": 18.25,
-      "Lcolor": "#00bfff",
-      "Ucolor": "#00bfff"
+      "StartLcolor": "#6767ff",
+      "StartUcolor": "#6767ff",
+      "EndLcolor": "#dff7ff",
+      "EndUcolor": "#dff7ff"
     },
     {
       "startT": 18.25,
-      "endT": 19.85,
-      "Lcolor": "#afeeee",
-      "Ucolor": "#afeeee"
-    },
-    {
-      "startT": 19.85,
       "endT": 21.45,
-      "Lcolor": "#ffffe0",
-      "Ucolor": "#ffffe0"
+      "StartLcolor": "#dff7ff",
+      "StartUcolor": "#dff7ff",
+      "EndLcolor": "#ffec8b",
+      "EndUcolor": "#ffec8b"
     },
     {
       "startT": 21.45,
       "endT": 27.45,
-      "Lcolor": "#ffec8b",
-      "Ucolor": "#ffec8b"
+      "StartLcolor": "#ffec8b",
+      "StartUcolor": "#ffec8b"
     },
     {
       "startT": 27.45,
-      "endT": 33.85,
-      "Lcolor": "#caff70",
-      "Ucolor": "#caff70"
-    },
-    {
-      "startT": 33.85,
-      "endT": 40.65,
-      "Lcolor": "#c0ff3e",
-      "Ucolor": "#c0ff3e"
-    },
-    {
-      "startT": 40.65,
       "endT": 43.85,
-      "Lcolor": "#7fff00",
-      "Ucolor": "#7fff00"
+      "StartLcolor": "#caff70",
+      "StartUcolor": "#caff70"
     },
     {
       "startT": 43.85,
       "endT": 47.05,
-      "Lcolor": "#00ff7f",
-      "Ucolor": "#00ff7f"
+      "StartLcolor": "#caff70",
+      "StartUcolor": "#caff70",
+      "EndLcolor": "#00ff7f",
+      "EndUcolor": "#00ff7f"
     },
     {
       "startT": 47.05,
-      "endT": 48.65,
-      "Lcolor": "#00ff7f",
-      "Ucolor": "#00ff7f"
-    },
-    {
-      "startT": 48.65,
       "endT": 48.95,
-      "Lcolor": "#00bfff",
-      "Ucolor": "#00bfff"
+      "StartLcolor": "#00ff7f",
+      "StartUcolor": "#00ff7f"
     },
     {
       "startT": 48.95,
-      "endT": 49.25,
-      "Lcolor": "#1e90ff",
-      "Ucolor": "#1e90ff"
+      "endT": 50.25,
+      "StartLcolor": "#00ff7f",
+      "StartUcolor": "#00ff7f",
+      "EndLcolor": "#ca95ff",
+      "EndUcolor": "#ca95ff"
     },
     {
-      "startT": 49.25,
-      "endT": 49.45,
-      "Lcolor": "#8470ff",
-      "Ucolor": "#8470ff"
+      "startT": 50.25,
+      "endT": 63.85,
+      "StartLcolor": "#ca95ff",
+      "StartUcolor": "#ca95ff"
     },
     {
-      "startT": 49.45,
-      "endT": 63.05,
-      "Lcolor": "#da70d6",
-      "Ucolor": "#da70d6"
-    },
-    {
-      "startT": 63.05,
-      "endT": 66.25,
-      "Lcolor": "#ff83fa",
-      "Ucolor": "#ff83fa"
-    },
-    {
-      "startT": 66.25,
+      "startT": 63.85,
       "endT": 67.85,
-      "Lcolor": "#ffbbff",
-      "Ucolor": "#ffbbff"
+      "StartLcolor": "#ca95ff",
+      "StartUcolor": "#ca95ff",
+      "EndLcolor": "#ffe1ff",
+      "EndUcolor": "#ffe1ff"
     },
     {
       "startT": 67.85,
       "endT": 69.45,
-      "Lcolor": "#ffe1ff",
-      "Ucolor": "#ffe1ff"
+      "StartLcolor": "#ffe1ff",
+      "StartUcolor": "#ffe1ff"
     },
     {
       "startT": 69.45,
       "endT": 70.25,
-      "Lcolor": "#ab82ff",
-      "Ucolor": "#ab82ff"
+      "StartLcolor": "#ffe1ff",
+      "StartUcolor": "#ffe1ff",
+      "EndLcolor": "#ff2dff",
+      "EndUcolor": "#ff2dff"
     },
     {
       "startT": 70.25,
       "endT": 71.05,
-      "Lcolor": "#9f79ee",
-      "Ucolor": "#9f79ee"
+      "StartLcolor": "#ff2dff",
+      "StartUcolor": "#ff2dff",
+      "EndLcolor": "#b996ff",
+      "EndUcolor": "#b996ff"
     },
     {
       "startT": 71.05,
       "endT": 71.85,
-      "Lcolor": "#9b30ff",
-      "Ucolor": "#9b30ff"
+      "StartLcolor": "#b996ff",
+      "StartUcolor": "#b996ff",
+      "EndLcolor": "#7631ff",
+      "EndUcolor": "#7631ff"
     },
     {
       "startT": 71.85,
       "endT": 72.65,
-      "Lcolor": "#912cee",
-      "Ucolor": "#912cee"
+      "StartLcolor": "#7631ff",
+      "StartUcolor": "#7631ff",
+      "EndLcolor": "#ffb2e5",
+      "EndUcolor": "#ffb2e5"
     },
     {
       "startT": 72.65,
       "endT": 75.85,
-      "Lcolor": "#ff34b3",
-      "Ucolor": "#ff34b3"
+      "StartLcolor": "#ffb2e5",
+      "StartUcolor": "#ffb2e5",
+      "EndLcolor": "#ff6cbc",
+      "EndUcolor": "#ff6cbc"
     },
     {
       "startT": 75.85,
+      "endT": 81.45,
+      "StartLcolor": "#ff6cbc",
+      "StartUcolor": "#ff6cbc"
+    },
+    {
+      "startT": 81.45,
       "endT": 82.25,
-      "Lcolor": "#ff1493",
-      "Ucolor": "#ff1493"
+      "StartLcolor": "#ff6cbc",
+      "StartUcolor": "#ff6cbc",
+      "EndLcolor": "#ec5b4f",
+      "EndUcolor": "#ec5b4f"
     },
     {
       "startT": 82.25,
       "endT": 94.25,
-      "Lcolor": "#ff6eb4",
-      "Ucolor": "#ff6eb4"
+      "StartLcolor": "#ec5b4f",
+      "StartUcolor": "#ec5b4f"
     },
     {
       "startT": 94.25,
       "endT": 95.05,
-      "Lcolor": "#ff1493",
-      "Ucolor": "#ff1493"
+      "StartLcolor": "#ec5b4f",
+      "StartUcolor": "#ec5b4f",
+      "EndLcolor": "#b41f13",
+      "EndUcolor": "#b41f13"
     },
     {
       "startT": 95.05,
       "endT": 104.65,
-      "Lcolor": "#ee0000",
-      "Ucolor": "#ee0000"
+      "StartLcolor": "#b41f13",
+      "StartUcolor": "#b41f13"
     },
     {
       "startT": 104.65,
       "endT": 106.25,
-      "Lcolor": "#ff4500",
-      "Ucolor": "#ff4500"
+      "StartLcolor": "#b41f13",
+      "StartUcolor": "#b41f13",
+      "EndLcolor": "#e3ff60",
+      "EndUcolor": "#e3ff60"
     },
     {
       "startT": 106.25,
       "endT": 107.85,
-      "Lcolor": "#ffa500",
-      "Ucolor": "#ffa500"
+      "StartLcolor": "#e3ff60",
+      "StartUcolor": "#e3ff60",
+      "EndLcolor": "#79ff60",
+      "EndUcolor": "#79ff60"
     },
     {
       "startT": 107.85,
       "endT": 109.25,
-      "Lcolor": "#ffd700",
-      "Ucolor": "#ffd700"
+      "StartLcolor": "#79ff60",
+      "StartUcolor": "#79ff60",
+      "EndLcolor": "#6767ff",
+      "EndUcolor": "#6767ff"
     },
     {
       "startT": 109.25,
       "endT": 999.0,
-      "Lcolor": "#0000cd",
-      "Ucolor": "#0000cd"
+      "StartLcolor": "#6767ff",
+      "StartUcolor": "#6767ff"
     }
   ],
   "plane": [
@@ -237,7 +225,7 @@
         {
           "startT": 0.0,
           "startY": 0.0,
-          "endT": 999.0,
+          "endT": 124.65,
           "endY": 0.0,
           "Func": "Linear"
         }

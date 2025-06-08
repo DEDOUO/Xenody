@@ -138,4 +138,18 @@ namespace Params
         // 控制Note位置更新和判定的帧率，默认120帧
         public static float updateInterval = 0.00833333f;
     }
+
+    //判定文本相关参数
+    public static class JudgeTextureParams
+    {
+        public static float Scale = 40f;
+        public static float FadeTime = 0.15f;
+        public static float StartAlpla = 1f;
+        public static float EndAlpla = 0f;
+        public static float EndSize = 0.7f;
+
+        public static float YAxisOffset = 50f;
+    }
+
+
 }

@@ -32,6 +32,7 @@ public class ChartInstantiator : MonoBehaviour
     private GameObject HoldOutlinesParent;
     private GameObject StarsParent;
     private GameObject SubStarsParent;
+    public GameObject JudgeTexturesParent;
     private GameObject MultiHitLinesParent;
     [SerializeField] private TMP_Text fpsText; // 需在Inspector中关联TextMeshPro组件
 
@@ -60,7 +61,7 @@ public class ChartInstantiator : MonoBehaviour
     
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
     public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent,
-        GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject subStarsParent, GameObject multiHitLinesParent,
+        GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject subStarsParent, GameObject judgeTexturesParent, GameObject multiHitLinesParent,
         Sprite judgePlaneSprite, Sprite holdSprite, GlobalRenderOrderManager globalRenderOrderManager, GameObject animatorContainer, TMP_Text FpsText)
     {
         JudgePlanesParent = judgePlanesParent;
@@ -74,6 +75,7 @@ public class ChartInstantiator : MonoBehaviour
         HoldOutlinesParent = holdOutlinesParent;
         StarsParent = starsParent;
         SubStarsParent = subStarsParent;
+        JudgeTexturesParent = judgeTexturesParent;
         MultiHitLinesParent = multiHitLinesParent;
         JudgePlaneSprite = judgePlaneSprite;
         HoldSprite = holdSprite;
@@ -241,7 +243,7 @@ public class ChartInstantiator : MonoBehaviour
         }
 
         // 调用 ConvertToUnityList 方法完成颜色转换
-        GradientColorList = ConvertToUnityList(chart.gradientColorList);
+        GradientColorList = GradientColorListUnity.ConvertToUnityList(chart.gradientColorList);
 
     }
 
@@ -895,6 +897,10 @@ public class ChartInstantiator : MonoBehaviour
                         float startY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.startT);
                         float endY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.endT);
 
+                        subHold.startY = startY;
+                        subHold.endY = endY;
+                        subHold.yAxisFunction = associatedJudgePlaneObject.GetPlaneYAxisFunction(subHold.startT);
+
                         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
                         float startYWorld = TransformYCoordinate(startY);
                         float endYWorld = TransformYCoordinate(endY);
@@ -1296,6 +1302,8 @@ public class ChartInstantiator : MonoBehaviour
                     //Debug.Log(substarEndScreen);
                     Vector2 substarEnd = ScreenPositionToScaleStar(substarEndScreen, SubStarsParentRect);
                     //Debug.Log(substarEnd);
+                    subStar.endX = substarEnd.x;
+                    subStar.endY = substarEnd.y;
 
                     if (subStarIndex == 1)
                     {
@@ -1478,11 +1486,14 @@ public class ChartInstantiator : MonoBehaviour
     private List<GameObject> CreateJudgePlaneAndColorLinesQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName,
         GameObject judgePlaneParent, GameObject ColorLinesParent, int RenderQueue, Color planecolor, List<Speed> speedList)
     {
+        //Debug.Log(startT);
         // 只有当startT为0时，startT往前推ChartStartTime
         if (Math.Abs(startT - 0f) <= 0.001)
         {
             startT -= ChartStartTime;
         }
+        //Debug.Log(startT);
+        //Debug.Log(planecolor);
 
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
         float startYWorld = TransformYCoordinate(startY);

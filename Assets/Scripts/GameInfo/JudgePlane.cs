@@ -116,6 +116,20 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
         return 0f;
     }
 
+    public TransFunctionType GetPlaneYAxisFunction(float currentTime)
+    {
+        //float minY = 0f;
+        //float maxY = HeightParams.HeightDefault;
+        foreach (SubJudgePlane subPlane in subJudgePlaneList)
+        {
+            if (currentTime >= subPlane.startT && currentTime < subPlane.endT)
+            {
+                return subPlane.yAxisFunction;
+            }
+        }
+        return 0f;
+    }
+
 
     // 计算指定子判定面在给定时间下根据不同函数类型的Y轴当前位置
     public static float CalculateYAxisPosition(float currentTime, float startTime, float startVal, float endTime, float endVal, TransFunctionType functionType)

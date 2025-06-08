@@ -1,7 +1,8 @@
 using UnityEngine;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+//using System.Collections.Generic;
+//using System.Threading.Tasks;
 using TMPro;
+//using DocumentFormat.OpenXml.Office2010.ExcelAc;
 
 
 public class AutoPlay : MonoBehaviour
@@ -27,6 +28,7 @@ public class AutoPlay : MonoBehaviour
     public GameObject HoldOutlinesParent;
     public GameObject StarsParent;
     public GameObject subStarsParent;
+    public GameObject JudgeTexturesParent;
     public GameObject MultiHitLinesParent;
     [SerializeField] private TMP_Text fpsText;
     [SerializeField] private TMP_Text ComboText;
@@ -62,6 +64,7 @@ public class AutoPlay : MonoBehaviour
         HoldOutlinesParent = GameObject.Find("HoldOutlinesParent");
         StarsParent = GameObject.Find("StarsParent");
         subStarsParent = GameObject.Find("SubStarsParent");
+        JudgeTexturesParent = GameObject.Find("JudgeTexturesParent");
         MultiHitLinesParent = GameObject.Find("MultiHitLinesParent");
         fpsText = GameObject.Find("FPS").GetComponent<TextMeshProUGUI>();
         ComboText = GameObject.Find("ComboText").GetComponent<TextMeshProUGUI>();
@@ -134,7 +137,7 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, MultiHitLinesParent,
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
             JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer, fpsText);
         instantiator.InstantiateAll(chart);
 
@@ -155,11 +158,11 @@ public class AutoPlay : MonoBehaviour
         player.enabled = false;
 
         // 播放音乐和更新谱面位置
-        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, MultiHitLinesParent,
+        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
             TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart, fpsText, ComboText, ScoreText);
         player.SetParameters2(instantiator.startTimeToInstanceNames, instantiator.holdTimes, instantiator.keyReachedJudgment, 
             instantiator.JudgePlanesStartT, instantiator.JudgePlanesEndT, instantiator.subStarInfoDict, instantiator.starTrackTimes, instantiator.GradientColorList, instantiator.ChartStartTime);
-        player.SetParameters3(scoreManager.SumComboMap, scoreManager.SumScoreMap);
+        player.SetParameters3(scoreManager.SumComboMap, scoreManager.SumScoreMap, scoreManager.JudgePosMap);
         player.enabled = true;
         player.PlayMusicAndChart(chart);
     }

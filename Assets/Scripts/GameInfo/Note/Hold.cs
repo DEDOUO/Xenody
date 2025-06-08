@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using UnityEngine;
 using Params;
+using static Utility;
 
 namespace Note
 {
@@ -33,11 +34,17 @@ namespace Note
             [JsonProperty("endXMax")]
             public float endXMax;
             [JsonProperty("LFunc")]
-            public Utility.TransFunctionType XLeftFunction;
+            public TransFunctionType XLeftFunction;
             [JsonProperty("RFunc")]
-            public Utility.TransFunctionType XRightFunction;
+            public TransFunctionType XRightFunction;
             [JsonProperty("Jagnum")]
             public int Jagnum;
+
+            //Y轴坐标
+            public float startY;
+            public float endY;
+            public TransFunctionType yAxisFunction;
+
 
             public SubHold(float startTime, float startXMinVal, float startXMaxVal, float endTime, float endXMinVal,
                            float endXMaxVal, Utility.TransFunctionType XLeftFunc, Utility.TransFunctionType XRightFunc, int jagnum)

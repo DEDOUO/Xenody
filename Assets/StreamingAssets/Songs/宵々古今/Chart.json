@@ -25,8 +25,8 @@
     {
       "startT": 0.0,
       "endT": 999.0,
-      "Lcolor": "#ff69b4",
-      "Ucolor": "#ffe4e1"
+      "StartLcolor": "#ff69b4",
+      "StartUcolor": "#ffe4e1"
     }
   ],
   "plane": [
