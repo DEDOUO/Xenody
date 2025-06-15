@@ -8,6 +8,8 @@ using static Note.Star;
 using System.Collections.Generic;
 using static GradientColorListUnity;
 using System.Linq;
+using System.Collections;
+using TMPro;
 //using DocumentFormat.OpenXml.InkML;
 //using System.Text.RegularExpressions;
 //using UnityEngine.Windows;
@@ -1067,7 +1069,69 @@ public class Utility : MonoBehaviour
     }
 
 
-    
+    // 控制动画和销毁的协程
+    public static IEnumerator AnimateAndDestroy(GameObject target)
+    {
+        float elapsedTime = 0;
+        Vector3 startScale = Vector3.one * JudgeTextureParams.Scale; // 初始缩放 (100%)
+        Vector3 endScale = Vector3.one * JudgeTextureParams.Scale * JudgeTextureParams.EndSize; // 最终缩放 (70%)
+
+        SpriteRenderer spriteRenderer = target.GetComponent<SpriteRenderer>();
+        Color SpriteColor = spriteRenderer.color; // 初始颜色 (Alpha=1)
+
+        float duration = JudgeTextureParams.FadeTime;
+
+        while (elapsedTime < duration)
+        {
+            float progress = elapsedTime / duration;
+
+            // 平滑插值更新缩放和透明度
+            target.transform.localScale = Vector3.Lerp(startScale, endScale, progress);
+            float alpha = JudgeTextureParams.StartAlpla + (JudgeTextureParams.EndAlpla - JudgeTextureParams.StartAlpla) * progress;
+
+            Color Color = new Color(SpriteColor.r, SpriteColor.g, SpriteColor.b, alpha);
+            spriteRenderer.color = Color;
+
+            elapsedTime += Time.deltaTime;
+            yield return null; // 等待下一帧
+        }
+
+        Destroy(target); // 动画结束后销毁对象
+    }
+
+    public static IEnumerator AnimateAndDeactivate(GameObject target)
+    {
+        float elapsedTime = 0;
+        Vector3 startScale = Vector3.one; // 初始缩放 (100%)
+        Vector3 endScale = Vector3.one * JudgeTextureParams.EndSize; // 最终缩放 (70%)
+
+        //SpriteRenderer spriteRenderer = target.GetComponent<SpriteRenderer>();
+        //Color SpriteColor = spriteRenderer.color; // 初始颜色 (Alpha=1)
+
+        TextMeshProUGUI errorText = target.GetComponentInChildren<TextMeshProUGUI>();
+        Color SpriteColor = errorText.color; // 初始颜色 (Alpha=1)
+
+
+
+        float duration = 1f;
+
+        while (elapsedTime < duration)
+        {
+            float progress = elapsedTime / duration;
+
+            // 平滑插值更新缩放和透明度
+            target.transform.localScale = Vector3.Lerp(startScale, endScale, progress);
+            float alpha = JudgeTextureParams.StartAlpla + (JudgeTextureParams.EndAlpla - JudgeTextureParams.StartAlpla) * progress;
+
+            Color Color = new Color(SpriteColor.r, SpriteColor.g, SpriteColor.b, alpha);
+            errorText.color = Color;
+
+            elapsedTime += Time.deltaTime;
+            yield return null; // 等待下一帧
+        }
+
+        target.SetActive(false);
+    }
 
 }
 

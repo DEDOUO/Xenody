@@ -1,0 +1,17 @@
+{
+  "song": {
+    "id": 3,
+    "title": "宵々古今",
+    "artist": "REOL",
+    "bpm": 150,
+    "time": "2:46"
+  },
+  "charts": [
+    {
+      "difficulty": 4,
+      "level": "13",
+      "prec": 13.3,
+      "charter": "ERDO KING"
+    }
+  ]
+}

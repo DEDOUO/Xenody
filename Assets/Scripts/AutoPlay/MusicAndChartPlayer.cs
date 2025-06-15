@@ -499,35 +499,7 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     }
 
-    // 控制动画和销毁的协程
-    private IEnumerator AnimateAndDestroy(GameObject target)
-    {
-        float elapsedTime = 0;
-        Vector3 startScale = Vector3.one * JudgeTextureParams.Scale; // 初始缩放 (100%)
-        Vector3 endScale = Vector3.one * JudgeTextureParams.Scale * JudgeTextureParams.EndSize; // 最终缩放 (70%)
 
-        SpriteRenderer spriteRenderer = target.GetComponent<SpriteRenderer>();
-        Color SpriteColor = spriteRenderer.color; // 初始颜色 (Alpha=1)
-        
-        float duration = JudgeTextureParams.FadeTime;
-
-        while (elapsedTime < duration)
-        {
-            float progress = elapsedTime / duration;
-
-            // 平滑插值更新缩放和透明度
-            target.transform.localScale = Vector3.Lerp(startScale, endScale, progress);
-            float alpha = JudgeTextureParams.StartAlpla + (JudgeTextureParams.EndAlpla - JudgeTextureParams.StartAlpla) * progress;
-
-            Color Color = new Color(SpriteColor.r, SpriteColor.g, SpriteColor.b, alpha);
-            spriteRenderer.color = Color;
-
-            elapsedTime += Time.deltaTime;
-            yield return null; // 等待下一帧
-        }
-
-        Destroy(target); // 动画结束后销毁对象
-    }
 
     private void UpdateStarSoundEffect(float currentTime)
     {

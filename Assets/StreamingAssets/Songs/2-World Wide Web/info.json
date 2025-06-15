@@ -1,0 +1,17 @@
+{
+  "song": {
+    "id": 2,
+    "title": "World Wide Web",
+    "artist": "Nirto Fun",
+    "bpm": 128,
+    "time": "2:38"
+  },
+  "charts": [
+    {
+      "difficulty": 4,
+      "level": "13",
+      "prec": 13.5,
+      "charter": "ERDO KING"
+    }
+  ]
+}

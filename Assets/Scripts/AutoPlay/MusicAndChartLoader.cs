@@ -28,7 +28,7 @@ public class MusicAndChartLoader : MonoBehaviour
         if (string.IsNullOrEmpty(musicPath))
         {
             Debug.Log("歌曲路径缺失，加载默认曲");
-            SongAndChartData.SetSelectedSong("Accelerate");
+            SongAndChartData.SetSelectedSong("Accelerate", "1-Accelerate", 4);
             musicPath = SongAndChartData.GetMusicFilePath();
         }
         if (!File.Exists(musicPath))

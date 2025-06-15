@@ -1,0 +1,17 @@
+{
+  "song": {
+    "id": 4,
+    "title": "清夏！乐园？大秘境！",
+    "artist": "HOYO-MiX",
+    "bpm": 150,
+    "time": "2:07"
+  },
+  "charts": [
+    {
+      "difficulty": 4,
+      "level": "11+",
+      "prec": 11.6,
+      "charter": "ERDO KING"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "song": {
+    "id": 1,
+    "title": "Accelerate",
+    "artist": "Skybreak / Teminite",
+    "bpm": 150,
+    "time": "4:10"
+  },
+  "charts": [
+    {
+      "difficulty": 4,
+      "level": "14+",
+      "prec": 14.8,
+      "charter": "ERDO KING"
+    }
+  ]
+}
