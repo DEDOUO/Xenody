@@ -4,7 +4,9 @@
     "title": "宵々古今",
     "artist": "REOL",
     "bpm": 150,
-    "time": "2:46"
+    "time": "2:46",
+    "previewStart": 51.0,
+    "previewEnd": 87.0
   },
   "charts": [
     {

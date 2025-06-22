@@ -779,7 +779,7 @@ public class Utility : MonoBehaviour
         }
 
         //加上偏移量
-        totalDistance += Offset;
+        totalDistance += Offset * FirstSpeed;
 
         return -totalDistance * SpeedParams.NoteSpeedDefault;
     }
@@ -881,27 +881,31 @@ public class Utility : MonoBehaviour
         return rightMiddlePos;
     }
 
-    public static float TransformYCoordinate(float startY)
+    public static float TransformYCoordinate(Camera autoPlayCamera, float startY, float bottomPixel, float topPixel)
     {
-        Camera mainCamera = Camera.main;
+        // 不再使用 Camera.main，而是手动查找 AutoPlay 场景的 Camera
+        //Camera autoPlayCamera = FindAutoPlayCamera();
+        //if (autoPlayCamera == null)
+        //{
+        //    Debug.LogError("未找到AutoPlay场景的Camera");
+        //    return 0f;
+        //}
 
-        // 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
-        float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
-        float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
+        //// 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
+        //float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
+        //float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
 
         // 计算 startY 对应的屏幕像素坐标
         float screenPixelY = bottomPixel + startY * (topPixel - bottomPixel);
 
         // 手动指定 z 轴的值为一个较大的值
         Vector3 screenPoint = new Vector3(Screen.width / 2, Screen.height - screenPixelY, 100);
-        //Debug.Log(screenPoint);
 
         // 通过 ScreenToWorldPoint 得到射线上的一个点
-        Vector3 worldPoint = mainCamera.ScreenToWorldPoint(screenPoint);
-        //Debug.Log(worldPoint);
+        Vector3 worldPoint = autoPlayCamera.ScreenToWorldPoint(screenPoint);
 
         // 计算射线
-        Ray ray = new Ray(mainCamera.transform.position, (worldPoint - mainCamera.transform.position).normalized);
+        Ray ray = new Ray(autoPlayCamera.transform.position, (worldPoint - autoPlayCamera.transform.position).normalized);
 
         // 计算射线与 z = 0 平面的交点
         Plane zZeroPlane = new Plane(Vector3.forward, Vector3.zero);
@@ -909,7 +913,6 @@ public class Utility : MonoBehaviour
         if (zZeroPlane.Raycast(ray, out distance))
         {
             Vector3 intersectionPoint = ray.GetPoint(distance);
-            //Debug.Log(intersectionPoint);
             return intersectionPoint.y;
         }
         else
@@ -917,6 +920,20 @@ public class Utility : MonoBehaviour
             Debug.LogError("射线未与 z = 0 平面相交");
             return 0f;
         }
+    }
+
+    // 查找 AutoPlay 场景的主 Camera
+    public static Camera FindAutoPlayCamera()
+    {
+        foreach (var camera in FindObjectsOfType<Camera>())
+        {
+            if (camera.CompareTag("MainCamera") &&
+                camera.gameObject.scene.name == "AutoPlay")
+            {
+                return camera;
+            }
+        }
+        return null;
     }
 
     public static Color HexToColor(string hex)

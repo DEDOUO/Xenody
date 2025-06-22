@@ -42,10 +42,10 @@ public static class SongAndChartData
         if (!File.Exists(chartFilePath) & !File.Exists(excelFilePath))
         {
             // 谱面不存在，清空选择状态并提示
-            selectedSongName = null;
-            selectedFolderName = null;
-            selectedDifficulty = 1;
-            Debug.LogError($"谱面不存在: {chartFilePath}");
+            //selectedSongName = null;
+            //selectedFolderName = null;
+            //selectedDifficulty = 1;
+            //Debug.LogError($"谱面不存在: {chartFilePath}");
             //ShowToast("谱面不存在！"); // 显示提示（需自行实现该方法）
         }
     }
@@ -78,7 +78,7 @@ public static class SongAndChartData
     {
         if (string.IsNullOrEmpty(selectedSongName) || !songInfoDict.ContainsKey(selectedSongName))
         {
-            Debug.LogError("未选择有效歌曲或歌曲信息不存在");
+            //Debug.LogError("未选择有效歌曲或歌曲信息不存在");
             return null;
         }
 

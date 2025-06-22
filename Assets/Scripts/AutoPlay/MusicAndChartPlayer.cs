@@ -96,6 +96,10 @@ public class MusicAndChartPlayer : MonoBehaviour
     private float startTime; // 协程启动的初始时间
     private float lastUpdateTime; // 上次更新的时间点
 
+    private Camera mainCamera = null;
+    private float bottomPixel;
+    private float topPixel;
+
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent,
@@ -152,27 +156,14 @@ public class MusicAndChartPlayer : MonoBehaviour
         this.scoreMap = scoreMap;
         this.JudgePosMap = JudgePosMap;
 
-        // 打印JudgePosMap的所有内容
-        //if (JudgePosMap != null && JudgePosMap.Count > 0)
-        //{
-        //    Debug.Log($"JudgePosMap 包含 {JudgePosMap.Count} 个时间点：");
-
-        //    foreach (var time in JudgePosMap.Keys)
-        //    {
-        //        var positions = JudgePosMap[time];
-        //        string posString = string.Join(" | ", positions.Select(p => $"({p.x}, {p.y})"));
-        //        Debug.Log($"时间 {time}s: {positions.Count} 个坐标 [{posString}]");
-        //    }
-        //}
-        //else
-        //{
-        //    Debug.Log("JudgePosMap 为空或未初始化");
-        //}
-
     }
 
     private void Start()
     {
+        mainCamera = Camera.main;
+        bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
+        topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
+
         pauseManager = GetComponent<PauseManager>();
         MusicSlider = GameObject.Find("MusicSlider");
         MusicSlider.SetActive(false);
@@ -216,9 +207,6 @@ public class MusicAndChartPlayer : MonoBehaviour
 
         while (true)
         {
-            //Debug.Log(audioSource.isPlaying);
-            //Debug.Log(audioSource.clip.length - audioSource.time);
-            //Debug.Log(pauseManager.isPaused);
 
             // 如果音乐播放完了
             if (!audioSource.isPlaying && audioSource.time >= audioSource.clip.length - 0.01f && !pauseManager.isPaused)
@@ -516,10 +504,10 @@ public class MusicAndChartPlayer : MonoBehaviour
 
                 // 计算音量衰减进度
                 float ElapsedTime = currentTime - fadeOutStartTime;
-                if (ElapsedTime < SoundParams.starSoundFadeOutTime)
+                if (ElapsedTime < StarArrowParams.starSoundFadeOutTime)
                 {
                     // 线性降低音量
-                    float newVolume = 1 - ElapsedTime / SoundParams.starSoundFadeOutTime;
+                    float newVolume = 1 - ElapsedTime / StarArrowParams.starSoundFadeOutTime;
                     StarSoundEffect.volume = newVolume;
                 }
                 else
@@ -619,7 +607,7 @@ public class MusicAndChartPlayer : MonoBehaviour
             JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
             float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(hold.GetFirstSubHoldStartTime());
             // 对yAxisPosition进行TransformYCoordinate变换
-            float yPos = TransformYCoordinate(yAxisPosition);
+            float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
             Vector3 referencePoint = new Vector3(0, yPos, 0);
 
             float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
@@ -706,7 +694,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                 JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
                 float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(currentTime);
                 // 对yAxisPosition进行TransformYCoordinate变换
-                float yPos = TransformYCoordinate(yAxisPosition);
+                float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
                 Vector3 referencePoint = new Vector3(0, yPos, 0);
                 float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
                 float startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
@@ -744,7 +732,7 @@ public class MusicAndChartPlayer : MonoBehaviour
                     
                     yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(holdEndTime);
                     // 对yAxisPosition进行TransformYCoordinate变换
-                    yPos = TransformYCoordinate(yAxisPosition);
+                    yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
                     referencePoint = new Vector3(0, yPos, 0);
                     worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
                     startXWorld = worldUnitToScreenPixelX * x / ChartParams.XaxisMax;
@@ -1118,7 +1106,13 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     private void ResetJudgePlanePosition(float currentTime, Transform childTransform)
     {
+        //Debug.Log("重置JudgePlane位置..");
+        //Debug.Log(currentTime);
         float ZPos = -CalculateZAxisPosition(currentTime, ChartStartTime, chart.speedList);
+        //Debug.Log(childTransform.gameObject.name);
+        //Debug.Log(ZPos);
+
+
         Vector3 currentPosition = childTransform.position;
         currentPosition.z = ZPos;
         childTransform.position = currentPosition;

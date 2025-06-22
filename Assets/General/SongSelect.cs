@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using static Utility;
 using Unity.VisualScripting;
 using System.Collections;
+using Params;
 
 public class SongSelect : MonoBehaviour
 {
@@ -19,7 +20,9 @@ public class SongSelect : MonoBehaviour
     private float buttonHeight = 60f;
     private float difficultyObjectOffset = 50f; // 难度物体水平偏移量（按钮右侧）
     private float difficultyObjectWidth = 100f; 
-    private float difficultyObjectHeight = 50f; 
+    private float difficultyObjectHeight = 50f;
+
+    private string DiffText;
 
     public ScrollRect songListScrollView;
     private List<string> songList = new List<string>();
@@ -43,21 +46,39 @@ public class SongSelect : MonoBehaviour
     // 新增：歌曲难度预制体引用
     //public GameObject songDifficultyPrefab; // 拖拽赋值 SongDifficulty 预制体
 
-    private Dictionary<int, string> difficultyTextMap = new Dictionary<int, string>()
-    {
-        { 1, "Initialize" },
-        { 2, "Operation" },
-        { 3, "Overburn" },
-        { 4, "Meltdown" }
-    };
+    //private Dictionary<int, string> difficultyTextMap = new Dictionary<int, string>()
+    //{
+    //    { 1, "Initialize" },
+    //    { 2, "Operation" },
+    //    { 3, "Overburn" },
+    //    { 4, "Meltdown" }
+    //};
 
-    private Dictionary<int, Color> difficultyColorMap = new Dictionary<int, Color>()
-    {
-        { 1, new Color(98f / 255f, 190f / 255f, 119f / 255f) },
-        { 2, new Color(190f / 255f, 187f / 255f, 98f / 255f) },
-        { 3, new Color(190f / 255f, 116f / 255f, 98f / 255f) },
-        { 4, new Color(153f / 255f, 0f / 255f, 181f / 255f) }
-    };
+    //private Dictionary<int, Color> difficultyColorMap = new Dictionary<int, Color>()
+    //{
+    //    { 1, new Color(98f / 255f, 190f / 255f, 119f / 255f) },
+    //    { 2, new Color(190f / 255f, 187f / 255f, 98f / 255f) },
+    //    { 3, new Color(190f / 255f, 116f / 255f, 98f / 255f) },
+    //    { 4, new Color(82f / 255f, 0f / 255f, 78f / 255f) }
+    //};
+
+    // 新增：JacketImage引用
+    public Image jacketImage;
+    //public Sprite defaultJacketSprite; // 默认封面图
+
+    public Image difficultyImage;    // 难度颜色显示Image
+    public TextMeshProUGUI difficultyText;  // 难度文本显示
+
+    // 新增：歌曲信息显示组件
+    public TextMeshProUGUI songNameText;    // 歌曲名显示
+    public TextMeshProUGUI artistNameText;  // 作者名显示
+
+    private string lastSelectedSong = ""; // 记录上一次选中的歌曲
+    //private bool isFirstClick = true; // 标记是否为首次点击
+
+    // 新增：预加载相关变量
+    private List<string> preloadedSongs = new List<string>();
+    //private bool isPreloading = false;
 
 
     private void Start()
@@ -67,6 +88,9 @@ public class SongSelect : MonoBehaviour
 
         difficultySwitchL.onClick.AddListener(() => { DecreaseDifficulty(); PlayDifficultySound(); });
         difficultySwitchR.onClick.AddListener(() => { IncreaseDifficulty(); PlayDifficultySound(); });
+
+        //// 开始预加载所有歌曲
+        //StartCoroutine(PreloadAllSongs());
     }
 
     private void PopulateSongList()
@@ -117,14 +141,6 @@ public class SongSelect : MonoBehaviour
                 return;
             }
 
-            //GameObject songDifficultyPrefab = Resources.Load<GameObject>("Prefabs/Editor/Buttons/SongDifficulty");
-            //// 确保预制体存在
-            //if (songDifficultyPrefab == null)
-            //{
-            //    Debug.LogError("未找到歌曲难度预制体: SongDifficulty");
-            //    return;
-            //}
-
             songList.Clear();
             songButtons.Clear();
             songDifficultyObjects.Clear(); // 清空难度物体列表
@@ -155,7 +171,7 @@ public class SongSelect : MonoBehaviour
                 }
 
                 // 设置初始颜色
-                if (difficultyColorMap.TryGetValue(currentDifficulty, out Color buttonColor))
+                if (ChartParams.difficultyColorMap.TryGetValue(currentDifficulty, out Color buttonColor))
                 {
                     buttonImage.color = buttonColor;
                 }
@@ -174,39 +190,15 @@ public class SongSelect : MonoBehaviour
                 textComponent.text = songName;
                 textComponent.alignment = TextAlignmentOptions.Center;
 
-                TMP_FontAsset fontAsset = GetFontBasedOnCharacters(songName);
-                textComponent.font = fontAsset;
-
-                if (IsNotoSansFont(fontAsset))
-                {
-                    textComponent.fontSize = 35;
-                }
-                else
-                {
-                    textComponent.fontSize = 50;
-                }
-
+                SetFontForText(textComponent, songName);
                 textComponent.color = Color.white;
 
                 button.onClick.AddListener(() =>
                 {
-                    // 查找当前歌曲对应的ChartInfo，确认难度是否存在
-                    ChartInfo chartInfo = FindChartInfoByDifficulty(songInfo, currentDifficulty);
 
-                    if (chartInfo != null)
-                    {
-                        SongAndChartData.SetSelectedSong(songName, songInfo.folderName, currentDifficulty);
-                        PlaySongButtonSound();
-                        // 难度存在，调用带难度参数的SetSelectedSong
-                        //SceneManager.LoadScene("AutoPlay");
-                    }
-                    else
-                    {
-                        // 难度不存在，显示提示
-                        Debug.Log($"歌曲 {songName} 不存在难度 {currentDifficulty} 的谱面");
-                        ShowToast("谱面不存在！"); // 显示提示（需自行实现该方法）
-                    }
-                    
+                    string currentSongName = songInfo.song.title;
+                    HandleSongSelection(currentSongName, songInfo);
+
                 });
 
                 RectTransform buttonRectTransform = buttonObj.GetComponent<RectTransform>();
@@ -228,6 +220,170 @@ public class SongSelect : MonoBehaviour
             Debug.LogError("Songs文件夹不存在，请检查路径是否正确！");
         }
     }
+
+    // 处理歌曲选择逻辑
+    private void HandleSongSelection(string songName, SongInfo songInfo)
+    {
+        SongAndChartData.SetSelectedSong(songName, songInfo.folderName, currentDifficulty);
+
+        if (songName == lastSelectedSong)
+        {
+            // 查找当前歌曲对应的ChartInfo，确认难度是否存在
+            ChartInfo chartInfo = FindChartInfoByDifficulty(songInfo, currentDifficulty);
+
+            if (chartInfo != null)
+            {
+                //如果存在，则跳转至Autoplay
+                PlaySongButtonSound();
+            }
+            else
+            {
+                PlayDifficultySound();
+                //如果不存在，则显示不存在
+                ShowToast("谱面不存在！");
+            }
+        }
+        else
+        {
+            PlayDifficultySound();
+            LoadAndDisplayJacket(songInfo);
+            UpdateSelectedSongDifficultyDisplay(); // 切换歌曲时更新难度显示
+            UpdateSongAndArtistDisplay(songInfo); // 切歌时更新歌曲名和作者名
+            lastSelectedSong = songName;
+            PlaySongPreview(songInfo);
+            //isFirstClick = false;
+        }
+    }
+
+    // 播放歌曲预览（更新后）
+    private void PlaySongPreview(SongInfo songInfo)
+    {
+        if (songInfo == null || songInfo.song == null) return;
+
+        // 获取音乐文件路径
+        string audioPath = SongAndChartData.GetMusicFilePath();
+
+        // 获取预览时间
+        float previewStart = songInfo.song.previewStart;
+        float previewEnd = songInfo.song.previewEnd;
+
+        // 确保预览时间有效
+        if (previewEnd <= previewStart || previewEnd <= 0)
+        {
+            // 使用默认预览范围（前30秒）
+            previewStart = 0f;
+            previewEnd = 30f;
+        }
+
+        // 调用MusicManager播放预览
+        MusicManager.instance.PlaySongPreview(audioPath, previewStart, previewEnd);
+    }
+
+
+    // 更新歌曲名和作者名显示
+    private void UpdateSongAndArtistDisplay(SongInfo songInfo = null)
+    {
+        if (songNameText == null || artistNameText == null) return;
+
+        // 获取当前选中的歌曲信息
+        if (songInfo == null)
+        {
+            songInfo = SongAndChartData.GetSelectedSongInfo();
+        }
+
+        if (songInfo == null || songInfo.song == null)
+        {
+            // 未选中歌曲时的显示
+            songNameText.text = "";
+            artistNameText.text = "";
+            return;
+        }
+
+        // 显示歌曲名和作者名
+        songNameText.text = songInfo.song.title;
+        artistNameText.text = songInfo.song.artist;
+
+        // 设置字体（与歌曲按钮逻辑一致）
+        SetFontForText(songNameText, songInfo.song.title);
+        SetFontForText(artistNameText, songInfo.song.artist);
+    }
+
+    // 设置文本的字体
+    private void SetFontForText(TextMeshProUGUI textComponent, string text)
+    {
+        if (textComponent == null || string.IsNullOrEmpty(text)) return;
+
+        TMP_FontAsset fontAsset = GetFontBasedOnCharacters(text);
+        if (fontAsset != null)
+        {
+            textComponent.font = fontAsset;
+
+            // 根据字体类型设置字号（与歌曲按钮逻辑一致）
+            if (IsNotoSansFont(fontAsset))
+            {
+                textComponent.fontSize = 35;
+            }
+            else
+            {
+                textComponent.fontSize = 50;
+            }
+        }
+    }
+
+    // 更新选中歌曲的难度显示
+    private void UpdateSelectedSongDifficultyDisplay()
+    {
+        if (difficultyImage == null || difficultyText == null) return;
+
+        // 获取当前选中的歌曲信息
+        SongInfo selectedSong = SongAndChartData.GetSelectedSongInfo();
+        if (selectedSong == null)
+        {
+            //Debug.Log(111);
+            // 未选中歌曲时的显示
+            difficultyImage.color = Color.gray;
+            difficultyText.text = $"{ChartParams.difficultyTextMap[currentDifficulty]} null";
+            DiffText = difficultyText.text;
+            return;
+        }
+
+        // 检查当前难度是否存在谱面
+        ChartInfo chartInfo = FindChartInfoByDifficulty(selectedSong, currentDifficulty);
+
+        if (chartInfo != null)
+        {
+            // 存在谱面，显示正常颜色和难度
+            difficultyImage.color = ChartParams.difficultyColorMap[currentDifficulty];
+            difficultyText.text = $"{ChartParams.difficultyTextMap[currentDifficulty]} Lv {chartInfo.level}";
+            DiffText = difficultyText.text;
+        }
+        else
+        {
+            // 不存在谱面，显示灰色和null
+            difficultyImage.color = Color.gray;
+            difficultyText.text = $"{ChartParams.difficultyTextMap[currentDifficulty]} null";
+            DiffText = difficultyText.text;
+        }
+    }
+
+    // 加载并显示封面图
+    private void LoadAndDisplayJacket(SongInfo songInfo)
+    {
+        if (jacketImage == null) return;
+
+        // 获取封面图
+        Sprite coverSprite = SongAndChartData.GetCoverSprite();
+
+        if (coverSprite != null)
+        {
+            jacketImage.sprite = coverSprite;
+        }
+        else
+        {
+            Debug.LogWarning($"未找到歌曲 {songInfo.song.title} 的封面图");
+        }
+    }
+
     // 在SongSelect类中添加或修改此方法
     private void ShowToast(string message)
     {
@@ -326,9 +482,10 @@ public class SongSelect : MonoBehaviour
         return null;
     }
 
+    // 在UpdateDifficultyUI中添加难度显示更新
     private void UpdateDifficultyUI()
     {
-        if (difficultyTextMap.TryGetValue(currentDifficulty, out string difficultyText))
+        if (ChartParams.difficultyTextMap.TryGetValue(currentDifficulty, out string difficultyText))
         {
             difficultyLabel.text = difficultyText;
         }
@@ -339,11 +496,14 @@ public class SongSelect : MonoBehaviour
 
         SetDifficultyButtonColors();
         UpdateSongButtonColors();
+
+        // 切换难度时更新选中歌曲的难度显示
+        UpdateSelectedSongDifficultyDisplay();
     }
 
     private void SetDifficultyButtonColors()
     {
-        if (difficultyColorMap.TryGetValue(currentDifficulty, out Color targetColor))
+        if (ChartParams.difficultyColorMap.TryGetValue(currentDifficulty, out Color targetColor))
         {
             difficultyLabelImage.color = targetColor;
             difficultySwitchLImage.color = targetColor;
@@ -361,7 +521,7 @@ public class SongSelect : MonoBehaviour
     // 修改UpdateSongButtonColors方法，增加ChartInfo检查
     private void UpdateSongButtonColors()
     {
-        if (difficultyColorMap.TryGetValue(currentDifficulty, out Color buttonColor))
+        if (ChartParams.difficultyColorMap.TryGetValue(currentDifficulty, out Color buttonColor))
         {
             for (int i = 0; i < songButtons.Count && i < songDifficultyObjects.Count && i < allSongInfo.Count; i++)
             {
@@ -415,15 +575,6 @@ public class SongSelect : MonoBehaviour
         }
     }
 
-    //private void PlaySongButtonSound()
-    //{
-    //    //Debug.Log("PlaySongButtonSound");
-    //    if (audioSource && songButtonClickSound)
-    //    {
-    //        //Debug.Log("PlaySongButtonSound");
-    //        audioSource.PlayOneShot(songButtonClickSound);
-    //    }
-    //}
 
     private void PlaySongButtonSound()
     {
@@ -432,30 +583,14 @@ public class SongSelect : MonoBehaviour
             audioSource.clip = songButtonClickSound;
             audioSource.Play();
 
+            SceneTransitionManager.instance.StartTransitionToScene("AutoPlay");
+            //SceneTransitionManager.instance.PlayEnterAnimationAndLoadScene(); 
             // 启动协程等待音效播放完成
-            StartCoroutine(WaitForSoundAndLoadScene());
-        }
-        else
-        {
-            // 没有音效，直接加载场景
-            SceneManager.LoadScene("AutoPlay");
+            //StartCoroutine(WaitForSoundAndLoadScene());
+
         }
     }
 
-    private IEnumerator WaitForSoundAndLoadScene()
-    {
-        // 等待音效播放完成
-        yield return new WaitForSeconds(songButtonClickSound.length);
-
-        // 销毁临时音频源
-        if (audioSource != null)
-        {
-            Destroy(audioSource);
-        }
-
-        // 加载场景
-        SceneManager.LoadScene("AutoPlay");
-    }
 
     // 字体相关方法保持不变...
     private TMP_FontAsset GetFontBasedOnCharacters(string input)

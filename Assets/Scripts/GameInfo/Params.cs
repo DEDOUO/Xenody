@@ -3,6 +3,9 @@
 //using System.Linq;
 //using System.Text;
 //using System.Threading.Tasks;
+using UnityEngine.UI;
+using UnityEngine;
+using System.Collections.Generic;
 
 namespace Params
 {
@@ -57,6 +60,25 @@ namespace Params
 
         //Hold每多少ms判定一次(100ms)
         public static float HoldJudgeTimeInterval = 0.1f;
+
+
+        public static Dictionary<int, string> difficultyTextMap = new Dictionary<int, string>
+        {
+            { 1, "Initialize" },
+            { 2, "Operation" },
+            { 3, "Overburn" },
+            { 4, "Meltdown" }
+        };
+
+        public static Dictionary<int, Color> difficultyColorMap = new Dictionary<int, Color>
+        {
+            { 1, new Color(98f / 255f, 190f / 255f, 119f / 255f) },
+            { 2, new Color(190f / 255f, 187f / 255f, 98f / 255f) },
+            { 3, new Color(190f / 255f, 116f / 255f, 98f / 255f) },
+            { 4, new Color(82f / 255f, 0f / 255f, 78f / 255f) }
+        };
+
+
     }
 
     //得分相关参数
@@ -90,11 +112,6 @@ namespace Params
         public static float HoldColorLineWidth = 0.2f;
     }
 
-    //public static class HeightParams
-    //{
-    //    // 天线在世界中的实际高度（Y轴）
-    //    public static float HeightDefault = 4.5f;
-    //}
 
     public static class HorizontalParams
     {
@@ -120,6 +137,8 @@ namespace Params
         public static float defaultScale = 30.0f;
         // 每单位长度的 SubArrow 数量
         public static int subArrowsPerUnitLength = 6;
+        // 星星划动结束后，音频音量线性地衰减为0的时间
+        public static float starSoundFadeOutTime = 0.5f;
     }
     public static class AlphaParams
     {
@@ -128,11 +147,7 @@ namespace Params
         public static float JudgePlaneAlphaMax = 0.9f;
     }
 
-    public static class SoundParams
-    {
-        // 星星划动结束后，音频音量线性地衰减为0的时间
-        public static float starSoundFadeOutTime = 0.5f;
-    }
+
     public static class FrameParams
     {
         // 控制Note位置更新和判定的帧率，默认120帧

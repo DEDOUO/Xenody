@@ -5,12 +5,11 @@ public class SongInfo
     [JsonProperty("song")]
     public SongData song;
 
-    [JsonProperty("folderName")] // 新增：文件夹名
+    [JsonProperty("folderName")]
     public string folderName;
 
     [JsonProperty("charts")]
     public ChartInfo[] charts;
-
 }
 
 public class SongData
@@ -30,7 +29,14 @@ public class SongData
     [JsonProperty("time")]
     public string time;
 
+    // 新增：预览时间范围
+    [JsonProperty("previewStart")]
+    public float previewStart;
+
+    [JsonProperty("previewEnd")]
+    public float previewEnd;
 }
+
 
 public class ChartInfo
 {
@@ -45,5 +51,4 @@ public class ChartInfo
 
     [JsonProperty("charter")]
     public string charter;
-
 }

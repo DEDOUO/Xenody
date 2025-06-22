@@ -1,9 +1,7 @@
 using UnityEngine;
-//using System.Collections.Generic;
-//using System.Threading.Tasks;
+using System.Collections;
 using TMPro;
-//using DocumentFormat.OpenXml.Office2010.ExcelAc;
-
+using UnityEngine.SceneManagement;
 
 public class AutoPlay : MonoBehaviour
 {
@@ -34,21 +32,17 @@ public class AutoPlay : MonoBehaviour
     [SerializeField] private TMP_Text ComboText;
     [SerializeField] private TMP_Text ScoreText;
 
-
-    //public RectTransform SubStarsParentRect;
-
     public Sprite JudgePlaneSprite;
     public Sprite HoldSprite;
-    //public Sprite StarArrowSprite;
     public GlobalRenderOrderManager renderOrderManager;
     public GameObject AnimatorContainer;
 
+    private MusicAndChartPlayer player;
+    private ChartInstantiator instantiator;
+    private ScoreManager scoreManager;
+    private MusicAndChartLoader loader;
+    private Chart chart; // 存储加载的谱面数据
 
-    //private List<float> JudgePlanesStartT = new List<float>(); // 判定面的开始时间（用于JudgeLine出现时间计算）
-    //private List<float> JudgePlanesEndT = new List<float>(); // 判定面的结束时间（用于JudgeLine结束时间计算）
-    //public Dictionary<float, List<string>> startTimeToInstanceNames = new Dictionary<float, List<string>>(); // 存储startT到对应实例名列表的映射
-
-    //private Dictionary<GameObject, bool> tapReachedJudgmentLine = new Dictionary<GameObject, bool>();
     private void Awake()
     {
         // 查找场景内游戏物体
@@ -66,11 +60,10 @@ public class AutoPlay : MonoBehaviour
         subStarsParent = GameObject.Find("SubStarsParent");
         JudgeTexturesParent = GameObject.Find("JudgeTexturesParent");
         MultiHitLinesParent = GameObject.Find("MultiHitLinesParent");
+
         fpsText = GameObject.Find("FPS").GetComponent<TextMeshProUGUI>();
         ComboText = GameObject.Find("ComboText").GetComponent<TextMeshProUGUI>();
         ScoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
-
-        //SubStarsParentRect = subStarsParent.GetComponent<RectTransform>();
 
         // 加载Sprite
         JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack2");
@@ -95,7 +88,6 @@ public class AutoPlay : MonoBehaviour
         GameObject SoundObj = GameObject.Find("HitsoundService");
         if (SoundObj != null)
         {
-
             audioSources = SoundObj.GetComponents<AudioSource>();
             TapSoundEffect = audioSources[0];
             SlideSoundEffect = audioSources[1];
@@ -105,7 +97,6 @@ public class AutoPlay : MonoBehaviour
 
             StarHeadSoundEffect = audioSources[3];
             StarSoundEffect = audioSources[4];
-
         }
 
         // 查找包含GlobalRenderOrderManager的GameObject
@@ -117,53 +108,103 @@ public class AutoPlay : MonoBehaviour
 
         // 查找Animator Container
         AnimatorContainer = GameObject.Find("AnimatorContainer");
+
+        // 获取MusicAndChartPlayer组件
+        player = GetComponent<MusicAndChartPlayer>();
+        if (player == null)
+        {
+            Debug.LogError("未找到 MusicAndChartPlayer 组件，请确保该组件已挂载到当前对象！");
+        }
     }
 
-    private async void Start()
+    private void Start()
     {
+        // 启动协程处理初始化流程
+        StartCoroutine(InitializeAutoPlay());
+    }
 
-        //跟据屏幕长宽比确认谱面范围
+    // 初始化AutoPlay，完成后通知SceneTransitionManager开始真正的场景切换
+    private IEnumerator InitializeAutoPlay()
+    {
+        // 跟据屏幕长宽比确认谱面范围
         AspectRatioManager aspectRatioManager = GetComponent<AspectRatioManager>();
         aspectRatioManager.SetupSpectrumBounds();
 
         // 加载音乐和谱面文件
-        //MusicAndChartLoader loader = new MusicAndChartLoader(audioSource);
-        MusicAndChartLoader loader = GetComponent<MusicAndChartLoader>();
+        loader = GetComponent<MusicAndChartLoader>();
         loader.Initialize(audioSource);
-        await loader.LoadMusicAndChartAsync();
 
-        // 获取加载后的谱面和音频源
-        Chart chart = loader.GetChart();
+        // 加载音乐和谱面
+        yield return loader.LoadMusicAndChartAsync();
+
+        // 获取加载后的谱面
+        chart = loader.GetChart();
 
         // 实例化谱面内容
-        ChartInstantiator instantiator = GetComponent<ChartInstantiator>();
+        instantiator = GetComponent<ChartInstantiator>();
         instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
             JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer, fpsText);
         instantiator.InstantiateAll(chart);
 
         // 计算连击和得分列表
-        ScoreManager scoreManager = GetComponent<ScoreManager>();
+        scoreManager = GetComponent<ScoreManager>();
         scoreManager.CalculateAutoPlayScores(chart);
 
-
-        // 先禁用MusicAndChartPlayer组件，避免在谱面加载时其Update方法干扰
-        MusicAndChartPlayer player = GetComponent<MusicAndChartPlayer>();
-
-
-        if (player == null)
+        // 先禁用MusicAndChartPlayer组件
+        if (player != null)
         {
-            Debug.LogError("未找到 MusicAndChartPlayer 组件，请确保该组件已挂载到当前对象！");
-            return;
-        }
-        player.enabled = false;
+            player.enabled = false;
 
-        // 播放音乐和更新谱面位置
-        player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
-            TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart, fpsText, ComboText, ScoreText);
-        player.SetParameters2(instantiator.startTimeToInstanceNames, instantiator.holdTimes, instantiator.keyReachedJudgment, 
-            instantiator.JudgePlanesStartT, instantiator.JudgePlanesEndT, instantiator.subStarInfoDict, instantiator.starTrackTimes, instantiator.GradientColorList, instantiator.ChartStartTime);
-        player.SetParameters3(scoreManager.SumComboMap, scoreManager.SumScoreMap, scoreManager.JudgePosMap);
-        player.enabled = true;
-        player.PlayMusicAndChart(chart);
+            // 设置参数
+            player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
+                TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart, fpsText, ComboText, ScoreText);
+            player.SetParameters2(instantiator.startTimeToInstanceNames, instantiator.holdTimes, instantiator.keyReachedJudgment,
+                instantiator.JudgePlanesStartT, instantiator.JudgePlanesEndT, instantiator.subStarInfoDict, instantiator.starTrackTimes, instantiator.GradientColorList, instantiator.ChartStartTime);
+            player.SetParameters3(scoreManager.SumComboMap, scoreManager.SumScoreMap, scoreManager.JudgePosMap);
+
+            // 启用组件（但不播放）
+            player.enabled = true;
+            print("谱面初始化完成！");
+        }
+
+        // 通知SceneTransitionManager可以开始真正的场景切换（开门动画）
+        if (SceneTransitionManager.instance != null)
+        {
+            SceneTransitionManager.instance.StartRealTransition();
+        }
+        else
+        {
+            Debug.LogError("未找到SceneTransitionManager实例，无法启动场景切换！");
+        }
+
+        // 等待场景切换完成
+        yield return StartCoroutine(WaitForSceneTransitionComplete());
+
+        // 场景切换完成后，开始播放音乐和谱面
+        if (player != null && chart != null)
+        {
+            player.PlayMusicAndChart(chart);
+            //Debug.Log("场景切换完成，开始播放音乐和谱面");
+        }
+    }
+
+    // 等待场景切换完成
+    private IEnumerator WaitForSceneTransitionComplete()
+    {
+        // 检查SceneTransitionManager是否存在
+        SceneTransitionManager transitionManager = SceneTransitionManager.instance;
+        if (transitionManager == null)
+        {
+            Debug.LogWarning("未找到SceneTransitionManager，无法等待场景切换完成");
+            yield break;
+        }
+
+        // 等待场景切换完成
+        while (transitionManager.isTransitioning)
+        {
+            yield return null;
+        }
+
+        //Debug.Log("场景切换完成，准备播放音乐");
     }
 }

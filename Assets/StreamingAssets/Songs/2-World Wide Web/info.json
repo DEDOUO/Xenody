@@ -4,7 +4,9 @@
     "title": "World Wide Web",
     "artist": "Nirto Fun",
     "bpm": 128,
-    "time": "2:38"
+    "time": "2:38",
+    "previewStart": 47.0,
+    "previewEnd": 80.0
   },
   "charts": [
     {

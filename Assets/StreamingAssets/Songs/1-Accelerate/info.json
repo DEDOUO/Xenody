@@ -4,7 +4,9 @@
     "title": "Accelerate",
     "artist": "Skybreak / Teminite",
     "bpm": 150,
-    "time": "4:10"
+    "time": "4:10",
+    "previewStart": 72.4,
+    "previewEnd": 98.0
   },
   "charts": [
     {

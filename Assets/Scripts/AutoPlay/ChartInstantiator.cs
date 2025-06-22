@@ -3,19 +3,11 @@ using UnityEditor;
 using Params;
 using static Utility;
 using System.Collections.Generic;
-//using UnityEngine.UIElements;
 using System;
-//using Unity.VisualScripting;
 using Note;
 using static JudgePlane;
 using System.Linq;
 using TMPro;
-using DocumentFormat.OpenXml.InkML;
-//using DocumentFormat.OpenXml.Wordprocessing;
-//using static KeyInfo;
-//using DocumentFormat.OpenXml.Math;
-//using DocumentFormat.OpenXml.Presentation;
-//using Unity.VisualScripting;
 
 
 
@@ -57,8 +49,10 @@ public class ChartInstantiator : MonoBehaviour
     private Dictionary<float, List<Vector3>> MultiHitPairsCoord = new Dictionary<float, List<Vector3>>();
     private float FirstNoteStartTime = 0f;
     public float ChartStartTime = 0f;
+    private Camera mainCamera = null;
+    private float bottomPixel;
+    private float topPixel;
 
-    
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量
     public void SetParameters(GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent, GameObject tapsParent, GameObject slidesParent, GameObject flicksParent, GameObject flickarrowsParent,
         GameObject holdsParent, GameObject holdOutlinesParent, GameObject starsParent, GameObject subStarsParent, GameObject judgeTexturesParent, GameObject multiHitLinesParent,
@@ -93,16 +87,7 @@ public class ChartInstantiator : MonoBehaviour
 
     private void PrepareStartTimeMapping(Chart chart)
     {
-        //根据摄像头范围，更新FPS文本的位置
-        //float screenHeight = Screen.height;
-        //Vector2 fpsTextPos = fpsText.gameObject.GetComponent<RectTransform>().position;
-        //Debug.Log(fpsTextPos);
-        //fpsTextPos.y += (screenHeight - AspectRatioManager.croppedScreenHeight)/2;
-        //fpsText.gameObject.GetComponent<RectTransform>().position = fpsTextPos;
-        //Debug.Log(fpsText.gameObject.GetComponent<RectTransform>().position);
 
-
-        //Debug.Log("start..");
         List<KeyValuePair<float, string>> allPairs = new List<KeyValuePair<float, string>>();
         //List<KeyValuePair<float, string>> MultiHitPairs = new List<KeyValuePair<float, string>>();
 
@@ -249,6 +234,10 @@ public class ChartInstantiator : MonoBehaviour
 
     public void InstantiateAll(Chart chart)
     {
+        mainCamera = Camera.main;
+        bottomPixel = AspectRatioManager.croppedScreenHeight* (1 - HorizontalParams.VerticalMarginBottom) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
+        topPixel = AspectRatioManager.croppedScreenHeight* (1 - HorizontalParams.VerticalMarginCeiling) + (Screen.height - AspectRatioManager.croppedScreenHeight) / 2f;
+
         PrepareStartTimeMapping(chart);
         InstantiateJudgePlanes(chart);
         InstantiateJudgeLines(chart);
@@ -261,6 +250,7 @@ public class ChartInstantiator : MonoBehaviour
         InstantiateMultiHitLines();
 
         subStarInfoDict = Star.InitializeSubStarInfo(chart, SubStarsParent);
+        //print("谱面初始化完成！");
     }
 
 
@@ -281,6 +271,7 @@ public class ChartInstantiator : MonoBehaviour
                 List<GameObject> judgePlaneInstances = new List<GameObject>();
                 List<GameObject> leftStripInstances = new List<GameObject>();
                 List<GameObject> rightStripInstances = new List<GameObject>();
+                float FirstStartT = 0f;
 
                 foreach (var subJudgePlane in judgePlane.subJudgePlaneList)
                 {
@@ -288,6 +279,7 @@ public class ChartInstantiator : MonoBehaviour
                     if (subJudgePlaneIndex == 1)
                     {
                         planecolor = GradientColorList.GetColorAtTimeAndY(subJudgePlane.startT, subJudgePlane.startY);
+                        FirstStartT = subJudgePlane.startT;
                     };
 
                     // 根据SubJudgePlane的函数类型来决定如何处理
@@ -329,20 +321,40 @@ public class ChartInstantiator : MonoBehaviour
                     subJudgePlaneIndex++;
                 }
 
+                //float ZPos = -CalculateZAxisPosition(FirstStartT, ChartStartTime, chart.speedList);
+
                 // 合并 SubJudgePlane
                 GameObject combinedJudgePlane = CombineInstances(judgePlaneInstances, JudgePlanesParent.transform);
                 combinedJudgePlane.name = $"JudgePlane{judgePlaneIndex}";
+                //Debug.Log(combinedJudgePlane.name);
+                //Debug.Log(combinedJudgePlane.transform.position.z);
+                //Vector3 currentPosition = combinedJudgePlane.transform.position;
+                //currentPosition.z = ZPos;
+                //combinedJudgePlane.transform.position = currentPosition;
                 ProcessCombinedInstance(combinedJudgePlane, JudgePlanesParent, JudgePlanesParent.layer);
 
                 // 合并左侧亮条
                 GameObject combinedLeftStrip = CombineInstances(leftStripInstances, ColorLinesParent.transform);
                 combinedLeftStrip.name = $"LeftColorLine{judgePlaneIndex}";
+                //currentPosition = combinedLeftStrip.transform.position;
+                //currentPosition.z = ZPos;
+                //combinedLeftStrip.transform.position = currentPosition;
                 ProcessCombinedInstance(combinedLeftStrip, ColorLinesParent, ColorLinesParent.layer);
 
                 // 合并右侧亮条
                 GameObject combinedRightStrip = CombineInstances(rightStripInstances, ColorLinesParent.transform);
                 combinedRightStrip.name = $"RightColorLine{judgePlaneIndex}";
+                //currentPosition = combinedRightStrip.transform.position;
+                //currentPosition.z = ZPos;
+                //combinedRightStrip.transform.position = currentPosition;
                 ProcessCombinedInstance(combinedRightStrip, ColorLinesParent, ColorLinesParent.layer);
+
+                //当JudgePlane为首个JudgePlane（开始时间为0）时，
+                //if (Math.Abs(FirstStartT - 0f) <= 0.001)
+                //{
+                //    startT -= ChartStartTime;
+                //}
+                
 
             }
         }
@@ -379,6 +391,7 @@ public class ChartInstantiator : MonoBehaviour
                     judgeLineRectTransform.localRotation = Quaternion.Euler(0, 0, 0);
                     judgeLineRectTransform.localScale = new Vector3(1000000, 100, 1);
 
+                    judgeLineInstance.SetActive(false);
                 }
             }
             else
@@ -432,7 +445,7 @@ public class ChartInstantiator : MonoBehaviour
                         tap.startY = yAxisPosition;
                         // 注意Outline初始化为最初的颜色
                         Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
-                        float yPos = TransformYCoordinate(yAxisPosition);
+                        float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（封装成方法方便复用，以下是示例方法定义，参数需根据实际情况传入合适的世界坐标点）
                         Vector3 referencePoint = new Vector3(0, yPos, 0);
@@ -550,7 +563,7 @@ public class ChartInstantiator : MonoBehaviour
                         slide.startY = yAxisPosition;
                         // 注意Outline初始化为最初的颜色
                         Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
-                        float yPos = TransformYCoordinate(yAxisPosition);
+                        float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
                         Vector3 referencePoint = new Vector3(0, yPos, 0);
@@ -653,7 +666,7 @@ public class ChartInstantiator : MonoBehaviour
                         flick.startY = yAxisPosition;
                         // 注意Outline初始化为最初的颜色
                         Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
-                        float yPos = TransformYCoordinate(yAxisPosition);
+                        float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
 
                         // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
                         Vector3 referencePoint = new Vector3(0, yPos, 0);
@@ -795,7 +808,7 @@ public class ChartInstantiator : MonoBehaviour
                     star.startY = yAxisPosition;
                     // 注意Outline初始化为最初的颜色
                     Color planecolor = GradientColorList.GetColorAtTimeAndY(0f, yAxisPosition);
-                    float yPos = TransformYCoordinate(yAxisPosition);
+                    float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
 
                     // 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
                     //float bottomPixel = AspectRatioManager.croppedScreenHeight * HorizontalParams.VerticalMarginBottom;
@@ -902,8 +915,8 @@ public class ChartInstantiator : MonoBehaviour
                         subHold.yAxisFunction = associatedJudgePlaneObject.GetPlaneYAxisFunction(subHold.startT);
 
                         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-                        float startYWorld = TransformYCoordinate(startY);
-                        float endYWorld = TransformYCoordinate(endY);
+                        float startYWorld = TransformYCoordinate(mainCamera, startY, bottomPixel, topPixel);
+                        float endYWorld = TransformYCoordinate(mainCamera, endY, bottomPixel, topPixel);
 
                         if (subHoldIndex == 1)
                         {
@@ -951,8 +964,8 @@ public class ChartInstantiator : MonoBehaviour
                                     float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
 
                                     // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-                                    float startYWorld_Inner = TransformYCoordinate(startY_Inner);
-                                    float endYWorld_Inner = TransformYCoordinate(endY_Inner);
+                                    float startYWorld_Inner = TransformYCoordinate(mainCamera, startY_Inner, bottomPixel, topPixel);
+                                    float endYWorld_Inner = TransformYCoordinate(mainCamera, endY_Inner, bottomPixel, topPixel);
 
                                     float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
                                     float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
@@ -995,8 +1008,8 @@ public class ChartInstantiator : MonoBehaviour
                                 float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
 
                                 // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-                                float startYWorld_Inner = TransformYCoordinate(startY_Inner);
-                                float endYWorld_Inner = TransformYCoordinate(endY_Inner);
+                                float startYWorld_Inner = TransformYCoordinate(mainCamera, startY_Inner, bottomPixel, topPixel);
+                                float endYWorld_Inner = TransformYCoordinate(mainCamera, endY_Inner, bottomPixel, topPixel);
 
                                 float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
                                 float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
@@ -1066,13 +1079,13 @@ public class ChartInstantiator : MonoBehaviour
                     // 初始化 StartWhiteRect 和 EndWhiteRect
                     float startY1 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList[0].startT);
                     float startY2 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
-                    float startYWorld1 = TransformYCoordinate(startY1);
-                    float startYWorld2 = TransformYCoordinate(startY2);
+                    float startYWorld1 = TransformYCoordinate(mainCamera, startY1, bottomPixel, topPixel);
+                    float startYWorld2 = TransformYCoordinate(mainCamera, startY2, bottomPixel, topPixel);
 
                     float endY1 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
                     float endY2 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT);
-                    float endYWorld1 = TransformYCoordinate(endY1);
-                    float endYWorld2 = TransformYCoordinate(endY2);
+                    float endYWorld1 = TransformYCoordinate(mainCamera, endY1, bottomPixel, topPixel);
+                    float endYWorld2 = TransformYCoordinate(mainCamera, endY2, bottomPixel, topPixel);
 
                     // 计算开始部分的四个顶点位置
                     float startXMin1 = CalculatePosition(hold.subHoldList[0].startT, hold.subHoldList[0].startT, hold.subHoldList[0].startXMin, hold.subHoldList[0].endT, hold.subHoldList[0].endXMin, hold.subHoldList[0].XLeftFunction);
@@ -1126,7 +1139,7 @@ public class ChartInstantiator : MonoBehaviour
 
                     //注意Hold的实际世界坐标与其他Note不一致，需要获取Hold对应的标准坐标
                     float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(HoldstartT);
-                    float yPos = TransformYCoordinate(yAxisPosition);
+                    float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
 
                     // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
                     Vector3 referencePoint = new Vector3(0, yPos, 0);
@@ -1496,10 +1509,11 @@ public class ChartInstantiator : MonoBehaviour
         //Debug.Log(planecolor);
 
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-        float startYWorld = TransformYCoordinate(startY);
-        float endYWorld = TransformYCoordinate(endY);
+        float startYWorld = TransformYCoordinate(mainCamera, startY, bottomPixel, topPixel);
+        float endYWorld = TransformYCoordinate(mainCamera, endY, bottomPixel, topPixel);
 
         // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
+        //Debug.Log(startT);
         float zPositionForStartT = CalculateZAxisPosition(startT, ChartStartTime, speedList);
         //Debug.Log(zPositionForStartT);
         float zPositionForEndT = CalculateZAxisPosition(endT, ChartStartTime, speedList);

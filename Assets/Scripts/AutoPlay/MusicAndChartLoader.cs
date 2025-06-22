@@ -3,8 +3,9 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.IO;
 using System.Collections;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using Params;
+using TMPro;
 
 public class MusicAndChartLoader : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class MusicAndChartLoader : MonoBehaviour
     private string musicPath;
     private string chartPath;
     private Sprite cover;
+    private static int selectedDifficulty = 1; // 新增：当前选择的难度
 
     // 新增初始化方法
     public void Initialize(AudioSource audioSource)
@@ -20,8 +22,10 @@ public class MusicAndChartLoader : MonoBehaviour
         this.audioSource = audioSource;
     }
 
-    public async Task LoadMusicAndChartAsync()
+    // 修改：返回 IEnumerator 而非 Task
+    public IEnumerator LoadMusicAndChartAsync()
     {
+        selectedDifficulty = SongAndChartData.selectedDifficulty;
         musicPath = SongAndChartData.GetMusicFilePath();
 
         // 判断如果没有获取到路径（即直接加载 AutoPlay 场景时），默认按照第一首歌曲加载
@@ -34,7 +38,7 @@ public class MusicAndChartLoader : MonoBehaviour
         if (!File.Exists(musicPath))
         {
             Debug.LogError($"音乐文件未找到：{musicPath}");
-            return;
+            yield break;
         }
 
         chartPath = SongAndChartData.GetChartFilePath();
@@ -51,14 +55,14 @@ public class MusicAndChartLoader : MonoBehaviour
             if (!File.Exists(chartPath))
             {
                 Debug.LogError("谱面文件不存在！");
-                return;
+                yield break;
             }
         }
 
         cover = SongAndChartData.GetCoverSprite();
 
         // 使用 UnityWebRequest 加载音频文件
-        await LoadAudioClipAsync(musicPath);
+        yield return StartCoroutine(LoadAudioClipAsync(musicPath));
 
         if (File.Exists(chartPath))
         {
@@ -77,7 +81,8 @@ public class MusicAndChartLoader : MonoBehaviour
         ApplyCoverToJacketImage();
     }
 
-    private async Task LoadAudioClipAsync(string path)
+    // 修改：返回 IEnumerator
+    private IEnumerator LoadAudioClipAsync(string path)
     {
         // 构建 StreamingAssets 路径
         string streamingPath = Path.Combine("file://", Application.streamingAssetsPath, path);
@@ -87,7 +92,7 @@ public class MusicAndChartLoader : MonoBehaviour
             var operation = www.SendWebRequest();
             while (!operation.isDone)
             {
-                await Task.Yield();
+                yield return null;
             }
 
             if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
@@ -110,7 +115,6 @@ public class MusicAndChartLoader : MonoBehaviour
 
     public Chart GetChart()
     {
-        //Debug.Log(chart);
         return chart;
     }
 
@@ -121,27 +125,86 @@ public class MusicAndChartLoader : MonoBehaviour
 
     private void ApplyCoverToJacketImage()
     {
-        // 查找 JacketImage 游戏物体
-        GameObject jacketImageObject = GameObject.Find("JacketImage");
-
+        // 1. 设置封面图（保持不变）
+        GameObject jacketImageObject = GameObject.Find("JacketCover");
         if (jacketImageObject != null)
         {
-            // 获取 Image 组件
             Image jacketImageComponent = jacketImageObject.GetComponent<Image>();
-
             if (jacketImageComponent != null)
             {
-                // 将封面设置为 Image 组件的源图像
                 jacketImageComponent.sprite = cover;
             }
             else
             {
-                Debug.LogError("JacketImage 游戏物体上没有找到 Image 组件！");
+                Debug.LogError("JacketCover 游戏物体上没有找到 Image 组件！");
             }
         }
         else
         {
-            Debug.LogError("未找到 JacketImage 游戏物体！");
+            Debug.LogError("未找到 JacketCover 游戏物体！");
+        }
+
+        // 2. 设置难度背景图颜色（保持不变）
+        GameObject diffImageObject = GameObject.Find("DiffImage");
+        if (diffImageObject != null)
+        {
+            Image diffImageComponent = diffImageObject.GetComponent<Image>();
+            if (diffImageComponent != null)
+            {
+                if (ChartParams.difficultyColorMap.TryGetValue(selectedDifficulty, out Color difficultyColor))
+                {
+                    diffImageComponent.color = difficultyColor;
+                }
+                else
+                {
+                    Debug.LogError($"未找到难度 {selectedDifficulty} 对应的颜色！");
+                    diffImageComponent.color = Color.white;
+                }
+            }
+            else
+            {
+                Debug.LogError("DiffImage 游戏物体上没有找到 Image 组件！");
+            }
+        }
+        else
+        {
+            Debug.LogError("未找到 DiffImage 游戏物体！");
+        }
+
+        // 3. 设置难度文本（修改后：从DifficultyText游戏物体获取文本）
+        GameObject difficultyTextObject = GameObject.Find("DifficultyText");
+        if (difficultyTextObject != null)
+        {
+            TextMeshProUGUI difficultyTextComponent = difficultyTextObject.GetComponent<TextMeshProUGUI>();
+            if (difficultyTextComponent != null)
+            {
+                GameObject diffTextObject = GameObject.Find("DiffText");
+                if (diffTextObject != null)
+                {
+                    TextMeshProUGUI diffTextComponent = diffTextObject.GetComponent<TextMeshProUGUI>();
+                    if (diffTextComponent != null)
+                    {
+                        // 将DifficultyText的文本复制到DiffText
+                        diffTextComponent.text = difficultyTextComponent.text;
+                    }
+                    else
+                    {
+                        Debug.LogError("DiffText 游戏物体上没有找到 TextMeshProUGUI 组件！");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("未找到 DiffText 游戏物体！");
+                }
+            }
+            else
+            {
+                Debug.LogError("DifficultyText 游戏物体上没有找到 TextMeshProUGUI 组件！");
+            }
+        }
+        else
+        {
+            Debug.LogError("未找到 DifficultyText 游戏物体！");
         }
     }
 }
