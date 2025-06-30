@@ -31,6 +31,7 @@ public class AutoPlay : MonoBehaviour
     [SerializeField] private TMP_Text fpsText;
     [SerializeField] private TMP_Text ComboText;
     [SerializeField] private TMP_Text ScoreText;
+    public TMP_Text readyText;
 
     public Sprite JudgePlaneSprite;
     public Sprite HoldSprite;
@@ -64,6 +65,7 @@ public class AutoPlay : MonoBehaviour
         fpsText = GameObject.Find("FPS").GetComponent<TextMeshProUGUI>();
         ComboText = GameObject.Find("ComboText").GetComponent<TextMeshProUGUI>();
         ScoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
+        readyText = GameObject.Find("ReadyText").GetComponent<TextMeshProUGUI>();
 
         // 加载Sprite
         JudgePlaneSprite = Resources.Load<Sprite>("Sprites/TrackBlack2");
@@ -147,7 +149,11 @@ public class AutoPlay : MonoBehaviour
         instantiator.InstantiateAll(chart);
 
         // 计算连击和得分列表
-        scoreManager = GetComponent<ScoreManager>();
+        scoreManager = ScoreManager.instance;
+        if (scoreManager == null)
+        {
+            Debug.LogError("未找到ScoreManager单例实例！");
+        }
         scoreManager.CalculateAutoPlayScores(chart);
 
         // 先禁用MusicAndChartPlayer组件
@@ -168,9 +174,9 @@ public class AutoPlay : MonoBehaviour
         }
 
         // 通知SceneTransitionManager可以开始真正的场景切换（开门动画）
-        if (SceneTransitionManager.instance != null)
+        if (SceneTransitionManagerDoor.instance != null)
         {
-            SceneTransitionManager.instance.StartRealTransition();
+            SceneTransitionManagerDoor.instance.StartRealTransition();
         }
         else
         {
@@ -180,6 +186,9 @@ public class AutoPlay : MonoBehaviour
         // 等待场景切换完成
         yield return StartCoroutine(WaitForSceneTransitionComplete());
 
+        // 显示Ready提示文字（新增逻辑）
+        yield return StartCoroutine(ShowReadyTextEffect());
+
         // 场景切换完成后，开始播放音乐和谱面
         if (player != null && chart != null)
         {
@@ -188,11 +197,62 @@ public class AutoPlay : MonoBehaviour
         }
     }
 
+    private IEnumerator ShowReadyTextEffect()
+    {
+        if (readyText == null)
+        {
+            readyText = GameObject.Find("ReadyText")?.GetComponent<TMP_Text>();
+            if (readyText == null) yield break;
+        }
+
+        // 初始状态
+        readyText.alpha = 0f;
+        readyText.transform.localScale = Vector3.one * 0.8f;
+
+        yield return new WaitForSeconds(0.5f); // 静止0.5秒
+        // 第一次闪烁：淡入+放大
+        yield return StartCoroutine(AnimateAlphaAndScale(0f, 1f, 0.8f, 1f, 0.3f));
+        yield return new WaitForSeconds(0.5f); // 静止0.3秒
+
+        // 第二次闪烁：透明度波动+缩放波动
+        yield return StartCoroutine(AnimateAlphaAndScale(1f, 0.5f, 1f, 0.8f, 0.3f));
+        yield return StartCoroutine(AnimateAlphaAndScale(0.5f, 1f, 0.8f, 1f, 0.3f));
+        yield return new WaitForSeconds(0.5f); // 静止0.3秒
+
+        // 淡出+放大消失
+        yield return StartCoroutine(AnimateAlphaAndScale(1f, 0f, 1f, 1.2f, 0.6f));
+
+        // 最终隐藏
+        readyText.alpha = 0f;
+    }
+
+    // 同时控制透明度和缩放的协程
+    IEnumerator AnimateAlphaAndScale(float startAlpha, float endAlpha, float startScale, float endScale, float duration)
+    {
+        float timer = 0f;
+        while (timer < duration)
+        {
+            float progress = timer / duration;
+            readyText.alpha = Mathf.Lerp(startAlpha, endAlpha, progress);
+            readyText.transform.localScale = Vector3.Lerp(
+                Vector3.one * startScale,
+                Vector3.one * endScale,
+                progress
+            );
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // 确保最终状态精确
+        readyText.alpha = endAlpha;
+        readyText.transform.localScale = Vector3.one * endScale;
+    }
+
     // 等待场景切换完成
     private IEnumerator WaitForSceneTransitionComplete()
     {
         // 检查SceneTransitionManager是否存在
-        SceneTransitionManager transitionManager = SceneTransitionManager.instance;
+        SceneTransitionManagerDoor transitionManager = SceneTransitionManagerDoor.instance;
         if (transitionManager == null)
         {
             Debug.LogWarning("未找到SceneTransitionManager，无法等待场景切换完成");

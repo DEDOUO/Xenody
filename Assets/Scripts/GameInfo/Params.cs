@@ -78,6 +78,15 @@ namespace Params
             { 4, new Color(82f / 255f, 0f / 255f, 78f / 255f) }
         };
 
+        //按钮的难度颜色需要更亮些（暂时只有MeltDown难度设置不一样的颜色）
+        public static Dictionary<int, Color> difficultyColorMapButton = new Dictionary<int, Color>
+        {
+            { 1, new Color(98f / 255f, 190f / 255f, 119f / 255f) },
+            { 2, new Color(190f / 255f, 187f / 255f, 98f / 255f) },
+            { 3, new Color(190f / 255f, 116f / 255f, 98f / 255f) },
+            { 4, new Color(169f / 255f, 45f / 255f, 164f / 255f) }
+        };
+
 
     }
 

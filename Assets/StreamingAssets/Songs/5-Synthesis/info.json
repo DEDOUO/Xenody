@@ -1,0 +1,19 @@
+{
+  "song": {
+    "id": 5,
+    "title": "Synthesis.",
+    "artist": "tn-shi",
+    "bpm": 180,
+    "time": "2:43",
+    "previewStart": 102.0,
+    "previewEnd": 125.0
+  },
+  "charts": [
+    {
+      "difficulty": 4,
+      "level": "15",
+      "prec": 15.5,
+      "charter": "ERDO KING"
+    }
+  ]
+}

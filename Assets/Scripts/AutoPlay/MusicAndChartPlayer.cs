@@ -7,13 +7,10 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using Note;
 using static Utility;
+using UnityEngine.UI;
 using TMPro;
 using static GradientColorListUnity;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using UnityEngine.UIElements;
-//using Unity.VisualScripting;
-//using DocumentFormat.OpenXml.Wordprocessing;
-//using DocumentFormat.OpenXml.Spreadsheet;
+
 
 
 public class MusicAndChartPlayer : MonoBehaviour
@@ -100,6 +97,10 @@ public class MusicAndChartPlayer : MonoBehaviour
     private float bottomPixel;
     private float topPixel;
 
+    //private GameObject transitionMaskObj = null;
+    //private Image transitionMask = null;
+    //bool isTransitioning = false; // 标记是否正在过渡
+
 
     // 新增的公共方法，用于接收各个参数并赋值给对应的私有变量，添加了SlidesParent和SlideSoundEffect参数
     public void SetParameters(AudioSource audioSource, GameObject judgePlanesParent, GameObject judgeLinesParent, GameObject colorLinesParent,
@@ -168,6 +169,21 @@ public class MusicAndChartPlayer : MonoBehaviour
         MusicSlider = GameObject.Find("MusicSlider");
         MusicSlider.SetActive(false);
         pauseManager.isPaused = false;
+
+        //// 查找过渡遮罩
+        //transitionMaskObj = GameObject.Find("Mask");
+        //if (transitionMaskObj != null)
+        //{
+        //    transitionMask = transitionMaskObj.GetComponent<Image>();
+        //    if (transitionMask == null)
+        //    {
+        //        Debug.LogError("TransitionMask缺少Image组件");
+        //    }
+        //}
+        //else
+        //{
+        //    Debug.LogWarning("未找到TransitionMask，场景切换将没有过渡效果");
+        //}
     }
 
 
@@ -207,11 +223,18 @@ public class MusicAndChartPlayer : MonoBehaviour
 
         while (true)
         {
-
+            //Debug.Log(audioSource.isPlaying);
             // 如果音乐播放完了
-            if (!audioSource.isPlaying && audioSource.time >= audioSource.clip.length - 0.01f && !pauseManager.isPaused)
+            if (!audioSource.isPlaying && audioSource.time >= audioSource.clip.length - 0.1f && !pauseManager.isPaused)
             {
-                SceneManager.LoadScene("SongSelect");
+                if (SceneTransitionManagerFade.instance != null)
+                {
+                    StartCoroutine(SceneTransitionManagerFade.instance.TransitionToScene("SongResult"));
+                }
+                else
+                {
+                    SceneManager.LoadScene("SongResult");
+                }
                 yield break;
             }
 
@@ -237,6 +260,53 @@ public class MusicAndChartPlayer : MonoBehaviour
         }
     }
 
+    private IEnumerator DoSceneTransition(string sceneName, Image transitionMask)
+    {
+        float transitionDuration = 0.5f; // 过渡持续时间(秒)
+        float timer = 0f;
+
+        // 淡入：原场景逐渐变黑
+        while (timer < transitionDuration && transitionMask != null)
+        {
+            timer += Time.deltaTime;
+            float alpha = Mathf.Clamp01(timer / transitionDuration);
+            transitionMask.color = new Color(0, 0, 0, alpha);
+            yield return null;
+        }
+
+        // 确保遮罩完全不透明
+        if (transitionMask != null)
+        {
+            transitionMask.color = new Color(0, 0, 0, 1f);
+        }
+
+        // 加载新场景
+        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName);
+        while (!loadOperation.isDone)
+        {
+            yield return null;
+        }
+
+        // 淡入完成后，重置计时器
+        timer = 0f;
+
+        // 淡出：新场景从黑色逐渐显现
+        while (timer < transitionDuration && transitionMask != null)
+        {
+            timer += Time.deltaTime;
+            float alpha = 1f - Mathf.Clamp01(timer / transitionDuration);
+            transitionMask.color = new Color(0, 0, 0, alpha);
+            yield return null;
+        }
+
+        // 确保遮罩完全透明
+        if (transitionMask != null)
+        {
+            transitionMask.color = new Color(0, 0, 0, 0f);
+        }
+
+        //isTransitioning = false;
+    }
 
     //当从暂停状态恢复播放时，IfResumePlay=1，此时所有Note重新计算位置和颜色
     private void Updateall(bool IfResumePlay)
