@@ -8,6 +8,10 @@ using Note;
 using static JudgePlane;
 using System.Linq;
 using TMPro;
+using static Note.Star;
+using DocumentFormat.OpenXml.Presentation;
+using static Note.Hold;
+//using DocumentFormat.OpenXml.Spreadsheet;
 
 
 
@@ -271,7 +275,8 @@ public class ChartInstantiator : MonoBehaviour
                 List<GameObject> judgePlaneInstances = new List<GameObject>();
                 List<GameObject> leftStripInstances = new List<GameObject>();
                 List<GameObject> rightStripInstances = new List<GameObject>();
-                float FirstStartT = 0f;
+                //float FirstStartT = 0f;
+                float FirstStartY = 0f;
 
                 foreach (var subJudgePlane in judgePlane.subJudgePlaneList)
                 {
@@ -279,43 +284,71 @@ public class ChartInstantiator : MonoBehaviour
                     if (subJudgePlaneIndex == 1)
                     {
                         planecolor = GradientColorList.GetColorAtTimeAndY(subJudgePlane.startT, subJudgePlane.startY);
-                        FirstStartT = subJudgePlane.startT;
+                        //FirstStartT = subJudgePlane.startT;
+                        FirstStartY = subJudgePlane.startY;
                     };
 
-                    // 根据SubJudgePlane的函数类型来决定如何处理
-                    switch (subJudgePlane.yAxisFunction)
+                    //// 根据SubJudgePlane的函数类型来决定如何处理
+                    //switch (subJudgePlane.yAxisFunction)
+                    //{
+                    //    case TransFunctionType.Linear:
+                    //        List<GameObject> objectsToCombine = CreateJudgePlaneAndColorLinesQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
+                    //            JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor, chart.speedList);
+
+                    //        judgePlaneInstances.Add(objectsToCombine[0]);
+                    //        leftStripInstances.Add(objectsToCombine[1]);
+                    //        rightStripInstances.Add(objectsToCombine[2]);
+
+                    //        break;
+
+                    //    case TransFunctionType.Sin:
+                    //    case TransFunctionType.Cos:
+                    //        // 精细度设为8，用于分割时间区间
+                    //        int segments = FinenessParams.Segment;
+                    //        float timeStep = (subJudgePlane.endT - subJudgePlane.startT) / segments;
+
+                    //        for (int i = 0; i < segments; i++)
+                    //        {
+                    //            float startT = subJudgePlane.startT + i * timeStep;
+                    //            float endT = subJudgePlane.startT + (i + 1) * timeStep;
+                    //            float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
+                    //            float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
+
+                    //            //float startY = judgePlane.GetPlaneYAxis(startT);
+                    //            //float endY = judgePlane.GetPlaneYAxis(endT);
+
+                    //            List<GameObject> ObjectsToCombine = CreateJudgePlaneAndColorLinesQuad(startY, endY, startT, endT,
+                    //                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor, chart.speedList);
+
+                    //            judgePlaneInstances.Add(ObjectsToCombine[0]);
+                    //            leftStripInstances.Add(ObjectsToCombine[1]);
+                    //            rightStripInstances.Add(ObjectsToCombine[2]);
+                    //        }
+
+                    //        break;
+                    //}
+
+                    //无论是线性还是非线性，都分段生成
+                    // 精细度设为8，用于分割时间区间
+                    int segments = FinenessParams.Segment;
+                    float timeStep = (subJudgePlane.endT - subJudgePlane.startT) / segments;
+
+                    for (int i = 0; i < segments; i++)
                     {
-                        case TransFunctionType.Linear:
-                            List<GameObject> objectsToCombine = CreateJudgePlaneAndColorLinesQuad(subJudgePlane.startY, subJudgePlane.endY, subJudgePlane.startT, subJudgePlane.endT,
-                                JudgePlaneSprite, $"Sub{subJudgePlaneIndex}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor, chart.speedList);
+                        float startT = subJudgePlane.startT + i * timeStep;
+                        float endT = subJudgePlane.startT + (i + 1) * timeStep;
+                        float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
+                        float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
 
-                            judgePlaneInstances.Add(objectsToCombine[0]);
-                            leftStripInstances.Add(objectsToCombine[1]);
-                            rightStripInstances.Add(objectsToCombine[2]);
+                        //float startY = judgePlane.GetPlaneYAxis(startT);
+                        //float endY = judgePlane.GetPlaneYAxis(endT);
 
-                            break;
+                        List<GameObject> ObjectsToCombine = CreateJudgePlaneAndColorLinesQuad(startY, endY, startT, endT,
+                            JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor, chart.speedList);
 
-                        case TransFunctionType.Sin:
-                        case TransFunctionType.Cos:
-                            // 精细度设为8，用于分割时间区间
-                            int segments = FinenessParams.Segment;
-                            float timeStep = (subJudgePlane.endT - subJudgePlane.startT) / segments;
-
-                            for (int i = 0; i < segments; i++)
-                            {
-                                float startT = subJudgePlane.startT + i * timeStep;
-                                float endT = subJudgePlane.startT + (i + 1) * timeStep;
-                                float startY = CalculatePosition(startT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
-                                float endY = CalculatePosition(endT, subJudgePlane.startT, subJudgePlane.startY, subJudgePlane.endT, subJudgePlane.endY, subJudgePlane.yAxisFunction);
-                                List<GameObject> ObjectsToCombine = CreateJudgePlaneAndColorLinesQuad(startY, endY, startT, endT,
-                                    JudgePlaneSprite, $"Sub{subJudgePlaneIndex}_{i + 1}", JudgePlanesParent, ColorLinesParent, RenderQueue, planecolor, chart.speedList);
-
-                                judgePlaneInstances.Add(ObjectsToCombine[0]);
-                                leftStripInstances.Add(ObjectsToCombine[1]);
-                                rightStripInstances.Add(ObjectsToCombine[2]);
-                            }
-
-                            break;
+                        judgePlaneInstances.Add(ObjectsToCombine[0]);
+                        leftStripInstances.Add(ObjectsToCombine[1]);
+                        rightStripInstances.Add(ObjectsToCombine[2]);
                     }
 
                     subJudgePlaneIndex++;
@@ -349,12 +382,15 @@ public class ChartInstantiator : MonoBehaviour
                 //combinedRightStrip.transform.position = currentPosition;
                 ProcessCombinedInstance(combinedRightStrip, ColorLinesParent, ColorLinesParent.layer);
 
+                // 根据 YAxis 的值，实时改变 currentJudgePlane 下所有 SubJudgePlane 实例的透明度
+                judgePlane.ChangeJudgePlaneTransparency(JudgePlanesParent, FirstStartY);
+
                 //当JudgePlane为首个JudgePlane（开始时间为0）时，
                 //if (Math.Abs(FirstStartT - 0f) <= 0.001)
                 //{
                 //    startT -= ChartStartTime;
                 //}
-                
+
 
             }
         }
@@ -386,12 +422,16 @@ public class ChartInstantiator : MonoBehaviour
                     //获取初始Y轴坐标并转化为屏幕坐标
                     float YAxisUniform = judgePlane.GetPlaneYAxis(subJudgePlane.startT);
                     //Debug.Log(YAxisUniform);
-                    Vector2 Position = ScalePositionToScreenJudgeLine(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
+                    Vector2 Position = ScalePositionToScreen(new Vector2(0f, YAxisUniform), JudgeLinesParent.GetComponent<RectTransform>());
                     judgeLineRectTransform.anchoredPosition3D = new Vector3(Position.x, Position.y, 0);
                     judgeLineRectTransform.localRotation = Quaternion.Euler(0, 0, 0);
                     judgeLineRectTransform.localScale = new Vector3(1000000, 100, 1);
 
-                    judgeLineInstance.SetActive(false);
+                    //如果是从0时刻开始的JudgeLine，就不设为非激活了
+                    if (subJudgePlane.startT > 0)
+                    {
+                        judgeLineInstance.SetActive(false);
+                    }
                 }
             }
             else
@@ -453,7 +493,7 @@ public class ChartInstantiator : MonoBehaviour
                         //Debug.Log(worldUnitToScreenPixelX);
 
                         // 计算Tap的X轴坐标
-                        float startXWorld = worldUnitToScreenPixelX * tap.startX / ChartParams.XaxisMax;
+                        //float startXWorld = worldUnitToScreenPixelX * tap.startX / ChartParams.XaxisMax;
 
                         // 根据noteSize折算到X轴世界坐标长度，计算每单位noteSize对应的世界坐标长度
                         float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
@@ -467,7 +507,16 @@ public class ChartInstantiator : MonoBehaviour
                         // 设置Tap实例的位置（X、Y、Z轴坐标），同时考虑Z轴偏移量
                         float zPositionForStartT = CalculateZAxisPosition(tap.startT, ChartStartTime, chart.speedList);
 
-                        tapInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
+                        // 关键：将2D UI坐标转换为3D世界坐标
+                        RectTransform SubStarsParentRect = SubStarsParent.GetComponent<RectTransform>();
+                        //Debug.Log(tap.startX);
+                        Vector2 position = ScalePositionToScreen(new Vector2 (tap.startX, tap.startY), SubStarsParentRect);
+                        Vector3 worldPosition = ConvertUIPositionToWorldPosition(position, SubStarsParentRect, mainCamera);
+                        //Debug.Log(worldPosition.x);
+                        // 设置3D物体的Transform坐标
+                        tapInstance.transform.position = new Vector3(worldPosition.x, worldPosition.y, zPositionForStartT + ChartParams.NoteZAxisOffset);
+
+                        //tapInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
                         //Debug.Log(tapInstance.transform.position);
 
                         // 获取MyOutline组件并设置属性
@@ -570,7 +619,7 @@ public class ChartInstantiator : MonoBehaviour
                         float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
 
                         // 计算Slide的X轴坐标（根据Slide相关参数和计算逻辑来确定，示例如下，需按实际调整）
-                        float startXWorld = worldUnitToScreenPixelX * slide.startX / ChartParams.XaxisMax;
+                        //float startXWorld = worldUnitToScreenPixelX * slide.startX / ChartParams.XaxisMax;
 
                         // 根据slideSize等参数折算到X轴世界坐标长度，计算每单位slideSize对应的世界坐标长度（示例逻辑，按实际修改）
                         float slideSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
@@ -581,9 +630,17 @@ public class ChartInstantiator : MonoBehaviour
                         // 设置Slide实例的缩放比例（这里只修改X轴缩放，保持Y、Z轴缩放为1，可根据实际需求改变）
                         slideInstance.transform.localScale = new Vector3(xAxisScale, ChartParams.NoteThickness, 1);
 
+
                         // 设置Slide实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(slide.startT, ChartStartTime, chart.speedList);
-                        slideInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
+
+                        RectTransform SubStarsParentRect = SubStarsParent.GetComponent<RectTransform>();
+                        Vector2 position = ScalePositionToScreen(new Vector2(slide.startX, slide.startY), SubStarsParentRect);
+                        Vector3 worldPosition = ConvertUIPositionToWorldPosition(position, SubStarsParentRect, mainCamera);
+
+                        // 设置3D物体的Transform坐标
+                        slideInstance.transform.position = new Vector3(worldPosition.x, worldPosition.y, zPositionForStartT + ChartParams.NoteZAxisOffset);
+                        //slideInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                         // 获取MyOutline组件并设置属性
                         MyOutline outlineComponent = slideInstance.GetComponent<MyOutline>();
@@ -686,7 +743,14 @@ public class ChartInstantiator : MonoBehaviour
 
                         // 设置Flick实例的位置（X、Y、Z轴坐标，示例逻辑，按实际情况调整）
                         float zPositionForStartT = CalculateZAxisPosition(flick.startT, ChartStartTime, chart.speedList);
-                        flickInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
+
+                        RectTransform SubStarsParentRect = SubStarsParent.GetComponent<RectTransform>();
+                        Vector2 position = ScalePositionToScreen(new Vector2(flick.startX, flick.startY), SubStarsParentRect);
+                        Vector3 worldPosition = ConvertUIPositionToWorldPosition(position, SubStarsParentRect, mainCamera);
+
+                        // 设置3D物体的Transform坐标
+                        flickInstance.transform.position = new Vector3(worldPosition.x, worldPosition.y, zPositionForStartT + ChartParams.NoteZAxisOffset);
+                        //flickInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
 
                         Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flickInstance);
 
@@ -815,11 +879,19 @@ public class ChartInstantiator : MonoBehaviour
                     //float topPixel = AspectRatioManager.croppedScreenHeight * HorizontalParams.VerticalMarginCeiling;
 
                     // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围
+
+                    RectTransform SubStarsParentRect = SubStarsParent.GetComponent<RectTransform>();
+                    Vector2 subStarStart = new Vector2(xAxisPosition, yAxisPosition);
+                    Vector2 position = ScalePositionToScreen(subStarStart, SubStarsParentRect);
+                    //Debug.Log(position);
+                    //RectTransform arrowRectTransform = starStartFXInstance.GetComponent<RectTransform>();
+                    //arrowRectTransform.anchoredPosition3D = new Vector3(position.x, position.y, 0);
+
                     Vector3 referencePoint = new Vector3(0, yPos, 0);
                     float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
 
                     // 计算X轴坐标
-                    float startXWorld = worldUnitToScreenPixelX * xAxisPosition / ChartParams.XaxisMax;
+                    //float startXWorld = worldUnitToScreenPixelX * xAxisPosition / ChartParams.XaxisMax;
                     // 根据noteSize折算到X轴世界坐标长度，计算每单位noteSize对应的世界坐标长度
                     float noteSizeWorldLengthPerUnit = worldUnitToScreenPixelX / ChartParams.XaxisMax;
                     // 根据StarHead本身在X轴的世界坐标长度和noteSize计算X轴的缩放值
@@ -830,10 +902,19 @@ public class ChartInstantiator : MonoBehaviour
 
                     // 设置StarHead实例的位置（X、Y、Z轴坐标）
                     float zPositionForStartT = CalculateZAxisPosition(star.starHeadT, ChartStartTime, chart.speedList);
-                    starheadInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
+                    //starheadInstance.transform.position = new Vector3(-startXWorld, yPos, zPositionForStartT + ChartParams.NoteZAxisOffset);
+
+                    // 关键：将2D UI坐标转换为3D世界坐标
+                    Vector3 worldPosition = ConvertUIPositionToWorldPosition(position,SubStarsParentRect,mainCamera);
+
+                    // 设置3D物体的Transform坐标
+                    starheadInstance.transform.position = new Vector3(worldPosition.x, worldPosition.y, zPositionForStartT + ChartParams.NoteZAxisOffset);
+                    starStartFXInstance.transform.position = new Vector3(worldPosition.x, worldPosition.y, 0f);
+                    //Debug.Log(starStartFXInstance.transform.position);
 
                     //先把启动特效设置为未激活
-                    starStartFXInstance.transform.position = new Vector3(-startXWorld, yPos, 0f);
+                    //starStartFXInstance.transform.position = new Vector3(-startXWorld, yPos, 0f);
+                    //Debug.Log(starStartFXInstance.transform.position);
                     starStartFXInstance.SetActive(false);
 
                     // 获取MyOutline组件并设置属性
@@ -885,290 +966,410 @@ public class ChartInstantiator : MonoBehaviour
 
     public void InstantiateHolds(Chart chart)
     {
-        if (chart != null && chart.holds != null)
+        if (chart == null || chart.holds == null)
+            return;
+
+        int holdIndex = 1;
+        int renderQueue = 3000; // 渲染队列，统一命名为renderQueue，使用小写驼峰
+
+        foreach (var hold in chart.holds)
         {
-            int holdIndex = 1;
-            int RenderQueue = 3000;
-            foreach (var hold in chart.holds)
+            float holdStartT = hold.GetFirstSubHoldStartTime();
+            JudgePlane associatedJudgePlane = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
+            Color planeColor = Color.black;
+
+            if (associatedJudgePlane != null)
             {
+                string shaderName = "MaskMaterial";
+                List<GameObject> subHoldInstances = new List<GameObject>();
+                List<GameObject> outlineInstances = new List<GameObject>();
+                int subHoldIndex = 1;
 
-                float HoldstartT = hold.GetFirstSubHoldStartTime();
-                // 创建一个空物体作为 hold 实例的父物体，用于统一管理和规范命名
-                JudgePlane associatedJudgePlaneObject = chart.GetCorrespondingJudgePlane(hold.associatedPlaneId);
-                Color planecolor = Color.black;
+                RectTransform subStarsParentRect = SubStarsParent.GetComponent<RectTransform>(); // 优化变量名
 
-                if (associatedJudgePlaneObject != null)
+                foreach (var subHold in hold.subHoldList)
                 {
-                    string shaderName = "MaskMaterial"; // 默认使用 MaskMaterial 作为 shader
+                    float startY = associatedJudgePlane.GetPlaneYAxis(subHold.startT);
+                    float endY = associatedJudgePlane.GetPlaneYAxis(subHold.endT);
 
-                    List<GameObject> subHoldInstances = new List<GameObject>();
-                    List<GameObject> OutlineInstances = new List<GameObject>();
-                    int subHoldIndex = 1;
-                    foreach (var subHold in hold.subHoldList)
+                    subHold.startY = startY;
+                    subHold.endY = endY;
+                    subHold.yAxisFunction = associatedJudgePlane.GetPlaneYAxisFunction(subHold.startT);
+
+                    #region 计算屏幕坐标和世界坐标（优化版）
+                    // 起始点坐标转换
+                    Vector2 startMinScreenPos = ScalePositionToScreen(new Vector2(subHold.startXMin, startY), subStarsParentRect);
+                    //Debug.Log(subHold.startXMin);
+                    Vector3 startMinWorldPos = ConvertUIPositionToWorldPosition(startMinScreenPos, subStarsParentRect, mainCamera);
+                    float startXMinWorld = startMinWorldPos.x;
+                    //Debug.Log(startXMinWorld);
+                    float startYWorld = startMinWorldPos.y;
+
+                    Vector2 startMaxScreenPos = ScalePositionToScreen(new Vector2(subHold.startXMax, startY), subStarsParentRect);
+                    Vector3 startMaxWorldPos = ConvertUIPositionToWorldPosition(startMaxScreenPos, subStarsParentRect, mainCamera);
+                    float startXMaxWorld = startMaxWorldPos.x;
+
+                    // 结束点坐标转换
+                    Vector2 endMinScreenPos = ScalePositionToScreen(new Vector2(subHold.endXMin, endY), subStarsParentRect);
+                    Vector3 endMinWorldPos = ConvertUIPositionToWorldPosition(endMinScreenPos, subStarsParentRect, mainCamera);
+                    float endXMinWorld = endMinWorldPos.x;
+                    float endYWorld = endMinWorldPos.y;
+
+                    Vector2 endMaxScreenPos = ScalePositionToScreen(new Vector2(subHold.endXMax, endY), subStarsParentRect);
+                    Vector3 endMaxWorldPos = ConvertUIPositionToWorldPosition(endMaxScreenPos, subStarsParentRect, mainCamera);
+                    float endXMaxWorld = endMaxWorldPos.x;
+                    #endregion
+
+                    if (subHoldIndex == 1)
                     {
+                        planeColor = GradientColorList.GetColorAtTimeAndY(subHold.startT, startY);
+                    }
 
-                        float startY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.startT);
-                        float endY = associatedJudgePlaneObject.GetPlaneYAxis(subHold.endT);
+                    bool isSubJudgePlaneLinear = associatedJudgePlane.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
 
-                        subHold.startY = startY;
-                        subHold.endY = endY;
-                        subHold.yAxisFunction = associatedJudgePlaneObject.GetPlaneYAxisFunction(subHold.startT);
+                    if (subHold.Jagnum == 0)
+                    {
+                        //if (subHold.XLeftFunction == TransFunctionType.Linear &&
+                        //    subHold.XRightFunction == TransFunctionType.Linear &&
+                        //    isSubJudgePlaneLinear)
+                        //{
 
-                        // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-                        float startYWorld = TransformYCoordinate(mainCamera, startY, bottomPixel, topPixel);
-                        float endYWorld = TransformYCoordinate(mainCamera, endY, bottomPixel, topPixel);
+                        //    Debug.Log(
+                        //              $"startY={startY:F3}, endY={endY:F3}, " +
+                        //              $"startT={subHold.startT:F3}, endT={subHold.endT:F3}, " +
+                        //              $"objectName=SubHold{subHoldIndex}");
 
-                        if (subHoldIndex == 1)
-                        {
-                            planecolor = GradientColorList.GetColorAtTimeAndY(subHold.startT, startY);
-                        };
+                        //    // 计算Z轴位置
+                        //    float zStart = CalculateZAxisPosition(subHold.startT, ChartStartTime, chart.speedList);
+                        //    float zEnd = CalculateZAxisPosition(subHold.endT, ChartStartTime, chart.speedList);
 
-                        // 检查 SubHold 所在的 SubJudgePlane 是否为 Linear
-                        bool isSubJudgePlaneLinear = associatedJudgePlaneObject.IsSubJudgePlaneLinear(subHold.startT, subHold.endT);
+                        //    // 调用创建方法，使用新计算的坐标
+                        //    List<GameObject> createdObjects = CreateHoldQuadWithColorLines(
+                        //        startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
+                        //        startYWorld, endYWorld, zStart, zEnd,
+                        //        HoldSprite, WhiteSprite,
+                        //        $"SubHold{subHoldIndex}",
+                        //        HoldsParent, HoldOutlinesParent,
+                        //        renderQueue, shaderName, planeColor
+                        //    );
 
-                        if (subHold.Jagnum == 0)
-                        {
-                            // Jagnum = 0 时，采用之前的代码
-                            if (subHold.XLeftFunction == TransFunctionType.Linear && subHold.XRightFunction == TransFunctionType.Linear && isSubJudgePlaneLinear)
+
+                        //    subHoldInstances.Add(createdObjects[0]);
+                        //    outlineInstances.Add(createdObjects[1]);
+                        //    outlineInstances.Add(createdObjects[2]);
+                        //}
+                        //else
+                        //{
+
+                            //无论是线性还是非线性，都分段生成
+                            int segments = FinenessParams.Segment;
+                            float timeStep = (subHold.endT - subHold.startT) / segments;
+
+                            for (int i = 0; i < segments; i++)
                             {
-                                float startXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMin / ChartParams.XaxisMax;
-                                float startXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.startXMax / ChartParams.XaxisMax;
-                                float endXMinWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMin / ChartParams.XaxisMax;
-                                float endXMaxWorld = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld, 0), HorizontalParams.HorizontalMargin) * subHold.endXMax / ChartParams.XaxisMax;
+                                float segmentStartT = subHold.startT + i * timeStep;
+                                float segmentEndT = subHold.startT + (i + 1) * timeStep;
 
-                                // 根据 startT 和 endT 计算 Z 轴位置
-                                float zPositionForStartT = CalculateZAxisPosition(subHold.startT, ChartStartTime, chart.speedList);
-                                float zPositionForEndT = CalculateZAxisPosition(subHold.endT, ChartStartTime, chart.speedList);
+                                float segmentStartY = associatedJudgePlane.GetPlaneYAxis(segmentStartT);
+                                float segmentEndY = associatedJudgePlane.GetPlaneYAxis(segmentEndT);
 
-                                // 一次性生成整个 SubHold 及两侧色条
-                                List<GameObject> subHoldAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld, startXMaxWorld, endXMinWorld, endXMaxWorld,
-                                    startYWorld, endYWorld, zPositionForStartT, zPositionForEndT, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
-                                //subHoldInstances.AddRange(subHoldAndColorLines);
-                                subHoldInstances.Add(subHoldAndColorLines[0]);
-                                OutlineInstances.Add(subHoldAndColorLines[1]);
-                                OutlineInstances.Add(subHoldAndColorLines[2]);
+                                #region 分段坐标计算
+                                // 计算当前段起始X坐标
+                                float segStartXMin = CalculatePosition(segmentStartT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                                float segStartXMax = CalculatePosition(segmentStartT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+                                // 计算当前段结束X坐标
+                                float segEndXMin = CalculatePosition(segmentEndT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                                float segEndXMax = CalculatePosition(segmentEndT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+
+                                // 转换为屏幕坐标和世界坐标
+                                Vector2 segStartMinScreen = ScalePositionToScreen(new Vector2(segStartXMin, segmentStartY), subStarsParentRect);
+                                Vector3 segStartMinWorld = ConvertUIPositionToWorldPosition(segStartMinScreen, subStarsParentRect, mainCamera);
+
+                                Vector2 segStartMaxScreen = ScalePositionToScreen(new Vector2(segStartXMax, segmentStartY), subStarsParentRect);
+                                Vector3 segStartMaxWorld = ConvertUIPositionToWorldPosition(segStartMaxScreen, subStarsParentRect, mainCamera);
+
+                                Vector2 segEndMinScreen = ScalePositionToScreen(new Vector2(segEndXMin, segmentEndY), subStarsParentRect);
+                                Vector3 segEndMinWorld = ConvertUIPositionToWorldPosition(segEndMinScreen, subStarsParentRect, mainCamera);
+
+                                Vector2 segEndMaxScreen = ScalePositionToScreen(new Vector2(segEndXMax, segmentEndY), subStarsParentRect);
+                                Vector3 segEndMaxWorld = ConvertUIPositionToWorldPosition(segEndMaxScreen, subStarsParentRect, mainCamera);
+                                #endregion
+
+                                float zSegStart = CalculateZAxisPosition(segmentStartT, ChartStartTime, chart.speedList);
+                                float zSegEnd = CalculateZAxisPosition(segmentEndT, ChartStartTime, chart.speedList);
+
+                                List<GameObject> segmentObjects = CreateHoldQuadWithColorLines(
+                                    segStartMinWorld.x, segStartMaxWorld.x, segEndMinWorld.x, segEndMaxWorld.x,
+                                    segStartMinWorld.y, segEndMinWorld.y, zSegStart, zSegEnd,
+                                    HoldSprite, WhiteSprite,
+                                    $"SubHold{subHoldIndex}_{i + 1}",
+                                    HoldsParent, HoldOutlinesParent,
+                                    renderQueue, shaderName, planeColor
+                                );
+
+                                subHoldInstances.Add(segmentObjects[0]);
+                                outlineInstances.Add(segmentObjects[1]);
+                                outlineInstances.Add(segmentObjects[2]);
+                            //}
+                        }
+                    }
+                    else
+                    {
+                        int totalSegments = subHold.Jagnum * 2;
+                        float timeStep = (subHold.endT - subHold.startT) / totalSegments;
+
+                        for (int i = 0; i < totalSegments; i++)
+                        {
+                            float segmentStartT = subHold.startT + i * timeStep;
+                            float segmentEndT = subHold.startT + (i + 1) * timeStep;
+
+                            float segmentStartY = associatedJudgePlane.GetPlaneYAxis(segmentStartT);
+                            float segmentEndY = associatedJudgePlane.GetPlaneYAxis(segmentEndT);
+
+                            #region 锯齿状坐标计算
+                            // 计算当前段起始和结束X坐标
+                            float segStartXMin = CalculatePosition(segmentStartT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                            float segStartXMax = CalculatePosition(segmentStartT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+                            float segEndXMin = CalculatePosition(segmentEndT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
+                            float segEndXMax = CalculatePosition(segmentEndT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
+
+                            // 计算中间点X坐标（锯齿效果）
+                            float middleXMin, middleXMax;
+                            if (i % 2 == 0)
+                            {
+                                float width = (segEndXMax - segEndXMin) / 2;
+                                float center = (segEndXMin + segEndXMax) / 2;
+                                middleXMin = center - width / 2;
+                                middleXMax = center + width / 2;
                             }
                             else
                             {
-                                // 精细度设为 8，用于分割时间区间（可根据实际需求调整精细度）
-                                int segments = FinenessParams.Segment;
-                                float timeStep = (subHold.endT - subHold.startT) / segments;
-                                // 用于存储细分的 Instance，以便后续合并
-                                List<GameObject> segmentInstances = new List<GameObject>();
-
-                                for (int i = 0; i < segments; i++)
-                                {
-                                    float startT = subHold.startT + i * timeStep;
-                                    float endT = subHold.startT + (i + 1) * timeStep;
-                                    float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
-                                    float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
-
-                                    // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-                                    float startYWorld_Inner = TransformYCoordinate(mainCamera, startY_Inner, bottomPixel, topPixel);
-                                    float endYWorld_Inner = TransformYCoordinate(mainCamera, endY_Inner, bottomPixel, topPixel);
-
-                                    float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-                                    float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
-                                    float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-                                    float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
-
-                                    float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMin / ChartParams.XaxisMax;
-                                    float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
-                                    float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
-                                    float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
-
-                                    // 根据 startT 和 endT 计算 Z 轴位置
-                                    float zPositionForStartT_Inner = CalculateZAxisPosition(startT, ChartStartTime, chart.speedList);
-                                    float zPositionForEndT_Inner = CalculateZAxisPosition(endT, ChartStartTime, chart.speedList);
-
-                                    // 生成细分的 SubHold 及两侧色条
-                                    List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld_Inner, startXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
-                                    //segmentInstances.AddRange(segmentAndColorLines);
-                                    subHoldInstances.Add(segmentAndColorLines[0]);
-                                    OutlineInstances.Add(segmentAndColorLines[1]);
-                                    OutlineInstances.Add(segmentAndColorLines[2]);
-                                }
+                                float width = (segStartXMax - segStartXMin) / 2;
+                                float center = (segStartXMin + segStartXMax) / 2;
+                                middleXMin = center - width / 2;
+                                middleXMax = center + width / 2;
                             }
-                        }
-                        else
-                        {
-                            // Jagnum > 0 时，创建锯齿状的 SubHold
-                            int totalSegments = subHold.Jagnum * 2;
-                            float timeStep = (subHold.endT - subHold.startT) / totalSegments;
 
-                            List<GameObject> segmentInstances = new List<GameObject>();
+                            // 转换为屏幕坐标和世界坐标
+                            Vector2 segStartMinScreen = ScalePositionToScreen(new Vector2(segStartXMin, segmentStartY), subStarsParentRect);
+                            Vector3 segStartMinWorld = ConvertUIPositionToWorldPosition(segStartMinScreen, subStarsParentRect, mainCamera);
 
-                            for (int i = 0; i < totalSegments; i++)
+                            Vector2 segStartMaxScreen = ScalePositionToScreen(new Vector2(segStartXMax, segmentStartY), subStarsParentRect);
+                            Vector3 segStartMaxWorld = ConvertUIPositionToWorldPosition(segStartMaxScreen, subStarsParentRect, mainCamera);
+
+                            Vector2 segEndMinScreen = ScalePositionToScreen(new Vector2(segEndXMin, segmentEndY), subStarsParentRect);
+                            Vector3 segEndMinWorld = ConvertUIPositionToWorldPosition(segEndMinScreen, subStarsParentRect, mainCamera);
+
+                            Vector2 segEndMaxScreen = ScalePositionToScreen(new Vector2(segEndXMax, segmentEndY), subStarsParentRect);
+                            Vector3 segEndMaxWorld = ConvertUIPositionToWorldPosition(segEndMaxScreen, subStarsParentRect, mainCamera);
+
+                            //Vector2 middleMinScreen = ScalePositionToScreen(new Vector2(middleXMin, segmentEndY), subStarsParentRect);
+                            //Vector3 middleMinWorld = ConvertUIPositionToWorldPosition(middleMinScreen, subStarsParentRect, mainCamera);
+
+                            //Vector2 middleMaxScreen = ScalePositionToScreen(new Vector2(middleXMax, segmentEndY), subStarsParentRect);
+                            //Vector3 middleMaxWorld = ConvertUIPositionToWorldPosition(middleMaxScreen, subStarsParentRect, mainCamera);
+                            #endregion
+
+                            float zSegStart = CalculateZAxisPosition(segmentStartT, ChartStartTime, chart.speedList);
+                            float zSegEnd = CalculateZAxisPosition(segmentEndT, ChartStartTime, chart.speedList);
+
+                            List<GameObject> segmentObjects;
+                            if (i % 2 == 0)
                             {
-                                float startT = subHold.startT + i * timeStep;
-                                float endT = subHold.startT + (i + 1) * timeStep;
+                                Vector2 middleMinScreen = ScalePositionToScreen(new Vector2(middleXMin, segmentEndY), subStarsParentRect);
+                                Vector3 middleMinWorld = ConvertUIPositionToWorldPosition(middleMinScreen, subStarsParentRect, mainCamera);
 
-                                float startY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(startT);
-                                float endY_Inner = associatedJudgePlaneObject.GetPlaneYAxis(endT);
+                                Vector2 middleMaxScreen = ScalePositionToScreen(new Vector2(middleXMax, segmentEndY), subStarsParentRect);
+                                Vector3 middleMaxWorld = ConvertUIPositionToWorldPosition(middleMaxScreen, subStarsParentRect, mainCamera);
 
-                                // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-                                float startYWorld_Inner = TransformYCoordinate(mainCamera, startY_Inner, bottomPixel, topPixel);
-                                float endYWorld_Inner = TransformYCoordinate(mainCamera, endY_Inner, bottomPixel, topPixel);
-
-                                float startXMin = CalculatePosition(startT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-                                float startXMax = CalculatePosition(startT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
-                                float endXMin = CalculatePosition(endT, subHold.startT, subHold.startXMin, subHold.endT, subHold.endXMin, subHold.XLeftFunction);
-                                float endXMax = CalculatePosition(endT, subHold.startT, subHold.startXMax, subHold.endT, subHold.endXMax, subHold.XRightFunction);
-
-                                float middleXMin, middleXMax;
-                                if (i % 2 == 0)
-                                {
-                                    // 偶数段，由 100% 宽到 50% 宽
-                                    float width = (endXMax - endXMin) / 2;
-                                    float center = (endXMin + endXMax) / 2;
-                                    middleXMin = center - width / 2;
-                                    middleXMax = center + width / 2;
-                                }
-                                else
-                                {
-                                    // 奇数段，由 50% 宽到 100% 宽
-                                    float width = (startXMax - startXMin) / 2;
-                                    float center = (startXMin + startXMax) / 2;
-                                    middleXMin = center - width / 2;
-                                    middleXMax = center + width / 2;
-                                }
-
-                                float startXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMin / ChartParams.XaxisMax;
-                                float startXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * startXMax / ChartParams.XaxisMax;
-                                float endXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMin / ChartParams.XaxisMax;
-                                float endXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * endXMax / ChartParams.XaxisMax;
-                                float middleXMinWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * middleXMin / ChartParams.XaxisMax;
-                                float middleXMaxWorld_Inner = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld_Inner, 0), HorizontalParams.HorizontalMargin) * middleXMax / ChartParams.XaxisMax;
-
-                                // 根据 startT 和 endT 计算 Z 轴位置
-                                float zPositionForStartT_Inner = CalculateZAxisPosition(startT, ChartStartTime, chart.speedList);
-                                float zPositionForEndT_Inner = CalculateZAxisPosition(endT, ChartStartTime, chart.speedList);
-
-                                if (i % 2 == 0)
-                                {
-                                    // 偶数段
-                                    List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(startXMinWorld_Inner, startXMaxWorld_Inner, middleXMinWorld_Inner, middleXMaxWorld_Inner,
-                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
-                                    //segmentInstances.AddRange(segmentAndColorLines);
-                                    subHoldInstances.Add(segmentAndColorLines[0]);
-                                    OutlineInstances.Add(segmentAndColorLines[1]);
-                                    OutlineInstances.Add(segmentAndColorLines[2]);
-                                }
-                                else
-                                {
-                                    // 奇数段
-                                    List<GameObject> segmentAndColorLines = CreateHoldQuadWithColorLines(middleXMinWorld_Inner, middleXMaxWorld_Inner, endXMinWorld_Inner, endXMaxWorld_Inner,
-                                        startYWorld_Inner, endYWorld_Inner, zPositionForStartT_Inner, zPositionForEndT_Inner, HoldSprite, WhiteSprite, $"SubHold{subHoldIndex}_{i + 1}", HoldsParent, HoldOutlinesParent, RenderQueue, shaderName, planecolor);
-                                    //segmentInstances.AddRange(segmentAndColorLines);
-                                    subHoldInstances.Add(segmentAndColorLines[0]);
-                                    OutlineInstances.Add(segmentAndColorLines[1]);
-                                    OutlineInstances.Add(segmentAndColorLines[2]);
-                                }
+                                segmentObjects = CreateHoldQuadWithColorLines(
+                                    segStartMinWorld.x, segStartMaxWorld.x, middleMinWorld.x, middleMaxWorld.x,
+                                    segStartMinWorld.y, middleMinWorld.y, zSegStart, zSegEnd,
+                                    HoldSprite, WhiteSprite,
+                                    $"SubHold{subHoldIndex}_{i + 1}",
+                                    HoldsParent, HoldOutlinesParent,
+                                    renderQueue, shaderName, planeColor
+                                );
                             }
-                        }
+                            else
+                            {
+                                Vector2 middleMinScreen = ScalePositionToScreen(new Vector2(middleXMin, segmentStartY), subStarsParentRect);
+                                Vector3 middleMinWorld = ConvertUIPositionToWorldPosition(middleMinScreen, subStarsParentRect, mainCamera);
 
-                        subHoldIndex++;
+                                Vector2 middleMaxScreen = ScalePositionToScreen(new Vector2(middleXMax, segmentStartY), subStarsParentRect);
+                                Vector3 middleMaxWorld = ConvertUIPositionToWorldPosition(middleMaxScreen, subStarsParentRect, mainCamera);
+
+                                segmentObjects = CreateHoldQuadWithColorLines(
+                                    middleMinWorld.x, middleMaxWorld.x, segEndMinWorld.x, segEndMaxWorld.x,
+                                    middleMinWorld.y, segEndMinWorld.y, zSegStart, zSegEnd,
+                                    HoldSprite, WhiteSprite,
+                                    $"SubHold{subHoldIndex}_{i + 1}",
+                                    HoldsParent, HoldOutlinesParent,
+                                    renderQueue, shaderName, planeColor
+                                );
+                            }
+
+                            subHoldInstances.Add(segmentObjects[0]);
+                            outlineInstances.Add(segmentObjects[1]);
+                            outlineInstances.Add(segmentObjects[2]);
+                        }
                     }
 
-                    // 合并所有的 SubHold 为一个整个的 Hold
-                    GameObject combinedHold = CombineInstances(subHoldInstances, HoldsParent.transform);
-                    combinedHold.name = $"Hold{holdIndex}";
-                    ProcessCombinedInstance(combinedHold, HoldsParent, HoldsParent.layer);
-
-                    // 初始化 StartWhiteRect 和 EndWhiteRect
-                    float startY1 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList[0].startT);
-                    float startY2 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
-                    float startYWorld1 = TransformYCoordinate(mainCamera, startY1, bottomPixel, topPixel);
-                    float startYWorld2 = TransformYCoordinate(mainCamera, startY2, bottomPixel, topPixel);
-
-                    float endY1 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
-                    float endY2 = associatedJudgePlaneObject.GetPlaneYAxis(hold.subHoldList.Last().endT);
-                    float endYWorld1 = TransformYCoordinate(mainCamera, endY1, bottomPixel, topPixel);
-                    float endYWorld2 = TransformYCoordinate(mainCamera, endY2, bottomPixel, topPixel);
-
-                    // 计算开始部分的四个顶点位置
-                    float startXMin1 = CalculatePosition(hold.subHoldList[0].startT, hold.subHoldList[0].startT, hold.subHoldList[0].startXMin, hold.subHoldList[0].endT, hold.subHoldList[0].endXMin, hold.subHoldList[0].XLeftFunction);
-                    float startXMax1 = CalculatePosition(hold.subHoldList[0].startT, hold.subHoldList[0].startT, hold.subHoldList[0].startXMax, hold.subHoldList[0].endT, hold.subHoldList[0].endXMax, hold.subHoldList[0].XRightFunction);
-                    float startXMin2 = CalculatePosition(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList[0].startT, hold.subHoldList[0].startXMin, hold.subHoldList[0].endT, hold.subHoldList[0].endXMin, hold.subHoldList[0].XLeftFunction);
-                    float startXMax2 = CalculatePosition(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList[0].startT, hold.subHoldList[0].startXMax, hold.subHoldList[0].endT, hold.subHoldList[0].endXMax, hold.subHoldList[0].XRightFunction);
-
-                    float startXMinWorld1 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld1, 0), HorizontalParams.HorizontalMargin) * startXMin1 / ChartParams.XaxisMax;
-                    float startXMaxWorld1 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld1, 0), HorizontalParams.HorizontalMargin) * startXMax1 / ChartParams.XaxisMax;
-                    float startXMinWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld2, 0), HorizontalParams.HorizontalMargin) * startXMin2 / ChartParams.XaxisMax;
-                    float startXMaxWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, startYWorld2, 0), HorizontalParams.HorizontalMargin) * startXMax2 / ChartParams.XaxisMax;
-
-                    float startZ1 = CalculateZAxisPosition(hold.subHoldList[0].startT, ChartStartTime, chart.speedList);
-                    float startZ2 = CalculateZAxisPosition(hold.subHoldList[0].startT + OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, ChartStartTime, chart.speedList);
-
-                    // 计算结束部分的四个顶点位置
-                    float endXMin1 = CalculatePosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMin, hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMin, hold.subHoldList.Last().XLeftFunction);
-                    float endXMax1 = CalculatePosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMax, hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMax, hold.subHoldList.Last().XRightFunction);
-                    float endXMin2 = CalculatePosition(hold.subHoldList.Last().endT, hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMin, hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMin, hold.subHoldList.Last().XLeftFunction);
-                    float endXMax2 = CalculatePosition(hold.subHoldList.Last().endT, hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMax, hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMax, hold.subHoldList.Last().XRightFunction);
-
-                    float endXMinWorld1 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld1, 0), HorizontalParams.HorizontalMargin) * endXMin1 / ChartParams.XaxisMax;
-                    float endXMaxWorld1 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld1, 0), HorizontalParams.HorizontalMargin) * endXMax1 / ChartParams.XaxisMax;
-                    float endXMinWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld2, 0), HorizontalParams.HorizontalMargin) * endXMin2 / ChartParams.XaxisMax;
-                    float endXMaxWorld2 = CalculateWorldUnitToScreenPixelXAtPosition(new Vector3(0, endYWorld2, 0), HorizontalParams.HorizontalMargin) * endXMax2 / ChartParams.XaxisMax;
-
-                    float endZ1 = CalculateZAxisPosition(hold.subHoldList.Last().endT - OutlineParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, ChartStartTime, chart.speedList);
-                    float endZ2 = CalculateZAxisPosition(hold.subHoldList.Last().endT, ChartStartTime, chart.speedList);
-
-                    // 增加渲染队列值，确保白色矩形显示在 Hold 之上
-                    //int whiteRectRenderQueue = RenderQueue + 1;
-
-                    // 创建开头的白色矩形及两侧色条
-                    GameObject startOutline = CreateHoldStartAndEndOutlineQuad(startXMinWorld1 - OutlineParams.HoldColorLineWidth, startXMaxWorld1 + OutlineParams.HoldColorLineWidth,
-                        startXMinWorld2 - OutlineParams.HoldColorLineWidth, startXMaxWorld2 + OutlineParams.HoldColorLineWidth,
-                        startYWorld1, startYWorld2, startZ1, startZ2, WhiteSprite, $"StartWhiteRect{holdIndex}", HoldsParent, RenderQueue, shaderName, planecolor);
-
-                    // 创建结尾的白色矩形及两侧色条
-                    GameObject endOutline = CreateHoldStartAndEndOutlineQuad(endXMinWorld1 - OutlineParams.HoldColorLineWidth, endXMaxWorld1 + OutlineParams.HoldColorLineWidth,
-                        endXMinWorld2 - OutlineParams.HoldColorLineWidth, endXMaxWorld2 + OutlineParams.HoldColorLineWidth,
-                        endYWorld1, endYWorld2, endZ1, endZ2, WhiteSprite, $"EndWhiteRect{holdIndex}", HoldsParent, RenderQueue, shaderName, planecolor);
-
-                    // 合并 Hold 周围一圈的所有亮条（包括 StartWhiteRect 和 EndWhiteRect）
-                    //List<GameObject> allOutlineInstances = new List<GameObject>();
-                    OutlineInstances.Add(startOutline);
-                    OutlineInstances.Add(endOutline);
-
-                    GameObject combinedHoldOutline = CombineInstances(OutlineInstances, HoldOutlinesParent.transform);
-                    combinedHoldOutline.name = $"HoldOutline{holdIndex}";
-                    ProcessCombinedInstance(combinedHoldOutline, HoldOutlinesParent, HoldOutlinesParent.layer);
-
-                    //注意Hold的实际世界坐标与其他Note不一致，需要获取Hold对应的标准坐标
-                    float yAxisPosition = associatedJudgePlaneObject.GetPlaneYAxis(HoldstartT);
-                    float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
-
-                    // 计算水平方向上在世界坐标中的单位长度对应的屏幕像素长度以及水平可视范围（这里可复用已有的相关方法，假设已经有合适的方法定义，参数需根据实际传入合适的世界坐标点）
-                    Vector3 referencePoint = new Vector3(0, yPos, 0);
-                    float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
-
-                    // 计算X轴坐标
-                    float HoldstartX = hold.GetFirstSubHoldStartX();
-                    float startXWorld = worldUnitToScreenPixelX * HoldstartX / ChartParams.XaxisMax;
-
-                    // Hold实例的标准位置
-                    float zPosForStartT = CalculateZAxisPosition(HoldstartT, ChartStartTime, chart.speedList);
-                    Vector3 HoldPos = new Vector3(-startXWorld, yPos, zPosForStartT);
-
-                    // 检查时间点和实例名是否都在 MultiHitPairs 中
-                    if (MultiHitPairs.ContainsKey(HoldstartT) &&
-                        MultiHitPairs.TryGetValue(HoldstartT, out List<string> namesAtTime) &&
-                        namesAtTime.Contains(combinedHold.name))
-                    {
-                        if (!MultiHitPairsCoord.ContainsKey(HoldstartT))
-                        {
-                            MultiHitPairsCoord[HoldstartT] = new List<Vector3>();
-                        }
-                        //添加Note坐标至MultiHitPairsCoord
-                        MultiHitPairsCoord[HoldstartT].Add(HoldPos);
-                    }
+                    subHoldIndex++;
                 }
 
-                holdIndex++;
+                // 合并SubHold实例
+                GameObject combinedHold = CombineInstances(subHoldInstances, HoldsParent.transform);
+                combinedHold.name = $"Hold{holdIndex}";
+                ProcessCombinedInstance(combinedHold, HoldsParent, HoldsParent.layer);
+
+                #region 计算StartWhiteRect和EndWhiteRect坐标
+                // 开始部分坐标
+                float startY1 = associatedJudgePlane.GetPlaneYAxis(hold.subHoldList[0].startT);
+                float startY2 = associatedJudgePlane.GetPlaneYAxis(hold.subHoldList[0].startT + ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
+
+                Vector2 startY1Screen = ScalePositionToScreen(new Vector2(0, startY1), subStarsParentRect);
+                Vector3 startY1World = ConvertUIPositionToWorldPosition(startY1Screen, subStarsParentRect, mainCamera);
+                float startY1WorldVal = startY1World.y;
+
+                Vector2 startY2Screen = ScalePositionToScreen(new Vector2(0, startY2), subStarsParentRect);
+                Vector3 startY2World = ConvertUIPositionToWorldPosition(startY2Screen, subStarsParentRect, mainCamera);
+                float startY2WorldVal = startY2World.y;
+
+                // 结束部分坐标
+                float endY1 = associatedJudgePlane.GetPlaneYAxis(hold.subHoldList.Last().endT - ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault);
+                float endY2 = associatedJudgePlane.GetPlaneYAxis(hold.subHoldList.Last().endT);
+
+                Vector2 endY1Screen = ScalePositionToScreen(new Vector2(0, endY1), subStarsParentRect);
+                Vector3 endY1World = ConvertUIPositionToWorldPosition(endY1Screen, subStarsParentRect, mainCamera);
+                float endY1WorldVal = endY1World.y;
+
+                Vector2 endY2Screen = ScalePositionToScreen(new Vector2(0, endY2), subStarsParentRect);
+                Vector3 endY2World = ConvertUIPositionToWorldPosition(endY2Screen, subStarsParentRect, mainCamera);
+                float endY2WorldVal = endY2World.y;
+
+                // 计算StartWhiteRect的四个顶点X坐标
+                float startXMin1 = CalculatePosition(hold.subHoldList[0].startT, hold.subHoldList[0].startT, hold.subHoldList[0].startXMin, hold.subHoldList[0].endT, hold.subHoldList[0].endXMin, hold.subHoldList[0].XLeftFunction);
+                float startXMax1 = CalculatePosition(hold.subHoldList[0].startT, hold.subHoldList[0].startT, hold.subHoldList[0].startXMax, hold.subHoldList[0].endT, hold.subHoldList[0].endXMax, hold.subHoldList[0].XRightFunction);
+                float startXMin2 = CalculatePosition(hold.subHoldList[0].startT + ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList[0].startT, hold.subHoldList[0].startXMin, hold.subHoldList[0].endT, hold.subHoldList[0].endXMin, hold.subHoldList[0].XLeftFunction);
+                float startXMax2 = CalculatePosition(hold.subHoldList[0].startT + ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, hold.subHoldList[0].startT, hold.subHoldList[0].startXMax, hold.subHoldList[0].endT, hold.subHoldList[0].endXMax, hold.subHoldList[0].XRightFunction);
+
+                Vector2 startXMin1Screen = ScalePositionToScreen(new Vector2(startXMin1, startY1), subStarsParentRect);
+                Vector3 startXMin1World = ConvertUIPositionToWorldPosition(startXMin1Screen, subStarsParentRect, mainCamera);
+                float startXMin1WorldVal = startXMin1World.x;
+
+                Vector2 startXMax1Screen = ScalePositionToScreen(new Vector2(startXMax1, startY1), subStarsParentRect);
+                Vector3 startXMax1World = ConvertUIPositionToWorldPosition(startXMax1Screen, subStarsParentRect, mainCamera);
+                float startXMax1WorldVal = startXMax1World.x;
+
+                Vector2 startXMin2Screen = ScalePositionToScreen(new Vector2(startXMin2, startY2), subStarsParentRect);
+                Vector3 startXMin2World = ConvertUIPositionToWorldPosition(startXMin2Screen, subStarsParentRect, mainCamera);
+                float startXMin2WorldVal = startXMin2World.x;
+
+                Vector2 startXMax2Screen = ScalePositionToScreen(new Vector2(startXMax2, startY2), subStarsParentRect);
+                Vector3 startXMax2World = ConvertUIPositionToWorldPosition(startXMax2Screen, subStarsParentRect, mainCamera);
+                float startXMax2WorldVal = startXMax2World.x;
+
+                // 计算EndWhiteRect的四个顶点X坐标
+                float endXMin1 = CalculatePosition(hold.subHoldList.Last().endT - ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault,
+                    hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMin,
+                    hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMin,
+                    hold.subHoldList.Last().XLeftFunction);
+                float endXMax1 = CalculatePosition(hold.subHoldList.Last().endT - ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault,
+                    hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMax,
+                    hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMax,
+                    hold.subHoldList.Last().XRightFunction);
+                float endXMin2 = CalculatePosition(hold.subHoldList.Last().endT,
+                    hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMin,
+                    hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMin,
+                    hold.subHoldList.Last().XLeftFunction);
+                float endXMax2 = CalculatePosition(hold.subHoldList.Last().endT,
+                    hold.subHoldList.Last().startT, hold.subHoldList.Last().startXMax,
+                    hold.subHoldList.Last().endT, hold.subHoldList.Last().endXMax,
+                    hold.subHoldList.Last().XRightFunction);
+
+                Vector2 endXMin1Screen = ScalePositionToScreen(new Vector2(endXMin1, endY1), subStarsParentRect);
+                Vector3 endXMin1World = ConvertUIPositionToWorldPosition(endXMin1Screen, subStarsParentRect, mainCamera);
+                float endXMin1WorldVal = endXMin1World.x;
+
+                Vector2 endXMax1Screen = ScalePositionToScreen(new Vector2(endXMax1, endY1), subStarsParentRect);
+                Vector3 endXMax1World = ConvertUIPositionToWorldPosition(endXMax1Screen, subStarsParentRect, mainCamera);
+                float endXMax1WorldVal = endXMax1World.x;
+
+                Vector2 endXMin2Screen = ScalePositionToScreen(new Vector2(endXMin2, endY2), subStarsParentRect);
+                Vector3 endXMin2World = ConvertUIPositionToWorldPosition(endXMin2Screen, subStarsParentRect, mainCamera);
+                float endXMin2WorldVal = endXMin2World.x;
+
+                Vector2 endXMax2Screen = ScalePositionToScreen(new Vector2(endXMax2, endY2), subStarsParentRect);
+                Vector3 endXMax2World = ConvertUIPositionToWorldPosition(endXMax2Screen, subStarsParentRect, mainCamera);
+                float endXMax2WorldVal = endXMax2World.x;
+                #endregion
+
+                // 增加渲染队列值，确保白色矩形显示在Hold之上
+                //int whiteRectRenderQueue = renderQueue + 1;
+
+                // 创建开头的白色矩形及两侧色条
+                GameObject startOutline = CreateHoldStartAndEndOutlineQuad(
+                    startXMin1WorldVal + ChartParams.HoldColorLineWidth, startXMax1WorldVal - ChartParams.HoldColorLineWidth,
+                    startXMin2WorldVal + ChartParams.HoldColorLineWidth, startXMax2WorldVal - ChartParams.HoldColorLineWidth,
+                    startY1WorldVal, startY2WorldVal,
+                    CalculateZAxisPosition(hold.subHoldList[0].startT, ChartStartTime, chart.speedList),
+                    CalculateZAxisPosition(hold.subHoldList[0].startT + ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, ChartStartTime, chart.speedList),
+                    WhiteSprite, $"StartWhiteRect{holdIndex}", HoldsParent, renderQueue, shaderName, planeColor
+                );
+
+                // 创建结尾的白色矩形及两侧色条
+                GameObject endOutline = CreateHoldStartAndEndOutlineQuad(
+                    endXMin1WorldVal + ChartParams.HoldColorLineWidth, endXMax1WorldVal - ChartParams.HoldColorLineWidth,
+                    endXMin2WorldVal + ChartParams.HoldColorLineWidth, endXMax2WorldVal - ChartParams.HoldColorLineWidth,
+                    endY1WorldVal, endY2WorldVal,
+                    CalculateZAxisPosition(hold.subHoldList.Last().endT - ChartParams.HoldColorLineWidth / SpeedParams.NoteSpeedDefault, ChartStartTime, chart.speedList),
+                    CalculateZAxisPosition(hold.subHoldList.Last().endT, ChartStartTime, chart.speedList),
+                    WhiteSprite, $"EndWhiteRect{holdIndex}", HoldsParent, renderQueue, shaderName, planeColor
+                );
+
+                // 合并Hold周围的所有亮条
+                outlineInstances.Add(startOutline);
+                outlineInstances.Add(endOutline);
+
+                GameObject combinedHoldOutline = CombineInstances(outlineInstances, HoldOutlinesParent.transform);
+                combinedHoldOutline.name = $"HoldOutline{holdIndex}";
+                ProcessCombinedInstance(combinedHoldOutline, HoldOutlinesParent, HoldOutlinesParent.layer);
+
+                #region 计算Hold标准位置
+                float holdStartX = hold.GetFirstSubHoldStartX();
+                float holdStartY = associatedJudgePlane.GetPlaneYAxis(holdStartT);
+                
+                //float yPos = TransformYCoordinate(mainCamera, yAxisPosition, bottomPixel, topPixel);
+
+                // 起始点坐标转换
+                Vector2 HoldScreenPos = ScalePositionToScreen(new Vector2(holdStartX, holdStartY), subStarsParentRect);
+                //Debug.Log(subHold.startXMin);
+                Vector3 HoldWorldPos = ConvertUIPositionToWorldPosition(HoldScreenPos, subStarsParentRect, mainCamera);
+
+
+                //Vector3 referencePoint = new Vector3(0, yPos, 0);
+                //float worldUnitToScreenPixelX = CalculateWorldUnitToScreenPixelXAtPosition(referencePoint, HorizontalParams.HorizontalMargin);
+                //float startXWorld = worldUnitToScreenPixelX * holdStartX / ChartParams.XaxisMax;
+
+                float zPosForStartT = CalculateZAxisPosition(holdStartT, ChartStartTime, chart.speedList);
+                Vector3 holdPos = new Vector3(HoldWorldPos.x, HoldWorldPos.y, zPosForStartT);
+                #endregion
+
+                // 检查时间点和实例名是否在MultiHitPairs中
+                if (MultiHitPairs.ContainsKey(holdStartT) &&
+                    MultiHitPairs.TryGetValue(holdStartT, out List<string> namesAtTime) &&
+                    namesAtTime.Contains(combinedHold.name))
+                {
+                    if (!MultiHitPairsCoord.ContainsKey(holdStartT))
+                    {
+                        MultiHitPairsCoord[holdStartT] = new List<Vector3>();
+                    }
+                    MultiHitPairsCoord[holdStartT].Add(holdPos);
+                }
             }
+
+            holdIndex++;
         }
     }
 
@@ -1245,7 +1446,7 @@ public class ChartInstantiator : MonoBehaviour
 
             //先将subStar的起点和终点转换为画布上的坐标
             Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
-            Vector2 subStarStartScreen = ScalePositionToScreenStar(subStarStart, SubStarsParentRect);
+            Vector2 subStarStartScreen = ScalePositionToScreen(subStarStart, SubStarsParentRect);
             //Debug.Log(subStarStart);
             //Debug.Log(subStarStartScreen);
 
@@ -1255,7 +1456,7 @@ public class ChartInstantiator : MonoBehaviour
                 // 如果是线性，则根据起始位置和终止位置初始化
                 case TrackFunctionType.Linear:
                     Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
-                    Vector2 subStarEndScreen = ScalePositionToScreenStar(subStarEnd, SubStarsParentRect);
+                    Vector2 subStarEndScreen = ScalePositionToScreen(subStarEnd, SubStarsParentRect);
                     if (subStarIndex == 1)
                     {
                         // 当 subStarIndex 为 1 时，初始化第一个箭头；否则忽略第一个箭头
@@ -1313,7 +1514,7 @@ public class ChartInstantiator : MonoBehaviour
 
                     Vector2 substarEndScreen = CauculateEndScreenStar(subStarStartScreen, SubStarsParentRect, subStar);
                     //Debug.Log(substarEndScreen);
-                    Vector2 substarEnd = ScreenPositionToScaleStar(substarEndScreen, SubStarsParentRect);
+                    Vector2 substarEnd = ScreenPositionToScale(substarEndScreen, SubStarsParentRect);
                     //Debug.Log(substarEnd);
                     subStar.endX = substarEnd.x;
                     subStar.endY = substarEnd.y;
@@ -1399,7 +1600,7 @@ public class ChartInstantiator : MonoBehaviour
                 {
                     Vector3 pointA = coordinates[i];
                     Vector3 pointB = coordinates[j];
-                    if (pointA.y != pointB.y) // 仅当y轴坐标不同时连线
+                    if (Mathf.Abs(pointA.y - pointB.y) > 1) // 仅当y轴坐标相差较大时连线
                     {
                         CreateMultiHitLine(multiHitLinePrefab, pointA, pointB, startT, Index);
                         Index += 1;
@@ -1499,6 +1700,12 @@ public class ChartInstantiator : MonoBehaviour
     private List<GameObject> CreateJudgePlaneAndColorLinesQuad(float startY, float endY, float startT, float endT, Sprite sprite, string objectName,
         GameObject judgePlaneParent, GameObject ColorLinesParent, int RenderQueue, Color planecolor, List<Speed> speedList)
     {
+        // 打印输入参数
+        //Debug.Log(
+        //          $"startY={startY:F3}, endY={endY:F3}, " +
+        //          $"startT={startT:F3}, endT={endT:F3}, " +
+        //          $"objectName={objectName}");
+
         //Debug.Log(startT);
         // 只有当startT为0时，startT往前推ChartStartTime
         if (Math.Abs(startT - 0f) <= 0.001)
@@ -1509,8 +1716,8 @@ public class ChartInstantiator : MonoBehaviour
         //Debug.Log(planecolor);
 
         // 根据摄像机角度修正y轴坐标，使y轴坐标在摄像机视角下是线性变换的
-        float startYWorld = TransformYCoordinate(mainCamera, startY, bottomPixel, topPixel);
-        float endYWorld = TransformYCoordinate(mainCamera, endY, bottomPixel, topPixel);
+        //float startYWorld = TransformYCoordinate(mainCamera, startY, bottomPixel, topPixel);
+        //float endYWorld = TransformYCoordinate(mainCamera, endY, bottomPixel, topPixel);
 
         // 根据SubJudgePlane的StartT来设置实例的Z轴位置（这里将变量名修改得更清晰些，叫zPositionForStartT）
         //Debug.Log(startT);
@@ -1521,30 +1728,62 @@ public class ChartInstantiator : MonoBehaviour
         // 计算在Z轴方向的长度（之前代码中的height变量，这里改为lengthForZAxis）
         //float lengthForZAxis = (endT - startT) * SpeedParams.NoteSpeedDefault;
 
-        // 假设获取到一个目标点的世界坐标
-        Vector3 StartPoint = new Vector3(0, startYWorld, 0);
-        Vector3 EndPoint = new Vector3(0, endYWorld, 0);
+        //// 假设获取到一个目标点的世界坐标
+        //Vector3 StartPoint = new Vector3(0, startYWorld, 0);
+        //Vector3 EndPoint = new Vector3(0, endYWorld, 0);
 
         // 计算StartXWorld和EndXWorld，确保在屏幕左右各留10%的距离
-        float startXWorld = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint, HorizontalParams.HorizontalMargin);
-        float endXWorld = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint, HorizontalParams.HorizontalMargin);
+        //float startXWorld = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint, HorizontalParams.HorizontalMargin);
+        //float endXWorld = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint, HorizontalParams.HorizontalMargin);
 
-        float startXWorldPlus = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint, HorizontalParams.PlusHorizontalMargin);
-        float endXWorldPlus = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint, HorizontalParams.PlusHorizontalMargin);
+        //float startXWorldPlus = CalculateWorldUnitToScreenPixelXAtPosition(StartPoint, HorizontalParams.PlusHorizontalMargin);
+        //float endXWorldPlus = CalculateWorldUnitToScreenPixelXAtPosition(EndPoint, HorizontalParams.PlusHorizontalMargin);
 
-        Vector3 point1 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
-        Vector3 point2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
-        Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForEndT);
-        Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForEndT);
+
+        RectTransform SubStarsParentRect = SubStarsParent.GetComponent<RectTransform>();
+        Vector2 LeftStart = ScalePositionToScreen(new Vector2(-ChartParams.XaxisMax, startY), SubStarsParentRect);
+        Vector2 RightStart = ScalePositionToScreen(new Vector2(ChartParams.XaxisMax, startY), SubStarsParentRect);
+        Vector2 LeftEnd = ScalePositionToScreen(new Vector2(-ChartParams.XaxisMax, endY), SubStarsParentRect);
+        Vector2 RightEnd = ScalePositionToScreen(new Vector2(ChartParams.XaxisMax, endY), SubStarsParentRect);
+
+        Vector2 LeftEdgeStart = ScalePositionToScreen(new Vector2(-ChartParams.XaxisMax- HorizontalParams.ColorLineWidth, startY), SubStarsParentRect);
+        Vector2 RightEdgeStart = ScalePositionToScreen(new Vector2(ChartParams.XaxisMax+ HorizontalParams.ColorLineWidth, startY), SubStarsParentRect);
+        Vector2 LeftEdgeEnd = ScalePositionToScreen(new Vector2(-ChartParams.XaxisMax- HorizontalParams.ColorLineWidth, endY), SubStarsParentRect);
+        Vector2 RightEdgeEnd = ScalePositionToScreen(new Vector2(ChartParams.XaxisMax+ HorizontalParams.ColorLineWidth, endY), SubStarsParentRect);
+
+        Vector3 LeftStartworldPos = ConvertUIPositionToWorldPosition(LeftStart, SubStarsParentRect, mainCamera);
+        Vector3 RightStartworldPos = ConvertUIPositionToWorldPosition(RightStart, SubStarsParentRect, mainCamera);
+        Vector3 LeftEndworldPos = ConvertUIPositionToWorldPosition(LeftEnd, SubStarsParentRect, mainCamera);
+        Vector3 RightEndworldPos = ConvertUIPositionToWorldPosition(RightEnd, SubStarsParentRect, mainCamera);
+
+        Vector3 LeftEdgeStartworldPos = ConvertUIPositionToWorldPosition(LeftEdgeStart, SubStarsParentRect, mainCamera);
+        Vector3 RightEdgeStartworldPos = ConvertUIPositionToWorldPosition(RightEdgeStart, SubStarsParentRect, mainCamera);
+        Vector3 LeftEdgeEndworldPos = ConvertUIPositionToWorldPosition(LeftEdgeEnd, SubStarsParentRect, mainCamera);
+        Vector3 RightEdgeEndworldPos = ConvertUIPositionToWorldPosition(RightEdgeEnd, SubStarsParentRect, mainCamera);
+
+        //Vector3 point1 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
+        //Vector3 point2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
+        //Vector3 point3 = new Vector3(endXWorld, endYWorld, zPositionForEndT);
+        //Vector3 point4 = new Vector3(-endXWorld, endYWorld, zPositionForEndT);
+
+        Vector3 point1 = new Vector3(LeftStartworldPos.x, LeftStartworldPos.y, zPositionForStartT);
+        Vector3 point2 = new Vector3(RightStartworldPos.x, RightStartworldPos.y, zPositionForStartT);
+        Vector3 point3 = new Vector3(RightEndworldPos.x, RightEndworldPos.y, zPositionForEndT); 
+        Vector3 point4 = new Vector3(LeftEndworldPos.x, LeftEndworldPos.y, zPositionForEndT);
 
         // 创建JudgePlane实例，使用Sprite的颜色，不再额外赋予灰色
         GameObject judgePlaneInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, judgePlaneParent, RenderQueue, 1f, "MaskMaterial");
 
         // 创建左侧亮条实例
-        Vector3 leftPoint1 = new Vector3(-startXWorldPlus, startYWorld, zPositionForStartT);
-        Vector3 leftPoint2 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
-        Vector3 leftPoint3 = new Vector3(-endXWorld, endYWorld, zPositionForEndT);
-        Vector3 leftPoint4 = new Vector3(-endXWorldPlus, endYWorld, zPositionForEndT);
+        //Vector3 leftPoint1 = new Vector3(-startXWorldPlus, startYWorld, zPositionForStartT);
+        //Vector3 leftPoint2 = new Vector3(-startXWorld, startYWorld, zPositionForStartT);
+        //Vector3 leftPoint3 = new Vector3(-endXWorld, endYWorld, zPositionForEndT);
+        //Vector3 leftPoint4 = new Vector3(-endXWorldPlus, endYWorld, zPositionForEndT);
+
+        Vector3 leftPoint1 = new Vector3(LeftStartworldPos.x, LeftStartworldPos.y, zPositionForStartT);
+        Vector3 leftPoint2 = new Vector3(LeftEdgeStartworldPos.x, LeftEdgeStartworldPos.y, zPositionForStartT);
+        Vector3 leftPoint3 = new Vector3(LeftEdgeEndworldPos.x, LeftEdgeEndworldPos.y, zPositionForEndT);
+        Vector3 leftPoint4 = new Vector3(LeftEndworldPos.x, LeftEndworldPos.y, zPositionForEndT);
 
         //string leftObjectName = $"LeftStrip_{objectName}";
         GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, sprite, objectName, ColorLinesParent, RenderQueue, 1f, "MaskMaterialColorLine");
@@ -1552,10 +1791,15 @@ public class ChartInstantiator : MonoBehaviour
 
 
         // 创建右侧亮条实例
-        Vector3 rightPoint1 = new Vector3(startXWorldPlus, startYWorld, zPositionForStartT);
-        Vector3 rightPoint2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
-        Vector3 rightPoint3 = new Vector3(endXWorld, endYWorld, zPositionForEndT);
-        Vector3 rightPoint4 = new Vector3(endXWorldPlus, endYWorld, zPositionForEndT);
+        //Vector3 rightPoint1 = new Vector3(startXWorldPlus, startYWorld, zPositionForStartT);
+        //Vector3 rightPoint2 = new Vector3(startXWorld, startYWorld, zPositionForStartT);
+        //Vector3 rightPoint3 = new Vector3(endXWorld, endYWorld, zPositionForEndT);
+        //Vector3 rightPoint4 = new Vector3(endXWorldPlus, endYWorld, zPositionForEndT);
+
+        Vector3 rightPoint1 = new Vector3(RightStartworldPos.x, RightStartworldPos.y, zPositionForStartT);
+        Vector3 rightPoint2 = new Vector3(RightEdgeStartworldPos.x, RightEdgeStartworldPos.y, zPositionForStartT);
+        Vector3 rightPoint3 = new Vector3(RightEdgeEndworldPos.x, RightEdgeEndworldPos.y, zPositionForEndT);
+        Vector3 rightPoint4 = new Vector3(RightEndworldPos.x, RightEndworldPos.y, zPositionForEndT);
 
         //string rightObjectName = $"RightStrip_{objectName}";
         GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, sprite, objectName, ColorLinesParent, RenderQueue, 1f, "MaskMaterialColorLine");
@@ -1577,10 +1821,10 @@ public class ChartInstantiator : MonoBehaviour
 
         float AlphaOutline = 1f;
         // 注意四边形顶点顺序
-        Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
-        Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
-        Vector3 point3 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
-        Vector3 point4 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
+        Vector3 point1 = new Vector3(startXMinWorld, startY, zPositionForStartT);
+        Vector3 point2 = new Vector3(endXMinWorld, endY, zPositionForEndT);
+        Vector3 point3 = new Vector3(endXMaxWorld, endY, zPositionForEndT);
+        Vector3 point4 = new Vector3(startXMaxWorld, startY, zPositionForStartT);
 
         GameObject holdInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, sprite, objectName, parentObject, RenderQueue, AlphaOutline, shaderName);
         SetSpriteColor(holdInstance, color);
@@ -1588,8 +1832,54 @@ public class ChartInstantiator : MonoBehaviour
         return holdInstance;
     }
 
+    //private List<GameObject> CreateHoldQuadWithColorLines(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
+    //    float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite spritehold, Sprite spritecolor, string objectName, GameObject parentObject, GameObject colorLineParentObject, int RenderQueue, string shaderName, Color color)
+    //{
+    //    float AlphaHold = 0.8f;
+    //    float AlphaOutline = 1f;
+
+    //    List<GameObject> instances = new List<GameObject>();
+
+    //    // 注意四边形顶点顺序
+    //    Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
+    //    Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
+    //    Vector3 point3 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
+    //    Vector3 point4 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
+
+    //    // 创建 Hold 实例
+    //    GameObject holdInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, spritehold, objectName, parentObject, RenderQueue, AlphaHold, shaderName);
+    //    instances.Add(holdInstance);
+
+    //    // 创建左侧亮条实例
+    //    float leftStartXMinWorld = -startXMinWorld + ChartParams.HoldColorLineWidth;
+    //    float leftEndXMinWorld = -endXMinWorld + ChartParams.HoldColorLineWidth;
+    //    Vector3 leftPoint1 = new Vector3(leftStartXMinWorld, startY, zPositionForStartT);
+    //    Vector3 leftPoint2 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
+    //    Vector3 leftPoint3 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
+    //    Vector3 leftPoint4 = new Vector3(leftEndXMinWorld, endY, zPositionForEndT);
+
+    //    GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, spritecolor, $"Left_{objectName}", colorLineParentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
+    //    SetSpriteColor(leftStripInstance, color);
+
+    //    instances.Add(leftStripInstance);
+
+    //    // 创建右侧亮条实例
+    //    float rightStartXMaxWorld = -startXMaxWorld - ChartParams.HoldColorLineWidth;
+    //    float rightEndXMaxWorld = -endXMaxWorld - ChartParams.HoldColorLineWidth;
+    //    Vector3 rightPoint1 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
+    //    Vector3 rightPoint2 = new Vector3(rightStartXMaxWorld, startY, zPositionForStartT);
+    //    Vector3 rightPoint3 = new Vector3(rightEndXMaxWorld, endY, zPositionForEndT);
+    //    Vector3 rightPoint4 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
+
+    //    GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, spritecolor, $"Right_{objectName}", colorLineParentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
+    //    SetSpriteColor(rightStripInstance, color);
+
+    //    instances.Add(rightStripInstance);
+
+    //    return instances;
+    //}
     private List<GameObject> CreateHoldQuadWithColorLines(float startXMinWorld, float startXMaxWorld, float endXMinWorld, float endXMaxWorld,
-        float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite spritehold, Sprite spritecolor, string objectName, GameObject parentObject, GameObject colorLineParentObject, int RenderQueue, string shaderName, Color color)
+    float startY, float endY, float zPositionForStartT, float zPositionForEndT, Sprite spritehold, Sprite spritecolor, string objectName, GameObject parentObject, GameObject colorLineParentObject, int RenderQueue, string shaderName, Color color)
     {
         float AlphaHold = 0.8f;
         float AlphaOutline = 1f;
@@ -1597,21 +1887,21 @@ public class ChartInstantiator : MonoBehaviour
         List<GameObject> instances = new List<GameObject>();
 
         // 注意四边形顶点顺序
-        Vector3 point1 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
-        Vector3 point2 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
-        Vector3 point3 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
-        Vector3 point4 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
+        Vector3 point1 = new Vector3(startXMinWorld, startY, zPositionForStartT);
+        Vector3 point2 = new Vector3(endXMinWorld, endY, zPositionForEndT);
+        Vector3 point3 = new Vector3(endXMaxWorld, endY, zPositionForEndT);
+        Vector3 point4 = new Vector3(startXMaxWorld, startY, zPositionForStartT);
 
         // 创建 Hold 实例
         GameObject holdInstance = CreateQuadFromPoints.CreateQuad(point1, point2, point3, point4, spritehold, objectName, parentObject, RenderQueue, AlphaHold, shaderName);
         instances.Add(holdInstance);
 
         // 创建左侧亮条实例
-        float leftStartXMinWorld = -startXMinWorld + OutlineParams.HoldColorLineWidth;
-        float leftEndXMinWorld = -endXMinWorld + OutlineParams.HoldColorLineWidth;
+        float leftStartXMinWorld = startXMinWorld + ChartParams.HoldColorLineWidth;
+        float leftEndXMinWorld = endXMinWorld + ChartParams.HoldColorLineWidth;
         Vector3 leftPoint1 = new Vector3(leftStartXMinWorld, startY, zPositionForStartT);
-        Vector3 leftPoint2 = new Vector3(-startXMinWorld, startY, zPositionForStartT);
-        Vector3 leftPoint3 = new Vector3(-endXMinWorld, endY, zPositionForEndT);
+        Vector3 leftPoint2 = new Vector3(startXMinWorld, startY, zPositionForStartT);
+        Vector3 leftPoint3 = new Vector3(endXMinWorld, endY, zPositionForEndT);
         Vector3 leftPoint4 = new Vector3(leftEndXMinWorld, endY, zPositionForEndT);
 
         GameObject leftStripInstance = CreateQuadFromPoints.CreateQuad(leftPoint1, leftPoint2, leftPoint3, leftPoint4, spritecolor, $"Left_{objectName}", colorLineParentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
@@ -1620,12 +1910,12 @@ public class ChartInstantiator : MonoBehaviour
         instances.Add(leftStripInstance);
 
         // 创建右侧亮条实例
-        float rightStartXMaxWorld = -startXMaxWorld - OutlineParams.HoldColorLineWidth;
-        float rightEndXMaxWorld = -endXMaxWorld - OutlineParams.HoldColorLineWidth;
-        Vector3 rightPoint1 = new Vector3(-startXMaxWorld, startY, zPositionForStartT);
+        float rightStartXMaxWorld = startXMaxWorld - ChartParams.HoldColorLineWidth;
+        float rightEndXMaxWorld = endXMaxWorld - ChartParams.HoldColorLineWidth;
+        Vector3 rightPoint1 = new Vector3(startXMaxWorld, startY, zPositionForStartT);
         Vector3 rightPoint2 = new Vector3(rightStartXMaxWorld, startY, zPositionForStartT);
         Vector3 rightPoint3 = new Vector3(rightEndXMaxWorld, endY, zPositionForEndT);
-        Vector3 rightPoint4 = new Vector3(-endXMaxWorld, endY, zPositionForEndT);
+        Vector3 rightPoint4 = new Vector3(endXMaxWorld, endY, zPositionForEndT);
 
         GameObject rightStripInstance = CreateQuadFromPoints.CreateQuad(rightPoint1, rightPoint2, rightPoint3, rightPoint4, spritecolor, $"Right_{objectName}", colorLineParentObject, RenderQueue, AlphaOutline, "MaskMaterialColorLine");
         SetSpriteColor(rightStripInstance, color);
@@ -1634,5 +1924,6 @@ public class ChartInstantiator : MonoBehaviour
 
         return instances;
     }
+
 
 }

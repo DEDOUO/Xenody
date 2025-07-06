@@ -331,7 +331,7 @@ public class Utility : MonoBehaviour
     }
 
 
-    public static Vector2 ScalePositionToScreenStar(Vector2 position, RectTransform canvas)
+    public static Vector2 ScalePositionToScreen(Vector2 position, RectTransform canvas)
     {
         // 注意这里获取的是画布的长宽，而不是屏幕的长宽
         float canvasWidth = canvas.sizeDelta.x;
@@ -355,7 +355,7 @@ public class Utility : MonoBehaviour
         return new Vector2(scaledX, scaledY);
     }
 
-    public static Vector2 ScreenPositionToScaleStar(Vector2 position, RectTransform canvas)
+    public static Vector2 ScreenPositionToScale(Vector2 position, RectTransform canvas)
     {
         // 获取画布的长宽
         float canvasWidth = canvas.sizeDelta.x;
@@ -390,21 +390,21 @@ public class Utility : MonoBehaviour
 
     // JudgeLine的X轴坐标一直为0，简化计算
     // JudgeLine的Y轴坐标需要额外修正；JudgePlane的Y轴坐标线性变化时，其实对应JudgeLine的Y轴坐标不是线性变化，需要修正（注意摄像机有一定倾角）
-    public static Vector2 ScalePositionToScreenJudgeLine(Vector2 position, RectTransform canvas)
-    {
-        float canvasHeight = canvas.sizeDelta.y;
-        float croppedcanvasHeight = AspectRatioManager.croppedScreenHeight / Screen.height * canvasHeight;
+    //public static Vector2 ScalePositionToScreenJudgeLine(Vector2 position, RectTransform canvas)
+    //{
+    //    float canvasHeight = canvas.sizeDelta.y;
+    //    float croppedcanvasHeight = AspectRatioManager.croppedScreenHeight / Screen.height * canvasHeight;
 
-        float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom);
-        float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling);
+    //    float bottomPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginBottom);
+    //    float topPixel = AspectRatioManager.croppedScreenHeight * (1 - HorizontalParams.VerticalMarginCeiling);
 
-        float ScreenYBottom = bottomPixel * canvasHeight / Screen.height;
-        //Debug.Log(ScreenYBottom);
-        float ScreenYCeiling = topPixel * canvasHeight / Screen.height;
+    //    float ScreenYBottom = bottomPixel * canvasHeight / Screen.height;
+    //    //Debug.Log(ScreenYBottom);
+    //    float ScreenYCeiling = topPixel * canvasHeight / Screen.height;
 
-        float scaledY = (croppedcanvasHeight / 2) - ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom);
-        return new Vector2(0, scaledY);
-    }
+    //    float scaledY = (croppedcanvasHeight / 2) - ((position.y / ChartParams.YaxisMax) * (ScreenYCeiling - ScreenYBottom) + ScreenYBottom);
+    //    return new Vector2(0, scaledY);
+    //}
 
     public static float CalculateWorldUnitToScreenPixelXAtPosition(Vector3 worldPosition, float targetHorizontalMargin)
     {
@@ -422,6 +422,90 @@ public class Utility : MonoBehaviour
         float XWorld = horizontalVisibleRange / 2 / WorldUnitToScreenPixelX;
 
         return XWorld;
+    }
+
+    /// <summary>
+    /// 使用射线检测将2D UI坐标转换为世界坐标平面(z=0)上的点
+    /// </summary>
+    public static Vector3 ConvertUIPositionToWorldPosition(Vector2 uiPosition, RectTransform uiRect, Camera camera)
+    {
+        if (camera == null)
+        {
+            Debug.LogError("摄像机对象为空，无法进行坐标转换");
+            return Vector3.zero;
+        }
+
+        // 创建一个位于z=0的平面
+        Plane worldPlane = new Plane(Vector3.forward, Vector3.zero);
+
+        //// 将局部坐标转换为世界坐标
+        //Vector3 worldPoint = uiRect.TransformPoint(localPoint);
+        Vector3 worldPoint = uiRect.TransformPoint(uiPosition);
+
+        // 将世界坐标转换为屏幕坐标
+        Vector3 screenPosition = camera.WorldToScreenPoint(worldPoint);
+
+        // 从摄像机发出一条射线
+        Ray ray = camera.ScreenPointToRay(screenPosition);
+
+        // 计算射线与z=0平面的交点
+        float enter;
+        if (worldPlane.Raycast(ray, out enter))
+        {
+            // 获取交点坐标
+            Vector3 worldPosition = ray.GetPoint(enter);
+            return worldPosition;
+        }
+
+        // 如果射线没有与平面相交，返回默认位置
+        Debug.LogWarning("射线未能与z=0平面相交，返回UI元素位置");
+        return uiRect.position;
+    }
+
+    public static Vector2 ConvertWorldToUIPosition(Vector3 worldPosition, RectTransform uiRect, Camera camera)
+    {
+        if (camera == null)
+        {
+            Debug.LogError("摄像机对象为空，无法进行坐标转换");
+            return Vector2.zero;
+        }
+
+        if (uiRect == null)
+        {
+            Debug.LogError("UI RectTransform对象为空，无法进行坐标转换");
+            return Vector2.zero;
+        }
+
+        // 将世界坐标转换为屏幕坐标
+        Vector3 screenPosition = camera.WorldToScreenPoint(worldPosition);
+
+        // 检查点是否在摄像机前方（z值为负表示在摄像机后方）
+        if (screenPosition.z < 0)
+        {
+            Debug.LogWarning($"世界坐标点 {worldPosition} 在摄像机后方，可能导致UI位置异常");
+            // 继续执行转换，某些场景下可能需要处理后方的UI
+        }
+
+        // 检查点是否在屏幕范围内
+        if (screenPosition.x < 0 || screenPosition.x > Screen.width ||
+            screenPosition.y < 0 || screenPosition.y > Screen.height)
+        {
+            Debug.LogWarning($"世界坐标点 {worldPosition} 投影到屏幕外: ({screenPosition.x}, {screenPosition.y})");
+            // 继续执行转换，允许处理屏幕外的UI
+        }
+
+        // 将屏幕坐标转换为UI RectTransform的局部坐标
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            uiRect,
+            screenPosition,
+            camera,
+            out Vector2 localPoint))
+        {
+            return localPoint;
+        }
+
+        Debug.LogError($"无法将世界坐标 {worldPosition} 转换为UI坐标");
+        return Vector2.zero;
     }
 
     public static void CheckArrowVisibility(float currentTime, Dictionary<(int, int), SubStarInfo> subStarInfoDict, GameObject SubStarsParent)
@@ -443,38 +527,42 @@ public class Utility : MonoBehaviour
             Star star = info.star;
             int id = info.id;
 
-            //更新启动Arrow的位置
+            // 更新启动Arrow的位置
             if (is_firstsubStar & StartArrow != null)
             {
                 UpdateStartArrowPos(StartArrow, currentTime, star, SubStarArrowParent);
             }
 
-
-            //预留个100ms的检测窗口，提前0.4秒播放星星开始提示
+            // 预留100ms的检测窗口，提前0.4秒播放星星开始提示
             if (currentTime >= starTrackStartT - 0.4f && currentTime <= starTrackStartT - 0.35f)
             {
                 if (is_firstsubStar & StartArrow != null)
                 {
-                    // 如果还没播放对应的启动特效，播放
                     string targetName = $"StarStartFX{id}";
                     Transform targetTransform = SubStarsParent.transform.Find(targetName);
                     if (targetTransform != null)
                     {
                         // 激活物体并播放粒子系统
                         targetTransform.gameObject.SetActive(true);
+                        //Debug.Log(targetTransform.position);
 
                         // 获取并播放粒子系统
                         ParticleSystem particleSystem = targetTransform.GetComponent<ParticleSystem>();
-                        if (particleSystem != null & !particleSystem.isPlaying)
+                        if (particleSystem != null)
                         {
-                            particleSystem.Play();
+                            if (!particleSystem.isPlaying)
+                            {
+                                particleSystem.Play();
+
+                                // 启动协程，等待粒子系统播放完毕后禁用对象
+                                CoroutineHelper.StartCoroutine(WaitForParticleSystemToFinish(particleSystem, targetTransform.gameObject));
+                            }
                         }
                     }
-
                 }
             }
 
-            // 当时间处于 starHeadT - StarAppearTime 和 starHeadT 之间时，将该 substar 下对应 Arrow 均设置为可见，该 substar 下所有 arrow 的透明度由 0 线性地变为 1
+            // 当时间处于 starHeadT - StarAppearTime 和 starHeadT 之间时，将该 substar 下对应 Arrow 均设置为可见
             if (currentTime >= starHeadT - ChartParams.StarAppearTime && currentTime <= starHeadT)
             {
                 SubStarArrowParent.SetActive(true);
@@ -488,14 +576,12 @@ public class Utility : MonoBehaviour
                     }
                 }
             }
-            // 当时间处于 starTrackStartT 和 starTrackEndT 之间时，按箭头顺序，将该 substar 下所有非启动 arrow 的透明度由 1 线性地变为 0
+            // 当时间处于 starTrackStartT 和 starTrackEndT 之间时，按箭头顺序设置透明度
             else if (currentTime >= starTrackStartT && currentTime <= starTrackEndT)
             {
-
                 SubStarArrowParent.SetActive(true);
                 if (arrows.Count != 0)
                 {
-
                     int arrowIndex = Mathf.FloorToInt((currentTime - starTrackStartT) / arrowTimeInterval);
                     arrowIndex = Mathf.Clamp(arrowIndex, 0, arrows.Count - 1);
 
@@ -530,7 +616,7 @@ public class Utility : MonoBehaviour
                 {
                     SubStarArrowParent.SetActive(false);
                 }
-                // 对于包含启动Arrow的SubStar，整个个星星结束了才设为非激活
+                // 对于包含启动Arrow的SubStar，整个星星结束了才设为非激活
                 else
                 {
                     if (currentTime > starendT)
@@ -544,13 +630,71 @@ public class Utility : MonoBehaviour
                             SetArrowAlpha(arrows[k], 0.0f);
                         }
                     }
-
                 }
             }
             else if (currentTime < starHeadT - ChartParams.StarAppearTime)
             {
                 SubStarArrowParent.SetActive(false);
             }
+        }
+    }
+
+    // 协程辅助类 - 用于在静态方法中启动协程
+    public static class CoroutineHelper
+    {
+        private static GameObject _coroutineRunner;
+
+        static CoroutineHelper()
+        {
+            if (_coroutineRunner == null)
+            {
+                _coroutineRunner = new GameObject("CoroutineRunner");
+                GameObject.DontDestroyOnLoad(_coroutineRunner);
+            }
+        }
+
+        // 启动协程等待粒子系统播放完毕
+        public static Coroutine StartCoroutine(IEnumerator routine)
+        {
+            if (_coroutineRunner == null)
+            {
+                _coroutineRunner = new GameObject("CoroutineRunner");
+                GameObject.DontDestroyOnLoad(_coroutineRunner);
+            }
+
+            return _coroutineRunner.AddComponent<CoroutineStarter>().StartCoroutine(routine);
+        }
+
+        // 内部类 - 用于承载协程
+        private class CoroutineStarter : MonoBehaviour { }
+    }
+
+    // 等待粒子系统播放完毕的协程
+    private static IEnumerator WaitForParticleSystemToFinish(ParticleSystem particleSystem, GameObject targetObject)
+    {
+        if (particleSystem == null || targetObject == null)
+            yield break;
+
+        // 获取粒子系统的持续时间（考虑循环）
+        float duration = particleSystem.main.duration;
+        bool isLooping = particleSystem.main.loop;
+
+        // 等待持续时间
+        yield return new WaitForSeconds(duration);
+
+        // 如果不是循环播放，或者循环播放后手动停止
+        if (!isLooping || !particleSystem.isPlaying)
+        {
+            targetObject.SetActive(false);
+        }
+        else
+        {
+            // 如果是循环播放，等待粒子系统实际停止
+            while (particleSystem.isPlaying)
+            {
+                yield return null;
+            }
+            targetObject.SetActive(false);
         }
     }
 
@@ -573,7 +717,7 @@ public class Utility : MonoBehaviour
             {
 
                 Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
-                Vector2 subStarStartScreen = ScalePositionToScreenStar(subStarStart, SubStarsParentRect);
+                Vector2 subStarStartScreen = ScalePositionToScreen(subStarStart, SubStarsParentRect);
 
                 switch (subStar.trackFunction)
                 {
@@ -582,7 +726,7 @@ public class Utility : MonoBehaviour
                     case TrackFunctionType.Linear:
 
                         Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
-                        Vector2 subStarEndScreen = ScalePositionToScreenStar(subStarEnd, SubStarsParentRect);
+                        Vector2 subStarEndScreen = ScalePositionToScreen(subStarEnd, SubStarsParentRect);
 
                         position = CalculateSubArrowPositionLinear(0f, subStarStartScreen, subStarEndScreen);
                         rotation = CalculateSubArrowRotationLinear(0f, subStarStartScreen, subStarEndScreen);
@@ -596,7 +740,7 @@ public class Utility : MonoBehaviour
                     case TrackFunctionType.CCWC:
 
                         Vector2 substarEndScreen = CauculateEndScreenStar(subStarStartScreen, SubStarsParentRect, subStar);
-                        Vector2 substarEnd = ScreenPositionToScaleStar(substarEndScreen, SubStarsParentRect);
+                        Vector2 substarEnd = ScreenPositionToScale(substarEndScreen, SubStarsParentRect);
                         position = CalculateSubArrowPositionCircle(0f, subStarStartScreen, SubStarsParentRect, subStar);
                         rotation = CalculateSubArrowRotationCircle(0f, subStarStartScreen, subStar);
 
@@ -613,7 +757,7 @@ public class Utility : MonoBehaviour
                 float currentRate = (currentTime - starTrackStartT) / (starTrackEndT - starTrackStartT);
 
                 Vector2 subStarStart = new Vector2(subStar.startX, subStar.startY);
-                Vector2 subStarStartScreen = ScalePositionToScreenStar(subStarStart, SubStarsParentRect);
+                Vector2 subStarStartScreen = ScalePositionToScreen(subStarStart, SubStarsParentRect);
 
                 switch (subStar.trackFunction)
                 {
@@ -622,7 +766,7 @@ public class Utility : MonoBehaviour
                     case TrackFunctionType.Linear:
 
                         Vector2 subStarEnd = new Vector2(subStar.endX, subStar.endY);
-                        Vector2 subStarEndScreen = ScalePositionToScreenStar(subStarEnd, SubStarsParentRect);
+                        Vector2 subStarEndScreen = ScalePositionToScreen(subStarEnd, SubStarsParentRect);
 
                         position = CalculateSubArrowPositionLinear(currentRate, subStarStartScreen, subStarEndScreen);
                         rotation = CalculateSubArrowRotationLinear(currentRate, subStarStartScreen, subStarEndScreen);
@@ -636,7 +780,7 @@ public class Utility : MonoBehaviour
                     case TrackFunctionType.CCWC:
 
                         Vector2 substarEndScreen = CauculateEndScreenStar(subStarStartScreen, SubStarsParentRect, subStar);
-                        Vector2 substarEnd = ScreenPositionToScaleStar(substarEndScreen, SubStarsParentRect);
+                        Vector2 substarEnd = ScreenPositionToScale(substarEndScreen, SubStarsParentRect);
                         position = CalculateSubArrowPositionCircle(currentRate, subStarStartScreen, SubStarsParentRect, subStar);
                         rotation = CalculateSubArrowRotationCircle(currentRate, subStarStartScreen, subStar);
 
@@ -804,7 +948,7 @@ public class Utility : MonoBehaviour
             {
                 //以Flick左侧坐标为锚点，往右平移
                 Vector3 Pos = leftMiddleWorldPos;
-                Vector3 PositionAdjust = new Vector3(0.8f, 0, 0);
+                Vector3 PositionAdjust = new Vector3(0.9f, 0, 0);
                 Vector3 newPosition = Pos + PositionAdjust;
                 flickarrow.transform.position = newPosition;
             }
@@ -812,7 +956,7 @@ public class Utility : MonoBehaviour
             {
                 //以Flick右侧坐标为锚点，往左平移
                 Vector3 Pos = rightMiddleWorldPos;
-                Vector3 PositionAdjust = new Vector3(-0.8f, 0, 0);
+                Vector3 PositionAdjust = new Vector3(-0.9f, 0, 0);
                 Vector3 newPosition = Pos + PositionAdjust;
                 flickarrow.transform.position = newPosition;
             }

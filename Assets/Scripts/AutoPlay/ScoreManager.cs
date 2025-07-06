@@ -92,7 +92,7 @@ public class ScoreManager : MonoBehaviour
             foreach (var tap in chart.taps)
             {
                 Vector2 Pos = new Vector2(tap.startX, tap.startY);
-                Vector2 PosScreen = ScalePositionToScreenStar(Pos, ParentRect);
+                Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
                 AddToMaps(tap.startT, PosScreen, 1, ScoreParams.TapScoreWeight);
             }
         }
@@ -103,7 +103,7 @@ public class ScoreManager : MonoBehaviour
             foreach (var flick in chart.flicks)
             {
                 Vector2 Pos = new Vector2(flick.startX, flick.startY);
-                Vector2 PosScreen = ScalePositionToScreenStar(Pos, ParentRect);
+                Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
                 AddToMaps(flick.startT, PosScreen, 1, ScoreParams.FlickScoreWeight);
             }
         }
@@ -114,7 +114,7 @@ public class ScoreManager : MonoBehaviour
             foreach (var slide in chart.slides)
             {
                 Vector2 Pos = new Vector2(slide.startX, slide.startY);
-                Vector2 PosScreen = ScalePositionToScreenStar(Pos, ParentRect);
+                Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
                 AddToMaps(slide.startT, PosScreen, 1, ScoreParams.SlideScoreWeight);
             }
         }
@@ -148,7 +148,7 @@ public class ScoreManager : MonoBehaviour
                     int intervals = Mathf.Max(1, (int)Math.Round(duration / ChartParams.HoldJudgeTimeInterval));
 
                     Vector2 Pos = new Vector2((subHold.startXMax + subHold.startXMin) / 2, subHold.startY);
-                    Vector2 PosScreen = ScalePositionToScreenStar(Pos, ParentRect);
+                    Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
 
                     // 起始点权重
                     AddToMaps(startT, PosScreen, 1, ScoreParams.HoldScoreWeight);
@@ -164,7 +164,7 @@ public class ScoreManager : MonoBehaviour
                                       CalculatePosition(timePoint, startT, subHold.startXMin, endT, subHold.endXMin, subHold.XLeftFunction)) / 2;
                             float y = CalculatePosition(timePoint, startT, subHold.startY, endT, subHold.endY, subHold.yAxisFunction);
                             Vector2 Pos2 = new Vector2(x, y);
-                            Vector2 PosScreen2 = ScalePositionToScreenStar(Pos2, ParentRect);
+                            Vector2 PosScreen2 = ScalePositionToScreen(Pos2, ParentRect);
                             AddToMaps(timePoint, PosScreen2, 1, ScoreParams.HoldScoreWeight);
                         }
                         catch (Exception e)
@@ -193,7 +193,7 @@ public class ScoreManager : MonoBehaviour
                 {
                     Star.SubStar firstStar = star.subStarList[0];
                     Vector2 Pos = new Vector2(firstStar.startX, firstStar.startY);
-                    Vector2 PosScreen = ScalePositionToScreenStar(Pos, ParentRect);
+                    Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
                     AddToMaps(star.starHeadT, PosScreen, 1, ScoreParams.StarHeadScoreWeight);
                 }
                 catch (Exception e)
@@ -207,7 +207,7 @@ public class ScoreManager : MonoBehaviour
                 {
                     Star.SubStar lastStar = star.subStarList[star.subStarList.Count - 1];
                     Vector2 Pos2 = new Vector2(lastStar.endX, lastStar.endY);
-                    Vector2 PosScreen2 = ScalePositionToScreenStar(Pos2, ParentRect);
+                    Vector2 PosScreen2 = ScalePositionToScreen(Pos2, ParentRect);
                     AddToMaps(lastStar.starTrackEndT, PosScreen2, 1, ScoreParams.StarScoreWeight);
                 }
                 catch (Exception e)

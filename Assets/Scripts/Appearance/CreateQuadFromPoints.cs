@@ -94,7 +94,13 @@ public class CreateQuadFromPoints : MonoBehaviour
 
         //将透明度设为Alpha
         meshRenderer.material.SetFloat("_Opacity", Alpha);
- 
+
+        // 打印物体名和四个顶点坐标
+        //Debug.Log($"创建四边形: {objectName}");
+        //Debug.Log($"顶点1: ({point1.x:F3}, {point1.y:F3}, {point1.z:F3})");
+        //Debug.Log($"顶点2: ({point2.x:F3}, {point2.y:F3}, {point2.z:F3})");
+        //Debug.Log($"顶点3: ({point3.x:F3}, {point3.y:F3}, {point3.z:F3})");
+        //Debug.Log($"顶点4: ({point4.x:F3}, {point4.y:F3}, {point4.z:F3})");
 
         return quadObject;
     }

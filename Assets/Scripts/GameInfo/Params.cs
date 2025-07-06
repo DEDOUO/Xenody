@@ -50,7 +50,8 @@ namespace Params
         public static float NoteZAxisOffset = -0.55f;
 
         //描边宽度
-        public static float OutlineWidth = 0.15f;
+        public static float OutlineWidth = 0.2f;
+        public static float HoldColorLineWidth = 0.25f;
 
         //谱面开始偏移秒数
         public static float ChartStartTimeOffset = 3f;
@@ -113,13 +114,13 @@ namespace Params
         public static float NoteSpeedDefault = 80f;
     }
 
-    public static class OutlineParams
-    {
-        // 描边参数
-        // Hold描边宽度
-        //public static float HoldOutlineDefault = 0.4f;
-        public static float HoldColorLineWidth = 0.2f;
-    }
+    //public static class OutlineParams
+    //{
+    //    // 描边参数
+    //    // Hold描边宽度
+    //    //public static float HoldOutlineDefault = 0.4f;
+    //    public static float HoldColorLineWidth = 0.2f;
+    //}
 
 
     public static class HorizontalParams
@@ -128,12 +129,15 @@ namespace Params
         public static float HorizontalMargin = 0.1f;
 
         // 判定区大小参数，谱面下方距离判定区（固定为16:9）下边缘的垂直边距
-        public static float VerticalMarginBottom = 0.08f;
+        public static float VerticalMarginBottom = 0.09f;
         // 判定区大小参数，谱面上方（Y轴谱面坐标=1）距离判定区（固定为16:9）下边缘的垂直边距
-        public static float VerticalMarginCeiling = 0.45f;
+        public static float VerticalMarginCeiling = 0.46f;
 
         // 判定区大小参数，加上两侧亮条后，距离屏幕边缘的水平边距（两侧各留1%亮条宽度，也就是8%）
         public static float PlusHorizontalMargin = 0.08f;
+
+        // 两侧亮条的世界宽度
+        public static float ColorLineWidth = 0.12f;
     }
     public static class FinenessParams
     {

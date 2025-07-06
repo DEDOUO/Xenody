@@ -104,6 +104,10 @@ public class JudgePlane : IEnumerable<SubJudgePlane>
     {
         //float minY = 0f;
         //float maxY = HeightParams.HeightDefault;
+        if (currentTime < 0 && subJudgePlaneList[0].startT == 0)
+        {
+            return subJudgePlaneList[0].startY;
+        }
         foreach (SubJudgePlane subPlane in subJudgePlaneList)
         {
             if (currentTime >= subPlane.startT && currentTime <= subPlane.endT)

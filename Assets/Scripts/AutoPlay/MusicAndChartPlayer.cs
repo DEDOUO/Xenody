@@ -170,20 +170,6 @@ public class MusicAndChartPlayer : MonoBehaviour
         MusicSlider.SetActive(false);
         pauseManager.isPaused = false;
 
-        //// 查找过渡遮罩
-        //transitionMaskObj = GameObject.Find("Mask");
-        //if (transitionMaskObj != null)
-        //{
-        //    transitionMask = transitionMaskObj.GetComponent<Image>();
-        //    if (transitionMask == null)
-        //    {
-        //        Debug.LogError("TransitionMask缺少Image组件");
-        //    }
-        //}
-        //else
-        //{
-        //    Debug.LogWarning("未找到TransitionMask，场景切换将没有过渡效果");
-        //}
     }
 
 
@@ -1213,62 +1199,57 @@ public class MusicAndChartPlayer : MonoBehaviour
 
     private void UpdateJudgeLinesPosition(float currentTime)
     {
-        // 如果已经创建了 JudgeLinesParent 并且音频正在播放，更新其子物体的 Y 轴坐标
         if (JudgeLinesParent != null)
         {
+            RectTransform JudgeLinesParentRect = JudgeLinesParent.GetComponent<RectTransform>();
             for (int i = 0; i < JudgeLinesParent.transform.childCount; i++)
             {
                 RectTransform judgeLineRectTransform = JudgeLinesParent.transform.GetChild(i) as RectTransform;
                 if (judgeLineRectTransform != null)
                 {
-                    // 通过名字获取对应的 JudgePlane
                     JudgePlane correspondingJudgePlane = chart.GetCorrespondingJudgePlane(judgeLineRectTransform.name);
                     if (correspondingJudgePlane != null)
                     {
-                        // 获取该 JudgeLine 的开始时间和结束时间
                         float startT = JudgePlanesStartT[i];
                         float endT = JudgePlanesEndT[i];
+                        bool isSpecialStartT = Mathf.Abs(startT) < 0.001f; // 判断startT是否接近0
 
-                        // 判断当前时间与开始时间的关系
-                        // 当当前时间小于开始时间 - 出现时间时，不进行操作
+                        // 特殊处理：startT=0时，只要没到结束时间都保持active并更新位置
+                        if (isSpecialStartT && currentTime <= endT)
+                        {
+                            judgeLineRectTransform.gameObject.SetActive(true);
+                            float YAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
+                            Vector2 Position = ScalePositionToScreen(new Vector2(0f, YAxis), JudgeLinesParentRect);
+                            judgeLineRectTransform.anchoredPosition = Position;
+                            JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, 1f);
+                            continue; // 跳过后续逻辑
+                        }
+
+                        // 原始逻辑（startT≠0时）或startT=0但已超过endT
                         if (currentTime < startT - ChartParams.JudgeLineAppearTime)
                         {
                             judgeLineRectTransform.gameObject.SetActive(false);
                         }
-                        // 当当前时间介于开始时间 - 出现时间与开始时间之间时，设置 JudgeLine 为 active，且透明度线性地由 0 变为 1
                         else if (currentTime >= startT - ChartParams.JudgeLineAppearTime && currentTime <= startT)
                         {
                             judgeLineRectTransform.gameObject.SetActive(true);
                             float t = (currentTime - (startT - ChartParams.JudgeLineAppearTime)) / ChartParams.JudgeLineAppearTime;
                             JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, t);
                         }
-                        // 当前时间大于开始时间，小于结束时间时，更新 JudgeLine 的位置，并设置对应JudgePlane透明度
                         else if (currentTime > startT && currentTime <= endT)
                         {
                             judgeLineRectTransform.gameObject.SetActive(true);
-                            // 获取当前时间的 Y 轴坐标
                             float YAxis = correspondingJudgePlane.GetPlaneYAxis(currentTime);
-
-                            // 获取判定区下边缘和上边缘在屏幕空间中的像素坐标
-                            //float bottomPixel = AspectRatioManager.croppedScreenHeight * (1-HorizontalParams.VerticalMarginBottom);
-                            //float topPixel = AspectRatioManager.croppedScreenHeight * (1-HorizontalParams.VerticalMarginCeiling);
-
-                            // 计算 YAxis 对应的归一化坐标
-                            //float YAxisUniform = (YAxis - bottomPixel) / (topPixel - bottomPixel);
-
-                            Vector2 Position = ScalePositionToScreenJudgeLine(new Vector2(0f, YAxis), JudgeLinesParent.GetComponent<RectTransform>());
+                            Vector2 Position = ScalePositionToScreen(new Vector2(0f, YAxis), JudgeLinesParentRect);
                             judgeLineRectTransform.anchoredPosition = Position;
-                            // 设置 JudgeLine 透明度为 1
                             JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, 1f);
                         }
-                        // 当当前时间介于结束时间与结束时间+出现时间之间时，设置 JudgeLine 为 active，且透明度线性地由 1 变为 0
                         else if (currentTime > endT && currentTime <= endT + ChartParams.JudgeLineAppearTime)
                         {
                             judgeLineRectTransform.gameObject.SetActive(true);
                             float t = 1 - (currentTime - endT) / ChartParams.JudgeLineAppearTime;
                             JudgeLine.SetJudgeLineAlpha(judgeLineRectTransform.gameObject, t);
                         }
-                        // 当当前时间超过结束时间时，设置 JudgeLine 为 false
                         else if (currentTime > endT + ChartParams.JudgeLineAppearTime)
                         {
                             judgeLineRectTransform.gameObject.SetActive(false);
