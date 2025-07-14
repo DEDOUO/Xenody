@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 //using static Utility;
 using Note;
+using DocumentFormat.OpenXml.ExtendedProperties;
 //using Params;
 
 public class Chart
@@ -27,12 +28,12 @@ public class Chart
     [JsonProperty("hold")]
     // Hold实例列表
     public List<Hold> holds;
-    [JsonProperty("slide")]
-    // Slide实例列表
-    public List<Slide> slides;
-    [JsonProperty("flick")]
-    // Flick实例列表
-    public List<Flick> flicks;
+    //[JsonProperty("slide")]
+    //// Slide实例列表
+    //public List<Slide> slides;
+    //[JsonProperty("flick")]
+    //// Flick实例列表
+    //public List<Flick> flicks;
     [JsonProperty("star")]
     // Star实例列表
     public List<Star> stars;
@@ -41,7 +42,8 @@ public class Chart
     public void ExportToJson(string filePath)
     {
         // 创建一个包含所有键型信息的匿名对象，用于序列化
-        var chartData = new { speedList, gradientColorList, judgePlanes, taps, holds, slides, flicks, stars };
+        //var chartData = new { speedList, gradientColorList, judgePlanes, taps, holds, slides, flicks, stars };
+        var chartData = new { speedList, gradientColorList, judgePlanes, taps, holds, stars };
 
         string json = JsonConvert.SerializeObject(chartData, Formatting.Indented);
         File.WriteAllText(filePath, json);

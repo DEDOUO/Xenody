@@ -93,31 +93,62 @@ public class ScoreManager : MonoBehaviour
             {
                 Vector2 Pos = new Vector2(tap.startX, tap.startY);
                 Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
-                AddToMaps(tap.startT, PosScreen, 1, ScoreParams.TapScoreWeight);
+
+                float weight;
+                if (tap.IfSlide)
+                {
+                    // Slide 类型
+                    if (tap.flickDirection.HasValue)
+                    {
+                        // Slide + Flick
+                        weight = ScoreParams.SlideFlickScoreWeight;
+                    }
+                    else
+                    {
+                        // 普通 Slide
+                        weight = ScoreParams.SlideScoreWeight;
+                    }
+                }
+                else
+                {
+                    // Tap 类型
+                    if (tap.flickDirection.HasValue)
+                    {
+                        // Tap + Flick
+                        weight = ScoreParams.TapFlickScoreWeight;
+                    }
+                    else
+                    {
+                        // 普通 Tap
+                        weight = ScoreParams.TapScoreWeight;
+                    }
+                }
+
+                AddToMaps(tap.startT, PosScreen, 1, weight);
             }
         }
 
-        // 处理 Flick
-        if (chart.flicks != null)
-        {
-            foreach (var flick in chart.flicks)
-            {
-                Vector2 Pos = new Vector2(flick.startX, flick.startY);
-                Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
-                AddToMaps(flick.startT, PosScreen, 1, ScoreParams.FlickScoreWeight);
-            }
-        }
+        //// 处理 Flick
+        //if (chart.flicks != null)
+        //{
+        //    foreach (var flick in chart.flicks)
+        //    {
+        //        Vector2 Pos = new Vector2(flick.startX, flick.startY);
+        //        Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
+        //        AddToMaps(flick.startT, PosScreen, 1, ScoreParams.FlickScoreWeight);
+        //    }
+        //}
 
-        // 处理 Slide
-        if (chart.slides != null)
-        {
-            foreach (var slide in chart.slides)
-            {
-                Vector2 Pos = new Vector2(slide.startX, slide.startY);
-                Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
-                AddToMaps(slide.startT, PosScreen, 1, ScoreParams.SlideScoreWeight);
-            }
-        }
+        //// 处理 Slide
+        //if (chart.slides != null)
+        //{
+        //    foreach (var slide in chart.slides)
+        //    {
+        //        Vector2 Pos = new Vector2(slide.startX, slide.startY);
+        //        Vector2 PosScreen = ScalePositionToScreen(Pos, ParentRect);
+        //        AddToMaps(slide.startT, PosScreen, 1, ScoreParams.SlideScoreWeight);
+        //    }
+        //}
 
         // 处理 Hold
         if (chart.holds != null)

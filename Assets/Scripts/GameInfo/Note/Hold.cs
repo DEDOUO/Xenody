@@ -15,6 +15,15 @@ namespace Note
         [JsonProperty("id")]
         // Hold的id，用于分辨同一时间戳的不同Hold
         public int holdId;
+        [JsonProperty("Slide")]
+        // 是否是Slide
+        public bool IfSlide;
+        [JsonProperty("startDir", NullValueHandling = NullValueHandling.Ignore)]
+        // 用于记录划键操作的滑动方向（设置为0-1之间的值）
+        public float? startDirection;
+        [JsonProperty("endDir", NullValueHandling = NullValueHandling.Ignore)]
+        // 用于记录划键操作的滑动方向（设置为0-1之间的值）
+        public float? endDirection;
         [JsonProperty("sub")]
         // 用于存储子Hold参数的列表
         public List<SubHold> subHoldList = new();
@@ -46,8 +55,7 @@ namespace Note
             public TransFunctionType yAxisFunction;
 
 
-            public SubHold(float startTime, float startXMinVal, float startXMaxVal, float endTime, float endXMinVal,
-                           float endXMaxVal, Utility.TransFunctionType XLeftFunc, Utility.TransFunctionType XRightFunc, int jagnum)
+            public SubHold(float startTime, float startXMinVal, float startXMaxVal, float endTime, float endXMinVal, float endXMaxVal, Utility.TransFunctionType XLeftFunc, Utility.TransFunctionType XRightFunc, int jagnum)
             {
                 startT = startTime;
                 startXMin = startXMinVal;
@@ -59,6 +67,7 @@ namespace Note
                 XRightFunction = XRightFunc;
                 Jagnum = jagnum;
             }
+
             public bool IsInXAxisRange()
             {
                 //可能要修改逻辑，需要确保每个子HoldX轴坐标都位于起止坐标轴之间
@@ -68,8 +77,7 @@ namespace Note
         }
 
         // 方法用于向子Hold参数列表中添加子Hold的参数，并检查添加是否合法
-        public void AddSubHold(float startTime, float startXMin, float startXMax, float endTime, float endXMin,
-                               float endXMax, Utility.TransFunctionType startXFunction, Utility.TransFunctionType endXFunction, int jagnum)
+        public void AddSubHold(float startTime, float startXMin, float startXMax, float endTime, float endXMin, float endXMax, Utility.TransFunctionType startXFunction, Utility.TransFunctionType endXFunction, int jagnum)
         {
             if (subHoldList.Count > 0)
             {

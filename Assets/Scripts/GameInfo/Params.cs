@@ -96,7 +96,9 @@ namespace Params
     {
         public static float TapScoreWeight = 1f;
         public static float SlideScoreWeight = 0.5f;
-        public static float FlickScoreWeight = 1f;
+        //public static float FlickScoreWeight = 1f;
+        public static float TapFlickScoreWeight = 1.25f;
+        public static float SlideFlickScoreWeight = 1f;
         public static float HoldScoreWeight = 0.5f;
         public static float StarHeadScoreWeight = 1f;
         public static float StarScoreWeight = 3f;

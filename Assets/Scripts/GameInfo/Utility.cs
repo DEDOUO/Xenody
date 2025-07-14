@@ -929,47 +929,52 @@ public class Utility : MonoBehaviour
     }
 
 
-    public static void AdjustFlickArrowPosition(GameObject flickarrow, GameObject flick, float flickDirection)
+    public static void AdjustFlickArrowPosition(GameObject flickarrow, float flickDirection)
     {
-        Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flick);
-        Vector3 rightMiddleWorldPos = GetRightMiddleWorldPosition(flick);
+        //Vector3 leftMiddleWorldPos = GetLeftMiddleWorldPosition(flick);
+        //Vector3 rightMiddleWorldPos = GetRightMiddleWorldPosition(flick);
         //Debug.Log(leftMiddleWorldPos);
         //Debug.Log(rightMiddleWorldPos);
 
         // 假设flickDirection是0-1之间的值，转换为0-360度的角度，根据实际调整
         float arrowRotationAngle = flickDirection * 360;
         //针对非横划（90度或270度），箭头应显示在水平平面内
-        if (Math.Abs(arrowRotationAngle - 90) <= 1 | Math.Abs(arrowRotationAngle - 270) <= 1)
-        {
-            bool ifleft = Math.Abs(arrowRotationAngle - 90) <= 1;
-            flickarrow.transform.rotation = Quaternion.Euler(-90, 0, arrowRotationAngle);
-            // 设置Flick箭头实例的位置，使其在Flick的合适位置上
-            if (ifleft)
-            {
-                //以Flick左侧坐标为锚点，往右平移
-                Vector3 Pos = leftMiddleWorldPos;
-                Vector3 PositionAdjust = new Vector3(0.9f, 0, 0);
-                Vector3 newPosition = Pos + PositionAdjust;
-                flickarrow.transform.position = newPosition;
-            }
-            else
-            {
-                //以Flick右侧坐标为锚点，往左平移
-                Vector3 Pos = rightMiddleWorldPos;
-                Vector3 PositionAdjust = new Vector3(-0.9f, 0, 0);
-                Vector3 newPosition = Pos + PositionAdjust;
-                flickarrow.transform.position = newPosition;
-            }
-            // 根据Flick的缩放比例同步缩放箭头（仅针对X轴缩放，即缩放箭头宽度）
-            flickarrow.transform.localScale = new Vector3(1f, 0.8f, 1);
-        }
-        //针对非横划（90度或270度），箭头应显示在竖直平面内
-        else
-        {
-            flickarrow.transform.rotation = Quaternion.Euler(0, 0, arrowRotationAngle);
-            // 根据Flick的缩放比例同步缩放箭头（仅针对X轴缩放，即缩放箭头宽度）
-            flickarrow.transform.localScale = new Vector3(1f, 0.8f, 1);
-        }
+        //if (Math.Abs(arrowRotationAngle - 90) <= 1 | Math.Abs(arrowRotationAngle - 270) <= 1)
+        //{
+        //    bool ifleft = Math.Abs(arrowRotationAngle - 90) <= 1;
+        //    flickarrow.transform.rotation = Quaternion.Euler(-90, 0, arrowRotationAngle);
+        //    // 设置Flick箭头实例的位置，使其在Flick的合适位置上
+        //    if (ifleft)
+        //    {
+        //        //以Flick左侧坐标为锚点，往右平移
+        //        Vector3 Pos = leftMiddleWorldPos;
+        //        Vector3 PositionAdjust = new Vector3(0.9f, 0, 0);
+        //        Vector3 newPosition = Pos + PositionAdjust;
+        //        flickarrow.transform.position = newPosition;
+        //    }
+        //    else
+        //    {
+        //        //以Flick右侧坐标为锚点，往左平移
+        //        Vector3 Pos = rightMiddleWorldPos;
+        //        Vector3 PositionAdjust = new Vector3(-0.9f, 0, 0);
+        //        Vector3 newPosition = Pos + PositionAdjust;
+        //        flickarrow.transform.position = newPosition;
+        //    }
+        //    // 根据Flick的缩放比例同步缩放箭头（仅针对X轴缩放，即缩放箭头宽度）
+        //    flickarrow.transform.localScale = new Vector3(1f, 0.8f, 1);
+        //}
+        ////针对非横划（90度或270度），箭头应显示在竖直平面内
+        //else
+        //{
+        //    flickarrow.transform.rotation = Quaternion.Euler(0, 0, arrowRotationAngle);
+        //    // 根据Flick的缩放比例同步缩放箭头（仅针对X轴缩放，即缩放箭头宽度）
+        //    flickarrow.transform.localScale = new Vector3(1f, 0.8f, 1);
+        //}
+
+        flickarrow.transform.rotation = Quaternion.Euler(0, 0, arrowRotationAngle);
+        // 根据Flick的缩放比例同步缩放箭头（仅针对X轴缩放，即缩放箭头宽度）
+        flickarrow.transform.localScale = new Vector3(0.8f, 1.3f, 1);
+
     }
 
     // 获取矩形左侧中间的世界坐标
@@ -1154,23 +1159,23 @@ public class Utility : MonoBehaviour
             }
         }
 
-        // 处理 Slide
-        if (chart.slides != null)
-        {
-            foreach (var slide in chart.slides)
-            {
-                AddOrIncrement(densityMap, slide.startT, 1);
-            }
-        }
+        //// 处理 Slide
+        //if (chart.slides != null)
+        //{
+        //    foreach (var slide in chart.slides)
+        //    {
+        //        AddOrIncrement(densityMap, slide.startT, 1);
+        //    }
+        //}
 
-        // 处理 Flick
-        if (chart.flicks != null)
-        {
-            foreach (var flick in chart.flicks)
-            {
-                AddOrIncrement(densityMap, flick.startT, 1);
-            }
-        }
+        //// 处理 Flick
+        //if (chart.flicks != null)
+        //{
+        //    foreach (var flick in chart.flicks)
+        //    {
+        //        AddOrIncrement(densityMap, flick.startT, 1);
+        //    }
+        //}
 
         // 处理 Hold
         if (chart.holds != null)

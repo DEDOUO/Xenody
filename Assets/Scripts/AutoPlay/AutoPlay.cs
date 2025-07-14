@@ -10,7 +10,7 @@ public class AutoPlay : MonoBehaviour
     public AudioSource TapSoundEffect;
     public AudioSource SlideSoundEffect;
     public AudioSource FlickSoundEffect;
-    public AudioSource HoldSoundEffect;
+    //public AudioSource HoldSoundEffect;
     public AudioSource StarHeadSoundEffect;
     public AudioSource StarSoundEffect;
 
@@ -19,9 +19,9 @@ public class AutoPlay : MonoBehaviour
     public GameObject JudgeLinesParent;
     public GameObject ColorLinesParent;
     public GameObject TapsParent;
-    public GameObject SlidesParent;
-    public GameObject FlicksParent;
-    public GameObject FlickArrowsParent;
+    //public GameObject SlidesParent;
+    //public GameObject FlicksParent;
+    public GameObject ArrowsParent;
     public GameObject HoldsParent;
     public GameObject HoldOutlinesParent;
     public GameObject StarsParent;
@@ -34,7 +34,7 @@ public class AutoPlay : MonoBehaviour
     public TMP_Text readyText;
 
     public Sprite JudgePlaneSprite;
-    public Sprite HoldSprite;
+    //public Sprite HoldSprite;
     public GlobalRenderOrderManager renderOrderManager;
     public GameObject AnimatorContainer;
 
@@ -52,9 +52,9 @@ public class AutoPlay : MonoBehaviour
         JudgeLinesParent = GameObject.Find("JudgeLinesParent");
         ColorLinesParent = GameObject.Find("ColorLinesParent");
         TapsParent = GameObject.Find("TapsParent");
-        SlidesParent = GameObject.Find("SlidesParent");
-        FlicksParent = GameObject.Find("FlicksParent");
-        FlickArrowsParent = GameObject.Find("FlickArrowsParent");
+        //SlidesParent = GameObject.Find("SlidesParent");
+        //FlicksParent = GameObject.Find("FlicksParent");
+        ArrowsParent = GameObject.Find("ArrowsParent");
         HoldsParent = GameObject.Find("HoldsParent");
         HoldOutlinesParent = GameObject.Find("HoldOutlinesParent");
         StarsParent = GameObject.Find("StarsParent");
@@ -73,11 +73,11 @@ public class AutoPlay : MonoBehaviour
         {
             Debug.LogError("Failed to load sprite: Sprites/TrackBlack2");
         }
-        HoldSprite = Resources.Load<Sprite>("Sprites/HoldBlueSprite2");
-        if (HoldSprite == null)
-        {
-            Debug.LogError("Failed to load sprite: Sprites/HoldBlueSprite2");
-        }
+        //HoldSprite = Resources.Load<Sprite>("Sprites/HoldBlueSprite2");
+        //if (HoldSprite == null)
+        //{
+        //    Debug.LogError("Failed to load sprite: Sprites/HoldBlueSprite2");
+        //}
 
         // 查找包含AudioSource的GameObject
         GameObject audioObj = GameObject.Find("AudioService");
@@ -95,7 +95,7 @@ public class AutoPlay : MonoBehaviour
             SlideSoundEffect = audioSources[1];
             FlickSoundEffect = audioSources[2];
             //Hold与Tap音效一致
-            HoldSoundEffect = audioSources[0];
+            //HoldSoundEffect = audioSources[0];
 
             StarHeadSoundEffect = audioSources[3];
             StarSoundEffect = audioSources[4];
@@ -144,8 +144,8 @@ public class AutoPlay : MonoBehaviour
 
         // 实例化谱面内容
         instantiator = GetComponent<ChartInstantiator>();
-        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
-            JudgePlaneSprite, HoldSprite, renderOrderManager, AnimatorContainer, fpsText);
+        instantiator.SetParameters(JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, ArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
+            JudgePlaneSprite, renderOrderManager, AnimatorContainer, fpsText);
         instantiator.InstantiateAll(chart);
 
         // 计算连击和得分列表
@@ -162,9 +162,9 @@ public class AutoPlay : MonoBehaviour
             player.enabled = false;
 
             // 设置参数
-            player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, SlidesParent, FlicksParent, FlickArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
-                TapSoundEffect, SlideSoundEffect, FlickSoundEffect, HoldSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart, fpsText, ComboText, ScoreText);
-            player.SetParameters2(instantiator.startTimeToInstanceNames, instantiator.holdTimes, instantiator.keyReachedJudgment,
+            player.SetParameters(audioSource, JudgePlanesParent, JudgeLinesParent, ColorLinesParent, TapsParent, ArrowsParent, HoldsParent, HoldOutlinesParent, StarsParent, subStarsParent, JudgeTexturesParent, MultiHitLinesParent,
+                TapSoundEffect, SlideSoundEffect, FlickSoundEffect, StarHeadSoundEffect, StarSoundEffect, chart, fpsText, ComboText, ScoreText);
+            player.SetParameters2(instantiator.startTimeToInstanceNames, instantiator.InstanceNamesToGameObject, instantiator.IfSlideDict, instantiator.IfFlickDict, instantiator.holdTimes, instantiator.keyReachedJudgment,
                 instantiator.JudgePlanesStartT, instantiator.JudgePlanesEndT, instantiator.subStarInfoDict, instantiator.starTrackTimes, instantiator.GradientColorList, instantiator.ChartStartTime);
             player.SetParameters3(scoreManager.SumComboMap, scoreManager.SumScoreMap, scoreManager.JudgePosMap);
 

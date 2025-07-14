@@ -19,6 +19,13 @@ namespace Note
         [JsonProperty("Pid")]
         // 与判定面相关联的标识（通过这个id后续去查找对应的JudgePlane实例）
         public int associatedPlaneId;
+        [JsonProperty("Slide")]
+        // 是否是Slide
+        public bool IfSlide;
+        [JsonProperty("Dir", NullValueHandling = NullValueHandling.Ignore)]
+        // 用于记录划键操作的滑动方向（设置为0-1之间的值）
+        public float? flickDirection;
+
 
         //Y轴坐标
         public float startY;

@@ -14,8 +14,8 @@ TagManager:
   - UI
   - JudgePlane
   - Hold
-  - Slide
-  - TapAndFlick
+  - Tap
+  - Flick
   - JudgeLine
   - Star
   - MyUI
